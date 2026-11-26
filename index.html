@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>抽签转盘</title>
+<meta name="description" content="输入名单，转一下，抽出结果。">
+<meta name="theme-color" content="#fcfbf8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23f24b4b' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='32' r='28'/%3E%3Cpath d='M32 32 18 7M32 32l26 9M32 32 10 50'/%3E%3C/g%3E%3Cpath d='M32 36V16m-6 4 6-9 6 9z' stroke='%23f24b4b' stroke-width='5' fill='%23f24b4b' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --c:#f24b4b;--c1:#fde9e9;--c2:#fbd2d2;--on-c:#fff;
+  --bg:#fcfbf8;--card:#fff;--ink:#2d2a26;--muted:#8c867f;--line:#ebe6df;
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
+  color:var(--ink);background:var(--bg);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+
+/* 抽签页 */
+#front{display:flex;flex-direction:column;align-items:center;padding:12px 16px 48px}
+.stage{width:100%;max-width:640px}
+.top{display:flex;align-items:flex-start;gap:12px;padding-top:12px}
+.heading{flex:1;min-width:0;margin:0;color:var(--c);font-size:clamp(26px,6.4vw,44px);font-weight:400;line-height:1.35;overflow-wrap:anywhere}
+.heading b{font-weight:600}
+.icon-btn{flex:none;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--muted);display:grid;place-items:center;padding:0;transition:color .15s,border-color .15s}
+.icon-btn:hover:not(:disabled){color:var(--c);border-color:var(--c)}
+.icon-btn:disabled{opacity:.4;cursor:default}
+.wheel-wrap{width:min(100%,max(260px,calc(100vh - 270px)));margin:16px auto 0}
+#wheel{display:block;width:100%;height:auto;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:visible}
+#wheel text{pointer-events:none}
+.hl{animation:pulse .9s ease-in-out infinite alternate}
+@keyframes pulse{to{opacity:.4}}
+.controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:20px}
+.go{min-width:210px;height:52px;padding:0 30px;border:0;border-radius:26px;background:var(--c);color:var(--on-c);font-size:18px;letter-spacing:.12em;box-shadow:0 8px 20px -10px var(--c);transition:transform .1s,opacity .15s}
+.go:active:not(:disabled){transform:scale(.97)}
+.go:disabled{opacity:.55;cursor:default}
+.status{font-size:14px;color:var(--muted);text-align:center}
+.link{border:0;background:none;padding:0 2px;color:var(--c);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.history{width:100%;max-width:640px;margin-top:28px;border-top:1px solid var(--line)}
+.history summary{cursor:pointer;padding:14px 0;color:var(--muted);font-size:14px;list-style:none}
+.history summary::-webkit-details-marker{display:none}
+.history summary::after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-3px) rotate(45deg);transition:transform .15s}
+.history[open] summary::after{transform:translateY(0) rotate(-135deg)}
+.history ol{list-style:none;margin:0;padding:0}
+.history li{display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
+.history li span{overflow-wrap:anywhere}
+.history time{flex:none;color:var(--muted);font-variant-numeric:tabular-nums}
+.history .link{margin:10px 0 0;font-size:13px}
+
+/* 设置页 */
+#settings{max-width:680px;margin:0 auto;padding:0 16px 64px}
+.set-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 0;background:var(--bg)}
+.set-top h1{margin:0;font-size:20px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px;margin-top:14px}
+.card h2{margin:0 0 6px;font-size:16px;font-weight:600}
+.note{margin:0 0 6px;color:var(--muted);font-size:13px;line-height:1.6}
+.row{display:grid;grid-template-columns:96px 1fr;gap:6px 14px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
+.card h2+.row,.card .note+.row{border-top:0}
+.lbl{font-size:14.5px}
+.hint{grid-column:2;margin:0;color:var(--muted);font-size:12.5px;line-height:1.6}
+@media (max-width:480px){.row{grid-template-columns:1fr}.hint{grid-column:1}}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:36px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:14px}
+.seg button[aria-pressed=true]{border-color:var(--c);background:var(--c1);color:var(--c);font-weight:600}
+.rng{display:flex;align-items:center;gap:12px}
+.rng input{flex:1;min-width:0;accent-color:var(--c)}
+.rng output{flex:none;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;margin:0;border-radius:13px;background:#ddd8d2;position:relative;cursor:pointer;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s}
+.sw:checked{background:var(--c)}
+.sw:checked::after{transform:translateX(18px)}
+.txt{width:100%;max-width:320px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:16px}
+.txt:focus{outline:none;border-color:var(--c)}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;width:max-content}
+.stepper button{width:40px;height:38px;border:0;background:#faf8f5;font-size:18px;line-height:1}
+.stepper input{width:56px;height:38px;border:0;text-align:center;font-size:16px;-moz-appearance:textfield;appearance:textfield}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.swatches{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.swatch{width:30px;height:30px;padding:0;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1.5px var(--line)}
+.swatch[aria-pressed=true]{box-shadow:0 0 0 2.5px var(--ink)}
+.custom{position:relative;overflow:hidden;background:conic-gradient(#f24b4b,#f5c13b,#3cb371,#2f8fde,#8a4fd8,#f24b4b)}
+.custom input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer;border:0;padding:0}
+textarea{display:block;width:100%;min-height:220px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16px;line-height:1.6;resize:vertical}
+textarea:focus{outline:none;border-color:var(--c)}
+.list-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
+.list-meta .count{color:var(--muted);font-size:13.5px}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13.5px}
+.chip{padding:6px 12px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:13.5px}
+.chip:hover{border-color:var(--c);color:var(--c)}
+.gen{padding:12px 0;border-top:1px solid var(--line)}
+.gen input{width:70px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;text-align:center;font-size:15px}
+.probs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.probs span{padding:3px 9px;border-radius:6px;background:var(--c1);font-size:12.5px}
+.probs b{color:var(--c);font-weight:600;margin-left:4px}
+
+/* 结果弹窗 */
+.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(45,35,30,.32)}
+.box{width:min(100%,420px);padding:30px 24px 22px;border-radius:22px;background:#fff;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.35);animation:pop .28s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.box .lead{color:var(--muted);font-size:15px}
+.box .names{margin:10px 0 24px;color:var(--c);font-size:clamp(28px,9vw,44px);font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.box .names.many{font-size:clamp(20px,5.5vw,28px)}
+.m-actions{display:flex;justify-content:center;gap:10px}
+.m-actions button{min-width:110px;height:44px;padding:0 18px;border-radius:22px;font-size:15px}
+.btn{border:0;background:var(--c);color:var(--on-c)}
+.btn-ghost{border:1.5px solid var(--line);background:#fff}
+#fx{position:fixed;inset:0;z-index:20;width:100%;height:100%;pointer-events:none}
+</style>
+</head>
+<body>
+
+<main id="front">
+  <div class="stage">
+    <div class="top">
+      <h1 class="heading" aria-live="polite"><span id="hText"></span><b id="res"></b></h1>
+      <button class="icon-btn" id="gearBtn" aria-label="设置" title="设置">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+    <div class="wheel-wrap">
+      <svg id="wheel" viewBox="-260 -260 520 520" role="img" aria-label="转盘，点一下开始转">
+        <g id="gWheel"><g id="gSectors"></g><g id="gLabels"></g></g>
+        <g id="gFixed"></g>
+        <g id="gPtr"></g>
+        <g id="gHub"></g>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="go" id="goBtn">开始抽签</button>
+      <div class="status"><span id="statusText"></span> <button class="link" id="resetBtn" hidden>重置</button></div>
+    </div>
+  </div>
+  <details class="history" id="hist" hidden>
+    <summary>抽签记录 <span id="histCount"></span></summary>
+    <ol id="histList"></ol>
+    <button class="link" id="histClear">清空记录</button>
+  </details>
+</main>
+
+<main id="settings" hidden>
+  <header class="set-top">
+    <button class="icon-btn" id="backBtn" aria-label="返回转盘" title="返回转盘">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1>设置</h1>
+  </header>
+  <section class="card">
+    <h2>参与抽选的名单</h2>
+    <textarea id="listTA" spellcheck="false" placeholder="一行一个，比如：&#10;小明&#10;小红&#10;小刚"></textarea>
+    <div class="list-meta">
+      <span class="count" id="listCount"></span>
+      <span class="tools"><button class="chip" id="shuffleBtn">打乱顺序</button><button class="chip" id="dedupeBtn">去掉重复</button></span>
+    </div>
+    <div class="gen tools">
+      <span>生成数字</span><input id="genFrom" type="number" inputmode="numeric" value="1"><span>到</span><input id="genTo" type="number" inputmode="numeric" value="30"><button class="chip" id="genBtn">替换名单</button>
+    </div>
+    <div class="probs" id="probs" hidden></div>
+  </section>
+  <div id="setCards"></div>
+  <section class="card">
+    <div class="row" style="border-top:0">
+      <div class="lbl">恢复默认设置</div>
+      <div><button class="chip" id="resetCfgBtn">恢复</button></div>
+      <p class="hint">名单和抽签记录会保留。</p>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="mLead">
+    <div class="lead" id="mLead"></div>
+    <div class="names" id="mNames"></div>
+    <div class="m-actions">
+      <button class="btn-ghost" id="mRemove">移出名单</button>
+      <button class="btn" id="mOk">好的</button>
+    </div>
+  </div>
+</div>
+<canvas id="fx" hidden></canvas>
+
+<script>
+(() => {
+'use strict';
+const KEY = 'lucky-wheel:v1';
+const R = 228;
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+
+const DEF = {
+  list: '火锅\n烧烤\n日料\n披萨\n麻辣烫\n轻食沙拉\n螺蛳粉\n饺子',
+  count: 1, multi: 'each', after: 'keep',
+  rng: 'equal', stopAt: 'random',
+  heading: '你抽中的是：', spinner: 'pointer', style: 'line', color: '#f24b4b',
+  duration: 5, turns: 6, easing: 'smooth',
+  labels: true, popup: true, confetti: true, sound: true
+};
+const SWATCHES = ['#f24b4b', '#f08a24', '#2f9e6e', '#2f6fde', '#8a4fd8', '#2d2a26'];
+const PAL = ['#ffb4a8', '#ffd59e', '#fbe7a1', '#bfe6c4', '#a9daee', '#b9c6fb', '#d9c3f5', '#ffc4dc'];
+
+const SECTIONS = [
+  { title: '抽签方式', fields: [
+    { key: 'count', type: 'stepper', label: '每次抽几个', min: 1, max: 99 },
+    { key: 'multi', type: 'seg', label: '抽多个时', opts: [['each', '一个一个转'], ['once', '转一次全出']], show: () => cfg.count > 1 },
+    { key: 'after', type: 'seg', label: '抽中后', opts: [['keep', '放回，还能再中'], ['remove', '移出转盘'], ['gray', '留着但置灰']] }
+  ]},
+  { title: '随机方式', note: '结果由浏览器的加密级随机数在开转前决定，转盘只是把它转出来。', fields: [
+    { key: 'rng', type: 'seg', label: '抽中概率', opts: [['equal', '人人相同'], ['weight', '按权重'], ['bag', '洗牌轮转']], hint: rngHint },
+    { key: 'stopAt', type: 'seg', label: '指针停在', opts: [['random', '扇区内随机处'], ['center', '扇区正中']] }
+  ]},
+  { title: '显示效果', fields: [
+    { key: 'heading', type: 'text', label: '标题文字', max: 20 },
+    { key: 'spinner', type: 'seg', label: '转动的是', opts: [['pointer', '指针'], ['wheel', '转盘']] },
+    { key: 'style', type: 'seg', label: '转盘样式', opts: [['line', '线稿'], ['mono', '单色'], ['rainbow', '多彩']] },
+    { key: 'color', type: 'color', label: '主色' },
+    { key: 'duration', type: 'range', label: '转动时长', min: 1, max: 15, step: 0.5, unit: ' 秒' },
+    { key: 'turns', type: 'range', label: '转动圈数', min: 1, max: 20, step: 1, unit: ' 圈' },
+    { key: 'easing', type: 'seg', label: '停下方式', opts: [['smooth', '平稳减速'], ['suspense', '慢慢挪到'], ['bounce', '冲过头再回弹'], ['accel', '先加速再减速']] },
+    { key: 'labels', type: 'switch', label: '转盘上显示文字' },
+    { key: 'popup', type: 'switch', label: '结果弹窗' },
+    { key: 'confetti', type: 'switch', label: '彩带庆祝' },
+    { key: 'sound', type: 'switch', label: '音效' }
+  ]}
+];
+const FIELDS = {};
+SECTIONS.forEach(s => s.fields.forEach(f => { FIELDS[f.key] = f; }));
+
+function rngHint() {
+  if (cfg.rng === 'weight') return '在名单里写成「名字 | 3」设置权重，权重越大扇区越大、越容易中；不写默认是 1。';
+  if (cfg.rng === 'bag') return cfg.after === 'keep'
+    ? '像洗牌发牌：一轮里每一项都会被抽到一次，全部轮过才重新洗牌。'
+    : '只在「抽中后：放回」时起作用，现在和「人人相同」一样。';
+  return '';
+}
+
+let cfg = Object.assign({}, DEF);
+const run = { sig: '', drawn: [], bag: [], history: [], last: [] };
+let items = [], layout = [];
+const highlight = new Set();
+let rot = { pointer: 0, wheel: 0 };
+let spinning = false, relayTimer = 0, modalPicked = [];
+
+/* ---------- 存取 ---------- */
+function valid(k, v) {
+  const f = FIELDS[k];
+  if (typeof v !== typeof DEF[k]) return false;
+  if (f && f.opts) return f.opts.some(o => o[0] === v);
+  if (f && (f.type === 'range' || f.type === 'stepper')) return v >= f.min && v <= f.max;
+  if (k === 'color') return /^#[0-9a-f]{6}$/i.test(v);
+  return true;
+}
+function load() {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
+  if (!d || typeof d !== 'object') return;
+  const c = d.cfg || {}, r = d.run || {};
+  for (const k in DEF) if (k in c && valid(k, c[k])) cfg[k] = c[k];
+  const ints = a => Array.isArray(a) ? a.filter(Number.isInteger) : [];
+  run.sig = typeof r.sig === 'string' ? r.sig : '';
+  run.drawn = ints(r.drawn);
+  run.bag = ints(r.bag);
+  run.history = Array.isArray(r.history) ? r.history.filter(x => x && Array.isArray(x.names)).slice(0, 100) : [];
+  run.last = Array.isArray(r.last) ? r.last.map(String) : [];
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify({ cfg, run })); } catch (e) { /* 无痕模式等存不了就算了 */ }
+}
+
+/* ---------- 名单 ---------- */
+function parse() {
+  items = [];
+  cfg.list.split(/\r?\n/).forEach(line => {
+    let name = line.trim(), w = 1;
+    if (!name) return;
+    const m = name.match(/^(.*?)\s*[|｜]\s*(\d+(?:\.\d+)?)$/);
+    if (m && m[1]) { name = m[1]; w = parseFloat(m[2]) || 1; }
+    items.push({ id: items.length, name, w });
+  });
+  const sig = items.map(i => i.name + '\u0001' + i.w).join('\n');
+  if (sig !== run.sig) { run.sig = sig; run.drawn = []; run.bag = []; }
+}
+const drawnSet = () => new Set(run.drawn);
+function visible() { const d = drawnSet(); return cfg.after === 'remove' ? items.filter(i => !d.has(i.id)) : items; }
+function pool() { const d = drawnSet(); return cfg.after === 'keep' ? items : items.filter(i => !d.has(i.id)); }
+function computeLayout() {
+  const vis = visible();
+  const ws = vis.map(i => cfg.rng === 'weight' ? i.w : 1);
+  const tot = ws.reduce((a, b) => a + b, 0);
+  let a = 0;
+  layout = vis.map((it, k) => { const s = { it, a0: a, a1: a + 360 * ws[k] / tot }; a = s.a1; return s; });
+  if (layout.length) layout[layout.length - 1].a1 = 360;
+}
+
+/* ---------- 随机 ---------- */
+const cr = window.crypto && window.crypto.getRandomValues ? window.crypto : null;
+function rand() {
+  if (!cr) return Math.random();
+  const a = new Uint32Array(1); cr.getRandomValues(a); return a[0] / 4294967296;
+}
+function randInt(n) {
+  if (!cr) return Math.floor(Math.random() * n);
+  const lim = Math.floor(4294967296 / n) * n, a = new Uint32Array(1);
+  do cr.getRandomValues(a); while (a[0] >= lim);
+  return a[0] % n;
+}
+function pickOne(ex) {
+  const p = pool().filter(i => !ex.has(i.id));
+  if (!p.length) return null;
+  if (cfg.rng === 'weight') {
+    const tot = p.reduce((s, i) => s + i.w, 0);
+    let r = rand() * tot;
+    for (const i of p) { r -= i.w; if (r < 0) return i; }
+    return p[p.length - 1];
+  }
+  if (cfg.rng === 'bag' && cfg.after === 'keep') {
+    const ok = new Set(p.map(i => i.id));
+    let cand = run.bag.filter(id => ok.has(id));
+    if (!cand.length) { run.bag = items.map(i => i.id); cand = run.bag.filter(id => ok.has(id)); }
+    const id = cand[randInt(cand.length)];
+    run.bag = run.bag.filter(x => x !== id);
+    return items[id];
+  }
+  return p[randInt(p.length)];
+}
+
+/* ---------- 画转盘 ---------- */
+const f2 = n => Math.round(n * 100) / 100;
+const mod = (a, m) => ((a % m) + m) % m;
+function pt(r, a) { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; }
+function sectorPath(a0, a1) {
+  if (a1 - a0 >= 359.999) return `M0 ${-R}A${R} ${R} 0 1 1 0 ${R}A${R} ${R} 0 1 1 0 ${-R}Z`;
+  const [x0, y0] = pt(R, a0), [x1, y1] = pt(R, a1);
+  return `M0 0L${f2(x0)} ${f2(y0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${f2(x1)} ${f2(y1)}Z`;
+}
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function mix(hex, w) {
+  const n = parseInt(hex.slice(1), 16), m = v => Math.round(v * w + 255 * (1 - w));
+  return `rgb(${m(n >> 16 & 255)},${m(n >> 8 & 255)},${m(n & 255)})`;
+}
+const cw = ch => /[ᄀ-￿]/.test(ch) ? 1 : 0.6;
+function textEm(s) { let w = 0; for (const ch of s) w += cw(ch); return w; }
+function cut(s, maxEm) {
+  let w = 0, out = '';
+  for (const ch of s) { const c = cw(ch); if (w + c > maxEm - 0.8) return out + '…'; w += c; out += ch; }
+  return out;
+}
+
+const gS = $('gSectors'), gL = $('gLabels'), gWheel = $('gWheel'), gPtr = $('gPtr'), gFixed = $('gFixed'), gHub = $('gHub');
+
+function renderWheel() {
+  gS.textContent = ''; gL.textContent = '';
+  const n = layout.length, c = cfg.color, st = cfg.style;
+  const sw = n > 60 ? 1.5 : n > 24 ? 2.5 : 3.5;
+  if (!n) {
+    el('circle', { r: R, fill: 'none', stroke: c, 'stroke-width': 3.5 }, gS);
+    el('text', { y: R * 0.62, 'text-anchor': 'middle', 'font-size': 18, fill: '#8c867f' }, gL).textContent =
+      items.length ? '全部抽完了，点这里重新开始' : '名单是空的，点这里添加';
+    return;
+  }
+  const drawn = drawnSet(), gray = cfg.after === 'gray';
+  layout.forEach((s, k) => {
+    let fill = 'none';
+    if (st === 'mono') fill = mix(c, (n % 2 && k === n - 1 && n > 1) ? 0.22 : k % 2 ? 0.3 : 0.14);
+    else if (st === 'rainbow') fill = PAL[(n > 1 && n % PAL.length === 1 && k === n - 1) ? 3 : k % PAL.length];
+    if (gray && drawn.has(s.it.id)) fill = st === 'line' ? '#f2f0ed' : '#e4e1dd';
+    if (fill === 'none') return;
+    el('path', { d: sectorPath(s.a0, s.a1), fill, stroke: st === 'line' ? 'none' : '#fff', 'stroke-width': st === 'line' ? 0 : (n > 60 ? 0.8 : 2), 'stroke-linejoin': 'round' }, gS);
+  });
+  if (st === 'line' && n > 1) layout.forEach(s => {
+    const [x, y] = pt(R, s.a0);
+    el('line', { x1: 0, y1: 0, x2: f2(x), y2: f2(y), stroke: c, 'stroke-width': sw, 'stroke-linecap': 'round' }, gS);
+  });
+  el('circle', { r: R, fill: 'none', stroke: c, 'stroke-width': st === 'line' ? sw : 5 }, gS);
+  layout.forEach(s => {
+    if (highlight.has(s.it.id)) el('path', { d: sectorPath(s.a0, s.a1), class: 'hl', fill: c, 'fill-opacity': 0.18, stroke: c, 'stroke-width': 5, 'stroke-linejoin': 'round' }, gS);
+  });
+  if (cfg.labels) drawLabels(drawn, gray);
+}
+
+function drawLabels(drawn, gray) {
+  const n = layout.length, inner = cfg.spinner === 'wheel' ? 50 : 26, outer = R - 16;
+  layout.forEach(s => {
+    const span = s.a1 - s.a0, mid = (s.a0 + s.a1) / 2;
+    const off = gray && drawn.has(s.it.id), on = highlight.has(s.it.id);
+    const attrs = {
+      fill: off ? '#b9b3ac' : (on && cfg.style === 'line' ? cfg.color : '#3a342e'),
+      'font-weight': on ? 700 : 500, 'dominant-baseline': 'central'
+    };
+    if (off) attrs['text-decoration'] = 'line-through';
+    let name = s.it.name, fs;
+    const em = textEm(name);
+    if (n === 1) {
+      fs = Math.min(36, R * 1.4 / Math.max(em, 1));
+      if (fs < 12) { fs = 12; name = cut(name, R * 1.4 / fs); }
+      Object.assign(attrs, { x: 0, y: -R * 0.7, 'text-anchor': 'middle', 'font-size': f2(fs) });
+    } else {
+      const k = 2 * Math.PI * span / 360;
+      fs = Math.min(30, k * R * 0.78 * 0.62);
+      if (fs < 8) return;
+      const roomFor = f => Math.min(outer - inner, outer - f * 1.15 / k);
+      let room = roomFor(fs);
+      if (em * fs > room) {
+        const fit = Math.max(11, Math.min(fs, room / em));
+        if (fit < fs) { fs = fit; room = roomFor(fs); }
+        if (em * fs > room) name = cut(name, room / fs);
+      }
+      if (room < fs * 1.2) return;
+      const right = mid <= 180;
+      Object.assign(attrs, {
+        transform: `rotate(${f2(right ? mid - 90 : mid + 90)})`,
+        x: right ? outer : -outer, y: 0, 'text-anchor': right ? 'end' : 'start', 'font-size': f2(fs)
+      });
+    }
+    el('text', attrs, gL).textContent = name;
+  });
+}
+
+function drawPointer() {
+  gPtr.textContent = ''; gFixed.textContent = ''; gHub.textContent = '';
+  const c = cfg.color;
+  if (cfg.spinner === 'pointer') {
+    const L = R * 0.5;
+    el('path', { d: `M-4.5 0L-2.4 ${-L + 22}L2.4 ${-L + 22}L4.5 0Z`, fill: c, stroke: c, 'stroke-width': 2, 'stroke-linejoin': 'round' }, gPtr);
+    el('path', { d: `M0 ${-L}L-9 ${-L + 22}L9 ${-L + 22}Z`, fill: c, stroke: c, 'stroke-width': 7, 'stroke-linejoin': 'round' }, gPtr);
+    el('circle', { r: 8, fill: c }, gPtr);
+  } else {
+    el('path', { d: `M0 ${-R + 26}L-17 ${-R - 18}L17 ${-R - 18}Z`, fill: c, stroke: '#fff', 'stroke-width': 3, 'stroke-linejoin': 'round' }, gFixed);
+    el('circle', { r: 42, fill: '#fff', stroke: c, 'stroke-width': 4 }, gHub);
+    el('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 21, 'font-weight': 600, fill: c }, gHub).textContent = '开始';
+  }
+}
+function applyRot() {
+  gWheel.setAttribute('transform', `rotate(${f2(rot.wheel)})`);
+  gPtr.setAttribute('transform', `rotate(${f2(rot.pointer)})`);
+}
+
+/* ---------- 转 ---------- */
+const outCubic = t => 1 - Math.pow(1 - t, 3);
+const inOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+const EASE = {
+  smooth: t => 1 - Math.pow(1 - t, 4),
+  suspense: t => 1 - Math.pow(1 - t, 6),
+  accel: t => 1 - Math.pow(1 - t * t, 3),
+  bounce: outCubic
+};
+let lastSec = -1, lastTick = 0;
+function pointedIndex() {
+  const a = cfg.spinner === 'pointer' ? mod(rot.pointer, 360) : mod(-rot.wheel, 360);
+  for (let i = 0; i < layout.length; i++) if (a < layout[i].a1) return i;
+  return layout.length - 1;
+}
+function tickCheck() {
+  const i = pointedIndex();
+  if (i === lastSec) return;
+  lastSec = i;
+  const now = performance.now();
+  if (now - lastTick > 30) { lastTick = now; tick(); }
+}
+function spinTo(it) {
+  let s = layout.find(x => x.it.id === it.id);
+  if (!s) { computeLayout(); renderWheel(); s = layout.find(x => x.it.id === it.id); }
+  const span = s.a1 - s.a0;
+  const target = s.a0 + span * (cfg.stopAt === 'center' ? 0.5 : 0.12 + 0.76 * rand());
+  const key = cfg.spinner, from = rot[key];
+  const dist = cfg.turns * 360 + mod((key === 'pointer' ? target : -target) - from, 360);
+  const over = cfg.easing === 'bounce' ? Math.max(6, Math.min(span * 0.7, 24)) : 0;
+  const ease = EASE[cfg.easing], dur = cfg.duration * 1000;
+  lastSec = pointedIndex();
+  return new Promise(done => {
+    const t0 = performance.now();
+    const frame = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      let p;
+      if (over) {
+        const o = over / dist, k = 0.82;
+        p = t < k ? (1 + o) * outCubic(t / k) : 1 + o * (1 - inOutSine((t - k) / (1 - k)));
+      } else p = ease(t);
+      rot[key] = from + dist * p;
+      applyRot(); tickCheck();
+      if (t < 1) requestAnimationFrame(frame);
+      else { rot[key] = mod(from + dist, 360); applyRot(); done(); }
+    };
+    requestAnimationFrame(frame);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+async function spin() {
+  if (spinning) return;
+  if (!items.length) { location.hash = 'settings'; return; }
+  if (!pool().length) { resetDraw(); return; }
+  unlockAudio();
+  clearTimeout(relayTimer);
+  spinning = true;
+  highlight.clear(); computeLayout(); renderWheel();
+  showResult([]); updateStatus();
+  const n = Math.min(cfg.count, pool().length);
+  const picked = [], ex = new Set();
+  const take = it => { picked.push(it); ex.add(it.id); if (cfg.after !== 'keep') run.drawn.push(it.id); };
+  if (n > 1 && cfg.multi === 'once') {
+    for (let k = 0; k < n; k++) { const it = pickOne(ex); if (!it) break; take(it); }
+    await spinTo(picked[0]);
+    picked.forEach(it => highlight.add(it.id));
+    renderWheel(); showResult(picked.map(i => i.name));
+  } else {
+    for (let k = 0; k < n; k++) {
+      const it = pickOne(ex);
+      if (!it) break;
+      await spinTo(it);
+      take(it); highlight.add(it.id);
+      renderWheel(); showResult(picked.map(i => i.name));
+      if (k < n - 1) {
+        await wait(cfg.after === 'remove' ? 900 : 600);
+        if (cfg.after === 'remove') { highlight.delete(it.id); computeLayout(); renderWheel(); await wait(200); }
+      }
+    }
+  }
+  finish(picked);
+}
+function finish(picked) {
+  spinning = false;
+  const names = picked.map(i => i.name);
+  run.last = names;
+  run.history.unshift({ t: Date.now(), names });
+  if (run.history.length > 100) run.history.length = 100;
+  save(); renderHistory(); updateStatus();
+  if (cfg.sound) chime();
+  if (cfg.confetti && !matchMedia('(prefers-reduced-motion: reduce)').matches) confetti();
+  if (cfg.popup) openModal(picked);
+  if (cfg.after === 'remove') relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderWheel(); }, 1800);
+}
+function resetDraw() {
+  run.drawn = []; run.bag = [];
+  highlight.clear(); computeLayout(); renderWheel(); updateStatus(); save();
+}
+
+/* ---------- 声音 ---------- */
+let ac = null;
+function unlockAudio() {
+  if (!cfg.sound) return;
+  try {
+    if (!ac) { const A = window.AudioContext || window.webkitAudioContext; if (A) ac = new A(); }
+    if (ac && ac.state === 'suspended') ac.resume();
+  } catch (e) { ac = null; }
+}
+function tone(freq, at, len, vol, type) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+  o.connect(g); g.connect(ac.destination);
+  o.start(at); o.stop(at + len + 0.02);
+}
+function tick() { if (cfg.sound && ac) tone(1500, ac.currentTime, 0.045, 0.12, 'triangle'); }
+function chime() {
+  if (!ac) return;
+  const t = ac.currentTime + 0.02;
+  [784, 988, 1319].forEach((f, i) => tone(f, t + i * 0.1, 0.5, 0.18, 'sine'));
+}
+
+/* ---------- 彩带 ---------- */
+function confetti() {
+  const cv = $('fx'), ctx = cv.getContext('2d');
+  const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cv.hidden = false;
+  const box = $('wheel').getBoundingClientRect();
+  const ox = box.left + box.width / 2, oy = box.top + box.height * 0.4;
+  const cols = [cfg.color, mix(cfg.color, 0.45), '#ffc94a', '#5bb8d6', '#7cc68d'];
+  const ps = Array.from({ length: 140 }, () => {
+    const a = (-90 + (Math.random() - 0.5) * 150) * Math.PI / 180, v = 7 + Math.random() * 9;
+    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4,
+      w: 6 + Math.random() * 6, h: 4 + Math.random() * 4, c: cols[Math.floor(Math.random() * cols.length)] };
+  });
+  const t0 = performance.now();
+  const step = now => {
+    ctx.clearRect(0, 0, W, H);
+    let alive = 0;
+    for (const p of ps) {
+      p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.32; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.y < H + 20) alive++;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    }
+    if (alive && now - t0 < 4000) requestAnimationFrame(step);
+    else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+  };
+  requestAnimationFrame(step);
+}
+
+/* ---------- 抽签页 ---------- */
+function showResult(names) { $('res').textContent = names.join('、'); }
+function updateStatus() {
+  const total = items.length, left = pool().length;
+  let s = total ? `共 ${total} 项` : '名单是空的';
+  let canReset = false;
+  if (total && cfg.after !== 'keep') { s += ` · 还剩 ${left} 项`; canReset = run.drawn.length > 0; }
+  if (total && cfg.after === 'keep' && cfg.rng === 'bag') {
+    const inBag = run.bag.length || total;
+    s += ` · 本轮还有 ${inBag} 项没抽到`; canReset = inBag < total;
+  }
+  $('statusText').textContent = s;
+  $('resetBtn').hidden = !canReset || spinning;
+  const go = $('goBtn');
+  go.disabled = spinning;
+  go.textContent = spinning ? '转动中…'
+    : !total ? '添加名单'
+    : !left ? '全部抽完了，重新开始'
+    : cfg.count > 1 ? `抽 ${Math.min(cfg.count, left)} 个`
+    : '开始抽签';
+  $('gearBtn').disabled = spinning;
+}
+function fmtTime(t) {
+  const d = new Date(t), now = new Date(), p = n => String(n).padStart(2, '0');
+  const hm = `${p(d.getHours())}:${p(d.getMinutes())}`;
+  return d.toDateString() === now.toDateString() ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
+}
+function renderHistory() {
+  const h = run.history, list = $('histList');
+  $('hist').hidden = !h.length;
+  $('histCount').textContent = h.length ? `（${h.length}）` : '';
+  list.textContent = '';
+  h.forEach(r => {
+    const li = document.createElement('li'), t = document.createElement('time'), s = document.createElement('span');
+    t.textContent = fmtTime(r.t); s.textContent = r.names.map(String).join('、');
+    li.append(t, s); list.append(li);
+  });
+}
+
+/* ---------- 结果弹窗 ---------- */
+function openModal(picked) {
+  modalPicked = picked;
+  $('mLead').textContent = cfg.heading.replace(/[:：]\s*$/, '') || '抽中';
+  const names = $('mNames');
+  names.textContent = picked.map(i => i.name).join('、');
+  names.classList.toggle('many', picked.length > 3);
+  $('mRemove').hidden = cfg.after !== 'keep';
+  $('modal').hidden = false;
+  $('mOk').focus();
+}
+function closeModal() { $('modal').hidden = true; }
+$('mOk').onclick = closeModal;
+$('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+$('mRemove').onclick = () => {
+  const ids = new Set(modalPicked.map(i => i.id));
+  setList(items.filter(i => !ids.has(i.id)).map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n'));
+  closeModal();
+};
+
+/* ---------- 设置页 ---------- */
+const refs = {};
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  kids.forEach(k => e.append(k));
+  return e;
+}
+function buildSettings() {
+  const host = $('setCards');
+  SECTIONS.forEach(sec => {
+    const card = h('section', { class: 'card' }, h('h2', {}, sec.title));
+    if (sec.note) card.append(h('p', { class: 'note' }, sec.note));
+    sec.fields.forEach(f => {
+      const id = 'f-' + f.key, row = h('div', { class: 'row' });
+      const r = refs[f.key] = { row };
+      const lbl = h(['switch', 'text', 'range'].includes(f.type) ? 'label' : 'div', { class: 'lbl' }, f.label);
+      if (lbl.tagName === 'LABEL') lbl.htmlFor = id;
+      let ctl;
+      if (f.type === 'seg') {
+        ctl = h('div', { class: 'seg', role: 'group', 'aria-label': f.label });
+        f.opts.forEach(([v, t]) => {
+          const b = h('button', { type: 'button', 'data-v': v }, t);
+          b.onclick = () => set(f.key, v);
+          ctl.append(b);
+        });
+      } else if (f.type === 'switch') {
+        r.inp = h('input', { type: 'checkbox', class: 'sw', id });
+        r.inp.onchange = () => set(f.key, r.inp.checked);
+        ctl = h('div', {}, r.inp);
+      } else if (f.type === 'range') {
+        r.inp = h('input', { type: 'range', id, min: f.min, max: f.max, step: f.step });
+        r.out = h('output', {});
+        r.inp.oninput = () => set(f.key, parseFloat(r.inp.value));
+        ctl = h('div', { class: 'rng' }, r.inp, r.out);
+      } else if (f.type === 'text') {
+        r.inp = h('input', { type: 'text', class: 'txt', id, maxlength: f.max });
+        r.inp.oninput = () => set(f.key, r.inp.value);
+        ctl = r.inp;
+      } else if (f.type === 'stepper') {
+        const minus = h('button', { type: 'button', 'aria-label': '减一' }, '−');
+        const plus = h('button', { type: 'button', 'aria-label': '加一' }, '+');
+        r.inp = h('input', { type: 'number', inputmode: 'numeric', min: f.min, max: f.max, 'aria-label': f.label });
+        const put = v => { set(f.key, Math.min(f.max, Math.max(f.min, Math.round(v) || f.min))); r.inp.value = cfg[f.key]; };
+        minus.onclick = () => put(cfg[f.key] - 1);
+        plus.onclick = () => put(cfg[f.key] + 1);
+        r.inp.onchange = () => put(parseFloat(r.inp.value));
+        ctl = h('div', { class: 'stepper' }, minus, r.inp, plus);
+      } else if (f.type === 'color') {
+        ctl = h('div', { class: 'swatches', role: 'group', 'aria-label': f.label });
+        r.sw = SWATCHES.map(col => {
+          const b = h('button', { type: 'button', class: 'swatch', 'aria-label': col, style: `background:${col}` });
+          b.onclick = () => set(f.key, col);
+          ctl.append(b);
+          return b;
+        });
+        r.inp = h('input', { type: 'color', 'aria-label': '自定义颜色' });
+        r.inp.oninput = () => set(f.key, r.inp.value.toLowerCase());
+        r.custom = h('span', { class: 'swatch custom', title: '自定义颜色' }, r.inp);
+        ctl.append(r.custom);
+      }
+      row.append(lbl, h('div', {}, ctl));
+      if (f.hint) { r.hint = h('p', { class: 'hint' }); row.append(r.hint); }
+      card.append(row);
+    });
+    host.append(card);
+  });
+}
+function syncSettings() {
+  for (const k in FIELDS) {
+    const f = FIELDS[k], r = refs[k], v = cfg[k];
+    if (f.show) r.row.hidden = !f.show();
+    if (f.type === 'seg') r.row.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    else if (f.type === 'switch') r.inp.checked = v;
+    else if (f.type === 'range') { r.inp.value = v; r.out.textContent = v + f.unit; }
+    else if (f.type === 'text' || f.type === 'stepper') { if (document.activeElement !== r.inp) r.inp.value = v; }
+    else if (f.type === 'color') {
+      const preset = SWATCHES.includes(v);
+      r.sw.forEach((b, i) => b.setAttribute('aria-pressed', String(SWATCHES[i] === v)));
+      r.custom.setAttribute('aria-pressed', String(!preset));
+      r.inp.value = v;
+    }
+    if (r.hint) { r.hint.textContent = f.hint(); r.hint.hidden = !r.hint.textContent; }
+  }
+  updateListMeta();
+}
+function updateListMeta() {
+  $('listCount').textContent = `${items.length} 项`;
+  const box = $('probs');
+  box.hidden = cfg.rng !== 'weight' || !items.length;
+  if (box.hidden) return;
+  const tot = items.reduce((s, i) => s + i.w, 0);
+  box.textContent = '';
+  items.slice(0, 60).forEach(i => {
+    const pct = i.w / tot * 100;
+    box.append(h('span', {}, i.name, h('b', {}, (pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)) + '%')));
+  });
+  if (items.length > 60) box.append(h('span', {}, `…等 ${items.length} 项`));
+}
+function applyAll() {
+  const s = document.documentElement.style, c = cfg.color, n = parseInt(c.slice(1), 16);
+  const lum = (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255;
+  s.setProperty('--c', c); s.setProperty('--c1', mix(c, 0.1)); s.setProperty('--c2', mix(c, 0.25));
+  s.setProperty('--on-c', lum > 0.68 ? '#2d2a26' : '#fff');
+  $('hText').textContent = cfg.heading;
+  computeLayout(); drawPointer(); renderWheel(); applyRot(); updateStatus();
+}
+function set(key, v) {
+  if (spinning || cfg[key] === v) return;
+  cfg[key] = v;
+  if (key === 'spinner') rot = { pointer: 0, wheel: 0 };
+  if (key === 'after' || key === 'rng') { run.drawn = []; run.bag = []; }
+  highlight.clear();
+  applyAll(); syncSettings(); save();
+}
+function setList(text) {
+  cfg.list = text;
+  $('listTA').value = text;
+  parse(); highlight.clear(); computeLayout(); renderWheel(); updateStatus(); updateListMeta(); save();
+}
+
+let listTimer = 0;
+$('listTA').addEventListener('input', () => {
+  clearTimeout(listTimer);
+  listTimer = setTimeout(() => {
+    cfg.list = $('listTA').value;
+    parse(); highlight.clear(); computeLayout(); renderWheel(); updateStatus(); updateListMeta(); save();
+  }, 200);
+});
+$('shuffleBtn').onclick = () => {
+  const lines = $('listTA').value.split(/\r?\n/).filter(l => l.trim());
+  for (let i = lines.length - 1; i > 0; i--) { const j = randInt(i + 1); [lines[i], lines[j]] = [lines[j], lines[i]]; }
+  setList(lines.join('\n'));
+};
+$('dedupeBtn').onclick = () => {
+  const seen = new Set();
+  setList(items.filter(i => !seen.has(i.name) && seen.add(i.name)).map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n'));
+};
+$('genBtn').onclick = () => {
+  let a = Math.round(parseFloat($('genFrom').value)), b = Math.round(parseFloat($('genTo').value));
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return;
+  if (a > b) [a, b] = [b, a];
+  if (b - a > 999) b = a + 999;
+  if (items.length && !confirm(`用 ${a} 到 ${b} 替换现在的名单？`)) return;
+  const out = [];
+  for (let i = a; i <= b; i++) out.push(String(i));
+  setList(out.join('\n'));
+};
+$('resetCfgBtn').onclick = () => {
+  if (!confirm('把设置恢复成默认？名单和抽签记录会保留。')) return;
+  cfg = Object.assign({}, DEF, { list: cfg.list });
+  rot = { pointer: 0, wheel: 0 };
+  run.drawn = []; run.bag = []; highlight.clear();
+  applyAll(); syncSettings(); save();
+};
+
+/* ---------- 页面切换与操作 ---------- */
+function route() {
+  const s = location.hash === '#settings' && !spinning;
+  $('front').hidden = s; $('settings').hidden = !s;
+  if (s) { $('listTA').value = cfg.list; syncSettings(); window.scrollTo(0, 0); }
+}
+addEventListener('hashchange', route);
+$('gearBtn').onclick = () => { location.hash = 'settings'; };
+$('backBtn').onclick = () => { location.hash = ''; };
+$('goBtn').onclick = spin;
+$('wheel').addEventListener('click', spin);
+$('resetBtn').onclick = resetDraw;
+$('histClear').onclick = () => { run.history = []; save(); renderHistory(); };
+document.addEventListener('keydown', e => {
+  if (!$('modal').hidden) { if (e.key === 'Escape') closeModal(); return; }
+  if ($('front').hidden || (e.key !== ' ' && e.key !== 'Enter')) return;
+  if (e.target.closest && e.target.closest('button,input,textarea,summary,a')) return;
+  e.preventDefault(); spin();
+});
+
+load(); parse(); buildSettings(); applyAll(); renderHistory(); showResult(run.last); route();
+})();
+</script>
+</body>
+</html>
