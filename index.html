@@ -5,179 +5,300 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>抽签转盘</title>
 <meta name="description" content="输入名单，转一下，抽出结果。">
-<meta name="theme-color" content="#fcfbf8">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23f24b4b' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='32' r='28'/%3E%3Cpath d='M32 32 18 7M32 32l26 9M32 32 10 50'/%3E%3C/g%3E%3Cpath d='M32 36V16m-6 4 6-9 6 9z' stroke='%23f24b4b' stroke-width='5' fill='%23f24b4b' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#f5eee3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 50a28 28 0 0 1 56 0z' fill='%232e221c'/%3E%3Cpath d='M10 50a22 22 0 0 1 44 0z' fill='%23f7d48c'/%3E%3Cpath d='M32 50 13 39a22 22 0 0 1 11-10z' fill='%23f3a083'/%3E%3Cpath d='M32 50 40 29a22 22 0 0 1 11 10z' fill='%23a2c5df'/%3E%3Cpath d='M32 50 40 20' stroke='%23e8553e' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='50' r='7' fill='%23e8553e'/%3E%3C/svg%3E">
 <style>
 :root{
-  --c:#f24b4b;--c1:#fde9e9;--c2:#fbd2d2;--on-c:#fff;
-  --bg:#fcfbf8;--card:#fff;--ink:#2d2a26;--muted:#8c867f;--line:#ebe6df;
-  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
-  color:var(--ink);background:var(--bg);
+  --bg:#f5eee3;--bg2:#fffaf2;--ink:#2a1f1a;--muted:#8b7b6d;--line:#e6dbca;--card:#fffcf7;
+  --accent:#e8553e;--on-accent:#fff;--rim:#2e221c;--bulb:#ffd36e;--win:#fff;
+  --hub-bg:#e8553e;--hub-ink:#fff;--hub-ring:#2e221c;
+  font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg)}
-body{min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);background:radial-gradient(130% 75% at 50% 80%,var(--bg2) 0%,var(--bg) 64%) fixed,var(--bg);transition:color .4s;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overflow-x:hidden}
+body[data-theme=night]::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.75;background-image:
+  radial-gradient(1.6px 1.6px at 8% 14%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 38%,#fff 50%,transparent 51%),
+  radial-gradient(1.8px 1.8px at 36% 9%,#ffe9a8 50%,transparent 51%),radial-gradient(1.1px 1.1px at 47% 27%,#fff 50%,transparent 51%),
+  radial-gradient(1.5px 1.5px at 63% 12%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 74% 33%,#cfc6ff 50%,transparent 51%),
+  radial-gradient(1.9px 1.9px at 88% 18%,#fff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 94% 46%,#fff 50%,transparent 51%),
+  radial-gradient(1.3px 1.3px at 4% 58%,#cfc6ff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 16% 82%,#fff 50%,transparent 51%),
+  radial-gradient(1.2px 1.2px at 84% 76%,#fff 50%,transparent 51%),radial-gradient(1.6px 1.6px at 96% 90%,#ffe9a8 50%,transparent 51%)}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 [hidden]{display:none!important}
-:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
-/* 抽签页 */
-#front{display:flex;flex-direction:column;align-items:center;padding:12px 16px 48px}
-.stage{width:100%;max-width:640px}
-.top{display:flex;align-items:flex-start;gap:12px;padding-top:12px}
-.heading{flex:1;min-width:0;margin:0;color:var(--c);font-size:clamp(26px,6.4vw,44px);font-weight:400;line-height:1.35;overflow-wrap:anywhere}
-.heading b{font-weight:600}
-.icon-btn{flex:none;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--muted);display:grid;place-items:center;padding:0;transition:color .15s,border-color .15s}
-.icon-btn:hover:not(:disabled){color:var(--c);border-color:var(--c)}
-.icon-btn:disabled{opacity:.4;cursor:default}
-.wheel-wrap{width:min(100%,max(260px,calc(100vh - 270px)));margin:16px auto 0}
-#wheel{display:block;width:100%;height:auto;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:visible}
-#wheel text{pointer-events:none}
-.hl{animation:pulse .9s ease-in-out infinite alternate}
-@keyframes pulse{to{opacity:.4}}
-.controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:20px}
-.go{min-width:210px;height:52px;padding:0 30px;border:0;border-radius:26px;background:var(--c);color:var(--on-c);font-size:18px;letter-spacing:.12em;box-shadow:0 8px 20px -10px var(--c);transition:transform .1s,opacity .15s}
-.go:active:not(:disabled){transform:scale(.97)}
-.go:disabled{opacity:.55;cursor:default}
-.status{font-size:14px;color:var(--muted);text-align:center}
-.link{border:0;background:none;padding:0 2px;color:var(--c);font-size:14px;text-decoration:underline;text-underline-offset:3px}
-.history{width:100%;max-width:640px;margin-top:28px;border-top:1px solid var(--line)}
-.history summary{cursor:pointer;padding:14px 0;color:var(--muted);font-size:14px;list-style:none}
-.history summary::-webkit-details-marker{display:none}
-.history summary::after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-3px) rotate(45deg);transition:transform .15s}
-.history[open] summary::after{transform:translateY(0) rotate(-135deg)}
-.history ol{list-style:none;margin:0;padding:0}
-.history li{display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
-.history li span{overflow-wrap:anywhere}
-.history time{flex:none;color:var(--muted);font-variant-numeric:tabular-nums}
-.history .link{margin:10px 0 0;font-size:13px}
+/* ===== 主界面 ===== */
+.app{position:relative;max-width:1040px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:0 16px calc(20px + env(safe-area-inset-bottom))}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;font-size:17px;font-weight:700;letter-spacing:.02em}
+.brand svg{flex:none}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex;gap:8px;flex:none}
+.icon-btn{width:42px;height:42px;padding:0;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;transition:transform .15s,border-color .2s,color .2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn:disabled{opacity:.35;pointer-events:none}
 
-/* 设置页 */
-#settings{max-width:680px;margin:0 auto;padding:0 16px 64px}
-.set-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 0;background:var(--bg)}
-.set-top h1{margin:0;font-size:20px;font-weight:600}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px;margin-top:14px}
-.card h2{margin:0 0 6px;font-size:16px;font-weight:600}
-.note{margin:0 0 6px;color:var(--muted);font-size:13px;line-height:1.6}
-.row{display:grid;grid-template-columns:96px 1fr;gap:6px 14px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
-.card h2+.row,.card .note+.row{border-top:0}
-.lbl{font-size:14.5px}
-.hint{grid-column:2;margin:0;color:var(--muted);font-size:12.5px;line-height:1.6}
-@media (max-width:480px){.row{grid-template-columns:1fr}.hint{grid-column:1}}
+.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:3vh}
+.hero{text-align:center;padding-top:clamp(14px,4vh,44px)}
+@media (max-width:640px){
+  .main .stage{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px}
+  .main{padding-bottom:8vh}
+}
+.kicker{display:inline-flex;align-items:center;gap:12px;color:var(--muted);font-size:clamp(13px,1.7vw,16px);letter-spacing:.38em;padding-left:.38em}
+.kicker::before,.kicker::after{content:"";width:clamp(18px,4vw,36px);height:1px;background:currentColor;opacity:.55}
+.result{min-height:1.3em;margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.18em .32em;font-size:clamp(40px,8.6vw,92px);font-weight:800;line-height:1.18;letter-spacing:.02em;color:var(--accent);overflow-wrap:anywhere}
+.result .ph{color:var(--muted);opacity:.45;font-weight:600}
+.result .live{color:var(--ink);opacity:.42;display:inline-block}
+.result .name{display:inline-block;position:relative}
+.result .name.land{animation:land .7s cubic-bezier(.18,1.35,.32,1) both}
+.result .name.land::after{content:"";position:absolute;left:8%;right:8%;bottom:-.04em;height:.09em;border-radius:1em;background:var(--accent);opacity:.28;transform-origin:left;animation:swash .5s .35s ease-out both}
+.result.multi{font-size:clamp(22px,4.6vw,42px);gap:10px;padding:0 4px}
+.result .tag{display:inline-block;padding:.14em .62em;border-radius:999px;background:var(--accent);color:var(--on-accent)}
+.result .tag.pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.result .tag.live{background:transparent;color:var(--ink);opacity:.45;border:2px dashed var(--line)}
+@keyframes land{0%{transform:scale(1.7);opacity:0;filter:blur(10px)}55%{opacity:1;filter:blur(0)}100%{transform:none}}
+@keyframes swash{from{transform:scaleX(0)}}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
+
+.stage{position:relative;width:min(100%,max(300px,min(960px,calc((100vh - 330px) * 1.786))));margin:clamp(10px,3vh,30px) auto 0}
+#dial{display:block;width:100%;height:auto;overflow:visible;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#dial text{pointer-events:none}
+#dial .sec{transition:opacity .4s,transform .55s cubic-bezier(.2,1.5,.35,1)}
+#dial .veil{opacity:0;transition:opacity .45s;pointer-events:none}
+#dial.landed .veil{opacity:.62}
+#dial .sec.win>path{stroke:var(--win);stroke-width:7px}
+#dial .sec text{opacity:var(--lab,1)}
+#dial .fadein{animation:fadein .45s ease-out both}
+@keyframes fadein{from{opacity:0}}
+#cur{transition:opacity .2s}
+#dial:not(.spinning) #cur{opacity:0}
+#bulbs .on{animation:twinkle 2.8s ease-in-out infinite;animation-delay:calc(var(--i) * -.31s)}
+#bulbs[data-mode=chase] .on{animation:chase .39s steps(1,end) infinite;animation-delay:calc(var(--k) * -.13s)}
+#bulbs[data-mode=win] .on{animation:flash .26s steps(1,end) 9 both}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes chase{0%{opacity:1}33.3%,100%{opacity:.1}}
+@keyframes flash{0%{opacity:1}50%{opacity:.08}}
+
+.hub{position:absolute;left:50%;top:91.07%;width:17%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;border:0;padding:0;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.5),rgba(255,255,255,0) 46%),var(--hub-bg);color:var(--hub-ink);
+  box-shadow:0 0 0 clamp(4px,.7vw,7px) var(--hub-ring),0 14px 30px -8px rgba(0,0,0,.45),inset 0 -7px 14px rgba(0,0,0,.18);
+  font-size:clamp(15px,2.6vw,27px);font-weight:800;letter-spacing:.14em;text-indent:.14em;transition:transform .18s cubic-bezier(.3,1.6,.5,1),filter .2s}
+.hub::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--hub-bg);animation:ripple 2.4s ease-out infinite;pointer-events:none}
+.hub:hover{filter:brightness(1.06)}
+.hub:active{transform:translate(-50%,-50%) scale(.92)}
+.hub:disabled{cursor:default}
+.hub:disabled::before{display:none}
+.hub .dots{display:inline-flex;gap:.18em}
+.hub .dots i{width:.24em;height:.24em;border-radius:50%;background:currentColor;animation:dot 1s ease-in-out infinite}
+.hub .dots i:nth-child(2){animation-delay:.15s}.hub .dots i:nth-child(3){animation-delay:.3s}
+@keyframes ripple{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(1.55);opacity:0}}
+@keyframes dot{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-.25em);opacity:1}}
+
+.below{display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:clamp(28px,5.5vw,56px)}
+.status{color:var(--muted);font-size:14px;text-align:center}
+.link{border:0;background:none;padding:0 2px;color:var(--accent);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.recent{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:720px}
+.recent span{padding:5px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--ink);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent span:first-child{border-color:var(--accent);color:var(--accent)}
+
+/* ===== 设置抽屉 ===== */
+.drawer{position:fixed;inset:0;z-index:30;visibility:hidden;transition:visibility 0s .4s}
+.drawer.open{visibility:visible;transition:none}
+.scrim{position:absolute;inset:0;background:rgba(18,12,8,.3);opacity:0;transition:opacity .35s}
+.drawer.open .scrim{opacity:1}
+.panel{position:absolute;top:0;right:0;bottom:0;width:min(450px,100%);display:flex;flex-direction:column;background:var(--card);color:var(--ink);box-shadow:-24px 0 60px -24px rgba(0,0,0,.4);transform:translateX(104%);transition:transform .42s cubic-bezier(.2,.9,.2,1)}
+.drawer.open .panel{transform:none}
+@media (max-width:640px){
+  .panel{top:auto;left:0;width:100%;height:92vh;border-radius:24px 24px 0 0;transform:translateY(104%)}
+  .panel::before{content:"";position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:var(--line)}
+}
+.p-head{display:flex;align-items:center;gap:8px;padding:18px 16px 0 20px}
+.tabs{flex:1;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--line)}
+.tabs button{flex:1;height:36px;border:0;border-radius:10px;background:transparent;font-size:14.5px;color:var(--muted);transition:background .2s,color .2s}
+.tabs button[aria-selected=true]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 2px 8px -3px rgba(0,0,0,.25)}
+.p-body{flex:1;overflow-y:auto;padding:6px 20px 40px;-webkit-overflow-scrolling:touch}
+.pane{animation:paneIn .3s ease-out}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}}
+.grp{margin-top:18px;font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.row{display:flex;flex-direction:column;gap:9px;padding:15px 0;border-bottom:1px solid var(--line)}
+.row.inline{flex-direction:row;align-items:center;justify-content:space-between}
+.lbl{font-size:14.5px;font-weight:600}
+.hint{margin:0;color:var(--muted);font-size:12.5px;line-height:1.65}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{min-height:36px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:14px}
-.seg button[aria-pressed=true]{border-color:var(--c);background:var(--c1);color:var(--c);font-weight:600}
-.rng{display:flex;align-items:center;gap:12px}
-.rng input{flex:1;min-width:0;accent-color:var(--c)}
-.rng output{flex:none;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px}
-.sw{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;margin:0;border-radius:13px;background:#ddd8d2;position:relative;cursor:pointer;transition:background .15s}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s}
-.sw:checked{background:var(--c)}
+.seg button{min-height:36px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:transparent;font-size:14px;transition:border-color .2s,background .2s,color .2s}
+.seg button[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--on-accent);font-weight:600}
+.rng{display:flex;align-items:center;gap:14px}
+.rng input{flex:1;min-width:0;accent-color:var(--accent)}
+.rng output{flex:none;min-width:48px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;margin:0;border-radius:14px;background:var(--line);position:relative;cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .22s cubic-bezier(.3,1.5,.5,1)}
+.sw:checked{background:var(--accent)}
 .sw:checked::after{transform:translateX(18px)}
-.txt{width:100%;max-width:320px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:16px}
-.txt:focus{outline:none;border-color:var(--c)}
-.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;width:max-content}
-.stepper button{width:40px;height:38px;border:0;background:#faf8f5;font-size:18px;line-height:1}
-.stepper input{width:56px;height:38px;border:0;text-align:center;font-size:16px;-moz-appearance:textfield;appearance:textfield}
+.txt{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:transparent;font-size:16px}
+.txt:focus,textarea:focus{outline:none;border-color:var(--accent)}
+.stepper{display:inline-flex;align-items:center;width:max-content;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.stepper button{width:42px;height:40px;border:0;background:transparent;font-size:19px}
+.stepper button:active{background:var(--line)}
+.stepper input{width:56px;height:40px;border:0;background:transparent;text-align:center;font-size:16px;font-weight:600;-moz-appearance:textfield;appearance:textfield}
 .stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.swatches{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.swatch{width:30px;height:30px;padding:0;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1.5px var(--line)}
-.swatch[aria-pressed=true]{box-shadow:0 0 0 2.5px var(--ink)}
-.custom{position:relative;overflow:hidden;background:conic-gradient(#f24b4b,#f5c13b,#3cb371,#2f8fde,#8a4fd8,#f24b4b)}
-.custom input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer;border:0;padding:0}
-textarea{display:block;width:100%;min-height:220px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16px;line-height:1.6;resize:vertical}
-textarea:focus{outline:none;border-color:var(--c)}
-.list-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
-.list-meta .count{color:var(--muted);font-size:13.5px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.cards.two{grid-template-columns:1fr 1fr}
+.card-opt{position:relative;padding:6px 6px 8px;border:1.5px solid var(--line);border-radius:14px;background:transparent;text-align:center;font-size:13.5px;transition:border-color .2s,transform .15s}
+.card-opt svg{display:block;width:100%;height:auto;border-radius:9px;margin-bottom:6px}
+.card-opt:active{transform:scale(.97)}
+.card-opt[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);font-weight:700}
+.card-opt small{display:block;margin-top:2px;color:var(--muted);font-size:11.5px;font-weight:400}
+textarea{display:block;width:100%;min-height:230px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:transparent;font-size:16px;line-height:1.65;resize:vertical}
 .tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13.5px}
-.chip{padding:6px 12px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:13.5px}
-.chip:hover{border-color:var(--c);color:var(--c)}
-.gen{padding:12px 0;border-top:1px solid var(--line)}
-.gen input{width:70px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;text-align:center;font-size:15px}
-.probs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
-.probs span{padding:3px 9px;border-radius:6px;background:var(--c1);font-size:12.5px}
-.probs b{color:var(--c);font-weight:600;margin-left:4px}
+.list-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.list-meta .count{color:var(--muted);font-size:13.5px}
+.chip{padding:6px 13px;border:1.5px solid var(--line);border-radius:999px;background:transparent;font-size:13.5px;transition:border-color .2s,color .2s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.gen input{width:68px;padding:6px 8px;border:1.5px solid var(--line);border-radius:9px;background:transparent;text-align:center;font-size:15px}
+.probs{display:flex;flex-wrap:wrap;gap:6px}
+.probs span{padding:3px 9px;border-radius:7px;border:1px solid var(--line);font-size:12.5px}
+.probs b{margin-left:4px;color:var(--accent)}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.hist li span{overflow-wrap:anywhere}
+.hist time{flex:none;color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px;padding-top:1px}
+.empty{padding:40px 0;color:var(--muted);text-align:center;font-size:14px}
 
-/* 结果弹窗 */
-.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(45,35,30,.32)}
-.box{width:min(100%,420px);padding:30px 24px 22px;border-radius:22px;background:#fff;text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.35);animation:pop .28s cubic-bezier(.2,1.3,.4,1)}
-@keyframes pop{from{transform:scale(.85);opacity:0}}
-.box .lead{color:var(--muted);font-size:15px}
-.box .names{margin:10px 0 24px;color:var(--c);font-size:clamp(28px,9vw,44px);font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.box .names.many{font-size:clamp(20px,5.5vw,28px)}
-.m-actions{display:flex;justify-content:center;gap:10px}
-.m-actions button{min-width:110px;height:44px;padding:0 18px;border-radius:22px;font-size:15px}
-.btn{border:0;background:var(--c);color:var(--on-c)}
-.btn-ghost{border:1.5px solid var(--line);background:#fff}
-#fx{position:fixed;inset:0;z-index:20;width:100%;height:100%;pointer-events:none}
+/* ===== 结果弹窗 ===== */
+.modal{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(18,12,8,.38);animation:fadein .25s}
+.box{position:relative;width:min(100%,430px);padding:34px 26px 24px;border-radius:26px;background:var(--card);color:var(--ink);text-align:center;box-shadow:0 30px 80px -24px rgba(0,0,0,.5);animation:boxIn .5s cubic-bezier(.2,1.4,.35,1) both}
+.box::before{content:"";position:absolute;left:24px;right:24px;top:0;height:6px;border-radius:0 0 6px 6px;background:var(--accent)}
+@keyframes boxIn{from{transform:translateY(30px) scale(.86);opacity:0}}
+.box .k{color:var(--muted);font-size:14px;letter-spacing:.3em;padding-left:.3em}
+.box .names{margin:12px 0 26px;color:var(--accent);font-size:clamp(30px,9vw,48px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.box .names.many{font-size:clamp(20px,5.6vw,28px)}
+.m-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.m-actions button{min-width:104px;height:46px;padding:0 18px;border-radius:23px;font-size:15px;font-weight:600}
+.btn{border:0;background:var(--accent);color:var(--on-accent)}
+.btn-ghost{border:1.5px solid var(--line);background:transparent}
+#fx{position:fixed;inset:0;z-index:50;width:100%;height:100%;pointer-events:none}
+
+@media (prefers-reduced-motion:reduce){
+  #bulbs .on,.hub::before{animation:none!important}
+}
 </style>
 </head>
-<body>
+<body data-theme="cream">
 
-<main id="front">
-  <div class="stage">
-    <div class="top">
-      <h1 class="heading" aria-live="polite"><span id="hText"></span><b id="res"></b></h1>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 50a28 28 0 0 1 56 0z" fill="var(--rim)"/><path d="M10 50a22 22 0 0 1 44 0z" fill="var(--bulb)"/><path d="M32 50 40 22" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="50" r="7" fill="var(--accent)"/></svg>
+      <span id="titleText"></span>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" id="histBtn" aria-label="抽签记录" title="抽签记录">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+      </button>
       <button class="icon-btn" id="gearBtn" aria-label="设置" title="设置">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
       </button>
     </div>
-    <div class="wheel-wrap">
-      <svg id="wheel" viewBox="-260 -260 520 520" role="img" aria-label="转盘，点一下开始转">
-        <g id="gWheel"><g id="gSectors"></g><g id="gLabels"></g></g>
-        <g id="gFixed"></g>
-        <g id="gPtr"></g>
-        <g id="gHub"></g>
-      </svg>
-    </div>
-    <div class="controls">
-      <button class="go" id="goBtn">开始抽签</button>
-      <div class="status"><span id="statusText"></span> <button class="link" id="resetBtn" hidden>重置</button></div>
-    </div>
-  </div>
-  <details class="history" id="hist" hidden>
-    <summary>抽签记录 <span id="histCount"></span></summary>
-    <ol id="histList"></ol>
-    <button class="link" id="histClear">清空记录</button>
-  </details>
-</main>
-
-<main id="settings" hidden>
-  <header class="set-top">
-    <button class="icon-btn" id="backBtn" aria-label="返回转盘" title="返回转盘">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <h1>设置</h1>
   </header>
-  <section class="card">
-    <h2>参与抽选的名单</h2>
-    <textarea id="listTA" spellcheck="false" placeholder="一行一个，比如：&#10;小明&#10;小红&#10;小刚"></textarea>
-    <div class="list-meta">
-      <span class="count" id="listCount"></span>
-      <span class="tools"><button class="chip" id="shuffleBtn">打乱顺序</button><button class="chip" id="dedupeBtn">去掉重复</button></span>
-    </div>
-    <div class="gen tools">
-      <span>生成数字</span><input id="genFrom" type="number" inputmode="numeric" value="1"><span>到</span><input id="genTo" type="number" inputmode="numeric" value="30"><button class="chip" id="genBtn">替换名单</button>
-    </div>
-    <div class="probs" id="probs" hidden></div>
+
+  <main class="main">
+  <section class="hero">
+    <div class="kicker">你抽中的是</div>
+    <div class="result" id="res" aria-live="polite"></div>
   </section>
-  <div id="setCards"></div>
-  <section class="card">
-    <div class="row" style="border-top:0">
-      <div class="lbl">恢复默认设置</div>
-      <div><button class="chip" id="resetCfgBtn">恢复</button></div>
-      <p class="hint">名单和抽签记录会保留。</p>
-    </div>
+
+  <section class="stage" id="stage">
+    <svg id="dial" viewBox="0 0 1000 560" aria-hidden="true">
+      <defs>
+        <clipPath id="clipUpper"><rect x="-40" y="-40" width="1080" height="550"/></clipPath>
+        <radialGradient id="gVig" gradientUnits="userSpaceOnUse" cx="500" cy="510" r="430">
+          <stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/>
+        </radialGradient>
+        <linearGradient id="gTop" gradientUnits="userSpaceOnUse" x1="0" y1="80" x2="0" y2="510">
+          <stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="gHalo"><stop offset="0" style="stop-color:var(--bulb)" stop-opacity=".8"/><stop offset="1" style="stop-color:var(--bulb)" stop-opacity="0"/></radialGradient>
+        <filter id="fDrop" x="-10%" y="-15%" width="120%" height="135%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".24"/></filter>
+        <filter id="fSoft" x="-60%" y="-20%" width="220%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".3"/></filter>
+        <g id="arcDefs"></g>
+      </defs>
+      <g id="gBack"></g>
+      <g clip-path="url(#clipUpper)"><g id="gWheel"><g id="gSecs"></g><path id="cur"/></g></g>
+      <g id="gOver"></g>
+      <g id="bulbs" data-mode="idle"></g>
+      <g id="gGhosts"></g>
+      <g id="gNeedle"></g>
+      <g id="gFlap"></g>
+      <g id="gBase"></g>
+    </svg>
+    <button class="hub" id="hub" aria-label="开始抽签">开始</button>
   </section>
-</main>
+
+  <footer class="below">
+    <div class="status"><span id="statusText"></span> <button class="link" id="resetBtn" hidden>重置</button></div>
+    <div class="recent" id="recent"></div>
+  </footer>
+  </main>
+</div>
+
+<div class="drawer" id="drawer" inert>
+  <div class="scrim" id="scrim"></div>
+  <aside class="panel" role="dialog" aria-modal="true" aria-label="设置">
+    <div class="p-head">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="list">名单</button>
+        <button role="tab" data-tab="draw">抽法</button>
+        <button role="tab" data-tab="look">外观</button>
+        <button role="tab" data-tab="history">记录</button>
+      </div>
+      <button class="icon-btn" id="closeBtn" aria-label="关闭" title="关闭">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="p-body" id="pBody">
+      <div class="pane" data-pane="list">
+        <div class="row">
+          <label class="lbl" for="titleInp">转盘名字</label>
+          <input class="txt" id="titleInp" maxlength="24" placeholder="比如：今天吃什么">
+        </div>
+        <div class="row">
+          <label class="lbl" for="listTA">参与抽选的名单</label>
+          <textarea id="listTA" spellcheck="false" placeholder="一行一个，比如：&#10;小明&#10;小红&#10;小刚"></textarea>
+          <div class="list-meta">
+            <span class="count" id="listCount"></span>
+            <span class="tools"><button class="chip" id="shuffleBtn">打乱顺序</button><button class="chip" id="dedupeBtn">去掉重复</button></span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="lbl">按数字生成</div>
+          <div class="tools gen"><input id="genFrom" type="number" inputmode="numeric" value="1" aria-label="起始数字"><span>到</span><input id="genTo" type="number" inputmode="numeric" value="30" aria-label="结束数字"><button class="chip" id="genBtn">替换名单</button></div>
+        </div>
+        <div class="row" id="probRow" hidden>
+          <div class="lbl">各项被抽中的概率</div>
+          <div class="probs" id="probs"></div>
+        </div>
+      </div>
+      <div class="pane" data-pane="draw"></div>
+      <div class="pane" data-pane="look"></div>
+      <div class="pane" data-pane="history">
+        <ol class="hist" id="histList"></ol>
+        <p class="empty" id="histEmpty">还没有抽过</p>
+        <div style="padding-top:14px"><button class="chip" id="histClear">清空记录</button></div>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <div class="modal" id="modal" hidden>
-  <div class="box" role="dialog" aria-modal="true" aria-labelledby="mLead">
-    <div class="lead" id="mLead"></div>
+  <div class="box" role="dialog" aria-modal="true" aria-label="抽签结果">
+    <div class="k">你抽中的是</div>
     <div class="names" id="mNames"></div>
     <div class="m-actions">
       <button class="btn-ghost" id="mRemove">移出名单</button>
+      <button class="btn-ghost" id="mAgain">再抽一次</button>
       <button class="btn" id="mOk">好的</button>
     </div>
   </div>
@@ -187,48 +308,68 @@ textarea:focus{outline:none;border-color:var(--c)}
 <script>
 (() => {
 'use strict';
-const KEY = 'lucky-wheel:v1';
-const R = 228;
-const NS = 'http://www.w3.org/2000/svg';
+const KEY = 'lucky-wheel:v2', OLD_KEY = 'lucky-wheel:v1';
+const NS = 'http://www.w3.org/2000/svg', XL = 'http://www.w3.org/1999/xlink';
 const $ = id => document.getElementById(id);
+const CX = 500, CY = 510, R = 430, RO = 470, RB = 450, PLATE = 118;
+
+const THEMES = {
+  cream: { name: '奶油', bg: '#f5eee3', bg2: '#fffaf2', ink: '#2a1f1a', muted: '#8b7b6d', line: '#e6dbca', card: '#fffcf7',
+    accent: '#e8553e', onAccent: '#ffffff', rim: '#2e221c', rimHi: '#5b473a', rimLo: '#140d0a', bulb: '#ffd36e', bulbOff: '#4a3a30',
+    secs: ['#f3a083', '#f7d48c', '#b6d39f', '#a2c5df', '#c9b4e3', '#f6bb98'], labels: ['#33251e'], fix: '#efe2cf', fixLabel: '#33251e', sep: '#fffaf2',
+    needle: '#2e221c', needleHi: '#8a7060', plate: '#fffaf2', plateRing: '#2e221c', glow: 'rgba(255,255,255,.42)', win: '#ffffff',
+    gone: '#e4dbcf', goneLabel: '#b2a597', hub: ['#e8553e', '#ffffff', '#2e221c'] },
+  night: { name: '夜场', bg: '#120f2b', bg2: '#2a2462', ink: '#f6f1ff', muted: '#a49dca', line: '#302b5e', card: '#1b1740',
+    accent: '#ffc94a', onAccent: '#2a1d00', rim: '#0b0920', rimHi: '#3a3380', rimLo: '#000000', bulb: '#ffd76a', bulbOff: '#2b2654',
+    secs: ['#ef476f', '#ffb238', '#1fbf9f', '#4d7cff', '#a35cf0', '#ff7a4a'], labels: ['#ffffff'], fix: '#2fd3e0', fixLabel: '#0b0920', sep: '#120f2b',
+    needle: '#ffc94a', needleHi: '#fff3c4', plate: '#1b1740', plateRing: '#ffc94a', glow: 'rgba(255,255,255,.3)', win: '#ffd76a',
+    gone: '#2b2752', goneLabel: '#6e679c', hub: ['#ffc94a', '#2a1d00', '#0b0920'] },
+  candy: { name: '糖果', bg: '#ffedf3', bg2: '#fffafc', ink: '#4b2638', muted: '#a8798e', line: '#f6d3e1', card: '#ffffff',
+    accent: '#ff4f8b', onAccent: '#ffffff', rim: '#ffffff', rimHi: '#ffffff', rimLo: '#ffc9dc', bulb: '#ff6f9f', bulbOff: '#ffd6e5',
+    secs: ['#ffb0c8', '#ffd6a5', '#fdef9e', '#bdeecd', '#b3dfff', '#d8c3ff'], labels: ['#4b2638'], fix: '#ffffff', fixLabel: '#4b2638', sep: '#ffffff',
+    needle: '#ff4f8b', needleHi: '#ffb0cb', plate: '#ffffff', plateRing: '#ffb3cc', glow: 'rgba(255,255,255,.55)', win: '#ff4f8b',
+    gone: '#f4e4eb', goneLabel: '#caa8b7', hub: ['#ff4f8b', '#ffffff', '#ffffff'] },
+  mono: { name: '黑白', bg: '#ebe9e3', bg2: '#faf9f5', ink: '#111111', muted: '#77736b', line: '#d8d4cb', card: '#ffffff',
+    accent: '#e63b2e', onAccent: '#ffffff', rim: '#111111', rimHi: '#3a3a3a', rimLo: '#000000', bulb: '#fff5dc', bulbOff: '#2c2c2c',
+    secs: ['#151515', '#faf9f5'], labels: ['#faf9f5', '#151515'], fix: '#e63b2e', fixLabel: '#ffffff', sep: '#151515',
+    needle: '#e63b2e', needleHi: '#ff9a90', plate: '#faf9f5', plateRing: '#111111', glow: 'rgba(230,59,46,.38)', win: '#e63b2e',
+    gone: '#b8b4ab', goneLabel: '#8a867d', hub: ['#e63b2e', '#ffffff', '#111111'] },
+  sketch: { name: '线稿', lineArt: true, bg: '#fbfaf7', bg2: '#ffffff', ink: '#2d2a26', muted: '#8c867f', line: '#ebe6df', card: '#ffffff',
+    accent: '#f04b45', onAccent: '#ffffff', rim: '#f04b45', bulb: '#f04b45',
+    secs: ['transparent'], labels: ['#3a342e'], sep: '#f04b45',
+    needle: '#f04b45', needleHi: '#f04b45', plate: '#fbfaf7', plateRing: '#f04b45', glow: 'rgba(240,75,69,.1)', win: '#f04b45',
+    gone: '#f1eeea', goneLabel: '#bdb7b0', hub: ['#ffffff', '#f04b45', '#f04b45'] }
+};
+const THEME_ORDER = ['cream', 'night', 'candy', 'mono', 'sketch'];
 
 const DEF = {
+  title: '今天吃什么',
   list: '火锅\n烧烤\n日料\n披萨\n麻辣烫\n轻食沙拉\n螺蛳粉\n饺子',
-  count: 1, multi: 'each', after: 'keep',
-  rng: 'equal', stopAt: 'random',
-  heading: '你抽中的是：', spinner: 'pointer', style: 'line', color: '#f24b4b',
-  duration: 5, turns: 6, easing: 'smooth',
-  labels: true, popup: true, confetti: true, sound: true
+  count: 1, multi: 'each', after: 'keep', rng: 'equal', stopAt: 'random',
+  theme: 'cream', spinner: 'pointer', duration: 5, turns: 5, easing: 'smooth',
+  labels: true, lights: true, confetti: true, sound: true, popup: false
 };
-const SWATCHES = ['#f24b4b', '#f08a24', '#2f9e6e', '#2f6fde', '#8a4fd8', '#2d2a26'];
-const PAL = ['#ffb4a8', '#ffd59e', '#fbe7a1', '#bfe6c4', '#a9daee', '#b9c6fb', '#d9c3f5', '#ffc4dc'];
-
-const SECTIONS = [
-  { title: '抽签方式', fields: [
-    { key: 'count', type: 'stepper', label: '每次抽几个', min: 1, max: 99 },
-    { key: 'multi', type: 'seg', label: '抽多个时', opts: [['each', '一个一个转'], ['once', '转一次全出']], show: () => cfg.count > 1 },
-    { key: 'after', type: 'seg', label: '抽中后', opts: [['keep', '放回，还能再中'], ['remove', '移出转盘'], ['gray', '留着但置灰']] }
-  ]},
-  { title: '随机方式', note: '结果由浏览器的加密级随机数在开转前决定，转盘只是把它转出来。', fields: [
-    { key: 'rng', type: 'seg', label: '抽中概率', opts: [['equal', '人人相同'], ['weight', '按权重'], ['bag', '洗牌轮转']], hint: rngHint },
-    { key: 'stopAt', type: 'seg', label: '指针停在', opts: [['random', '扇区内随机处'], ['center', '扇区正中']] }
-  ]},
-  { title: '显示效果', fields: [
-    { key: 'heading', type: 'text', label: '标题文字', max: 20 },
-    { key: 'spinner', type: 'seg', label: '转动的是', opts: [['pointer', '指针'], ['wheel', '转盘']] },
-    { key: 'style', type: 'seg', label: '转盘样式', opts: [['line', '线稿'], ['mono', '单色'], ['rainbow', '多彩']] },
-    { key: 'color', type: 'color', label: '主色' },
-    { key: 'duration', type: 'range', label: '转动时长', min: 1, max: 15, step: 0.5, unit: ' 秒' },
-    { key: 'turns', type: 'range', label: '转动圈数', min: 1, max: 20, step: 1, unit: ' 圈' },
-    { key: 'easing', type: 'seg', label: '停下方式', opts: [['smooth', '平稳减速'], ['suspense', '慢慢挪到'], ['bounce', '冲过头再回弹'], ['accel', '先加速再减速']] },
-    { key: 'labels', type: 'switch', label: '转盘上显示文字' },
-    { key: 'popup', type: 'switch', label: '结果弹窗' },
-    { key: 'confetti', type: 'switch', label: '彩带庆祝' },
-    { key: 'sound', type: 'switch', label: '音效' }
-  ]}
+const isWheel = () => cfg.spinner === 'wheel';
+const FIELDS = [
+  { tab: 'draw', key: 'count', type: 'stepper', label: '每次抽几个', min: 1, max: 99 },
+  { tab: 'draw', key: 'multi', type: 'seg', label: '抽多个时', opts: [['each', '一个一个转'], ['once', '转一次全出']], show: () => cfg.count > 1 },
+  { tab: 'draw', key: 'after', type: 'seg', label: '抽中后', opts: [['keep', '放回，还能再中'], ['remove', '移出转盘'], ['gray', '留着但置灰']] },
+  { tab: 'draw', key: 'rng', type: 'seg', label: '抽中概率', opts: [['equal', '人人相同'], ['weight', '按权重'], ['bag', '洗牌轮转']], hint: rngHint },
+  { tab: 'draw', key: 'stopAt', type: 'seg', label: '指针停在扇区的', opts: [['random', '随机位置'], ['center', '正中间']],
+    hint: () => '结果用浏览器的加密级随机数在开转前就定好，转盘只是把它演出来。' },
+  { tab: 'look', key: 'theme', type: 'themes', label: '主题' },
+  { tab: 'look', key: 'spinner', type: 'spinner', label: '转动方式' },
+  { tab: 'look', key: 'duration', type: 'range', label: '转动时长', min: 1, max: 15, step: 0.5, unit: () => ' 秒', group: '动画' },
+  { tab: 'look', key: 'turns', type: 'range', label: () => isWheel() ? '转几圈' : '来回摆几次', min: 1, max: 20, step: 1, unit: () => isWheel() ? ' 圈' : ' 次' },
+  { tab: 'look', key: 'easing', type: 'seg', label: '停下方式', opts: [['smooth', '平稳减速'], ['suspense', '慢慢挪到'], ['bounce', '冲过头再回弹'], ['accel', '先加速再减速']] },
+  { tab: 'look', key: 'labels', type: 'switch', label: '转盘上显示文字', group: '细节' },
+  { tab: 'look', key: 'lights', type: 'switch', label: '跑马灯', show: () => !THEMES[cfg.theme].lineArt },
+  { tab: 'look', key: 'confetti', type: 'switch', label: '抽中撒彩带' },
+  { tab: 'look', key: 'sound', type: 'switch', label: '音效' },
+  { tab: 'look', key: 'popup', type: 'switch', label: '抽中后弹出结果卡片' }
 ];
-const FIELDS = {};
-SECTIONS.forEach(s => s.fields.forEach(f => { FIELDS[f.key] = f; }));
+const FIELD = {};
+FIELDS.forEach(f => { FIELD[f.key] = f; });
 
 function rngHint() {
   if (cfg.rng === 'weight') return '在名单里写成「名字 | 3」设置权重，权重越大扇区越大、越容易中；不写默认是 1。';
@@ -242,33 +383,37 @@ let cfg = Object.assign({}, DEF);
 const run = { sig: '', drawn: [], bag: [], history: [], last: [] };
 let items = [], layout = [];
 const highlight = new Set();
-let rot = { pointer: 0, wheel: 0 };
-let spinning = false, relayTimer = 0, modalPicked = [];
+const st = { ph: 0, wr: 0 };
+let spinning = false, relayTimer = 0, idleTimer = 0, modalPicked = [];
 
 /* ---------- 存取 ---------- */
 function valid(k, v) {
-  const f = FIELDS[k];
+  const f = FIELD[k];
   if (typeof v !== typeof DEF[k]) return false;
   if (f && f.opts) return f.opts.some(o => o[0] === v);
   if (f && (f.type === 'range' || f.type === 'stepper')) return v >= f.min && v <= f.max;
-  if (k === 'color') return /^#[0-9a-f]{6}$/i.test(v);
+  if (k === 'theme') return v in THEMES;
+  if (k === 'spinner') return v === 'pointer' || v === 'wheel';
   return true;
 }
 function load() {
   let d = null;
   try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
-  if (!d || typeof d !== 'object') return;
+  if (!d) {
+    try { const o = JSON.parse(localStorage.getItem(OLD_KEY)); if (o && o.cfg && typeof o.cfg.list === 'string') cfg.list = o.cfg.list; } catch (e) { /* 旧版数据读不出就用默认 */ }
+    return;
+  }
   const c = d.cfg || {}, r = d.run || {};
   for (const k in DEF) if (k in c && valid(k, c[k])) cfg[k] = c[k];
   const ints = a => Array.isArray(a) ? a.filter(Number.isInteger) : [];
   run.sig = typeof r.sig === 'string' ? r.sig : '';
   run.drawn = ints(r.drawn);
   run.bag = ints(r.bag);
-  run.history = Array.isArray(r.history) ? r.history.filter(x => x && Array.isArray(x.names)).slice(0, 100) : [];
+  run.history = Array.isArray(r.history) ? r.history.filter(x => x && Array.isArray(x.names)).slice(0, 200) : [];
   run.last = Array.isArray(r.last) ? r.last.map(String) : [];
 }
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify({ cfg, run })); } catch (e) { /* 无痕模式等存不了就算了 */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ cfg, run })); } catch (e) { /* 无痕模式存不了 */ }
 }
 
 /* ---------- 名单 ---------- */
@@ -284,16 +429,21 @@ function parse() {
   const sig = items.map(i => i.name + '\u0001' + i.w).join('\n');
   if (sig !== run.sig) { run.sig = sig; run.drawn = []; run.bag = []; }
 }
+const listText = arr => arr.map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n');
 const drawnSet = () => new Set(run.drawn);
 function visible() { const d = drawnSet(); return cfg.after === 'remove' ? items.filter(i => !d.has(i.id)) : items; }
 function pool() { const d = drawnSet(); return cfg.after === 'keep' ? items : items.filter(i => !d.has(i.id)); }
 function computeLayout() {
   const vis = visible();
+  layout = [];
+  if (!vis.length) return;
   const ws = vis.map(i => cfg.rng === 'weight' ? i.w : 1);
   const tot = ws.reduce((a, b) => a + b, 0);
-  let a = 0;
-  layout = vis.map((it, k) => { const s = { it, a0: a, a1: a + 360 * ws[k] / tot }; a = s.a1; return s; });
-  if (layout.length) layout[layout.length - 1].a1 = 360;
+  for (let c = 0; c < (isWheel() ? 2 : 1); c++) {
+    let a = -90 + 180 * c;
+    vis.forEach((it, k) => { const s = { it, k, c, a0: a, a1: a + 180 * ws[k] / tot }; a = s.a1; layout.push(s); });
+    layout[layout.length - 1].a1 = 90 + 180 * c;
+  }
 }
 
 /* ---------- 随机 ---------- */
@@ -328,24 +478,25 @@ function pickOne(ex) {
   return p[randInt(p.length)];
 }
 
-/* ---------- 画转盘 ---------- */
+/* ---------- 几何 ---------- */
 const f2 = n => Math.round(n * 100) / 100;
 const mod = (a, m) => ((a % m) + m) % m;
-function pt(r, a) { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; }
-function sectorPath(a0, a1) {
-  if (a1 - a0 >= 359.999) return `M0 ${-R}A${R} ${R} 0 1 1 0 ${R}A${R} ${R} 0 1 1 0 ${-R}Z`;
-  const [x0, y0] = pt(R, a0), [x1, y1] = pt(R, a1);
-  return `M0 0L${f2(x0)} ${f2(y0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${f2(x1)} ${f2(y1)}Z`;
+function pt(r, a) { const t = a * Math.PI / 180; return [f2(CX + r * Math.sin(t)), f2(CY - r * Math.cos(t))]; }
+function sectorD(r, a0, a1) {
+  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
+  return `M${CX} ${CY}L${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}Z`;
 }
+function arcD(r, a0, a1) {
+  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
+  return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`;
+}
+const halfDisc = r => `M${CX - r} ${CY}A${r} ${r} 0 0 1 ${CX + r} ${CY}Z`;
+const halfRing = (r1, r2) => `M${CX - r2} ${CY}A${r2} ${r2} 0 0 1 ${CX + r2} ${CY}L${CX + r1} ${CY}A${r1} ${r1} 0 0 0 ${CX - r1} ${CY}Z`;
 function el(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
   if (parent) parent.appendChild(e);
   return e;
-}
-function mix(hex, w) {
-  const n = parseInt(hex.slice(1), 16), m = v => Math.round(v * w + 255 * (1 - w));
-  return `rgb(${m(n >> 16 & 255)},${m(n >> 8 & 255)},${m(n & 255)})`;
 }
 const cw = ch => /[ᄀ-￿]/.test(ch) ? 1 : 0.6;
 function textEm(s) { let w = 0; for (const ch of s) w += cw(ch); return w; }
@@ -355,93 +506,225 @@ function cut(s, maxEm) {
   return out;
 }
 
-const gS = $('gSectors'), gL = $('gLabels'), gWheel = $('gWheel'), gPtr = $('gPtr'), gFixed = $('gFixed'), gHub = $('gHub');
+/* ---------- 画转盘 ---------- */
+const dial = $('dial'), gBack = $('gBack'), gWheel = $('gWheel'), gSecs = $('gSecs'), cur = $('cur'), gOver = $('gOver'),
+  gBulbs = $('bulbs'), gGhosts = $('gGhosts'), gNeedle = $('gNeedle'), gFlap = $('gFlap'), gBase = $('gBase'), arcDefs = $('arcDefs');
+let needleRot = null, needleSway = null, flapRot = null, ghosts = [];
 
-function renderWheel() {
-  gS.textContent = ''; gL.textContent = '';
-  const n = layout.length, c = cfg.color, st = cfg.style;
-  const sw = n > 60 ? 1.5 : n > 24 ? 2.5 : 3.5;
-  if (!n) {
-    el('circle', { r: R, fill: 'none', stroke: c, 'stroke-width': 3.5 }, gS);
-    el('text', { y: R * 0.62, 'text-anchor': 'middle', 'font-size': 18, fill: '#8c867f' }, gL).textContent =
-      items.length ? '全部抽完了，点这里重新开始' : '名单是空的，点这里添加';
+function renderFrame() {
+  const t = THEMES[cfg.theme];
+  [gBack, gOver, gBulbs, gNeedle, gGhosts, gFlap, gBase].forEach(g => { g.textContent = ''; });
+  if (t.lineArt) {
+    el('path', { d: arcD(R, -90, 90), fill: 'none', stroke: t.rim, 'stroke-width': 6, 'stroke-linecap': 'round' }, gOver);
+    el('path', { d: halfDisc(PLATE), fill: t.plate, stroke: t.plateRing, 'stroke-width': 4 }, gOver);
+    el('line', { x1: CX - R - 30, y1: CY, x2: CX + R + 30, y2: CY, stroke: t.rim, 'stroke-width': 6, 'stroke-linecap': 'round' }, gBase);
+  } else {
+    el('path', { d: halfDisc(RO), fill: t.rim, filter: 'url(#fDrop)' }, gBack);
+    el('path', { d: halfDisc(R), fill: 'url(#gVig)' }, gOver);
+    el('path', { d: halfDisc(R), fill: 'url(#gTop)' }, gOver);
+    el('path', { d: arcD(R + 1.5, -90, 90), fill: 'none', stroke: t.rimLo, 'stroke-width': 3 }, gOver);
+    el('path', { d: arcD(RO - 3, -90, 90), fill: 'none', stroke: t.rimHi, 'stroke-width': 2, opacity: 0.9 }, gOver);
+    el('path', { d: halfDisc(PLATE + 14), fill: t.rim, opacity: 0.16 }, gOver);
+    el('path', { d: halfDisc(PLATE), fill: t.plate, stroke: t.plateRing, 'stroke-width': 5 }, gOver);
+    el('rect', { x: CX - RO - 18, y: CY - 6, width: 2 * RO + 36, height: 44, rx: 16, fill: t.rim, filter: 'url(#fDrop)' }, gBase);
+    el('rect', { x: CX - RO - 10, y: CY - 3, width: 2 * RO + 20, height: 2.5, rx: 1.2, fill: t.rimHi, opacity: 0.8 }, gBase);
+    if (cfg.lights) {
+      const n = 17;
+      for (let i = 0; i < n; i++) {
+        const [x, y] = pt(RB, -84 + 168 * i / (n - 1));
+        const b = el('g', { class: 'bulb', transform: `translate(${x} ${y})`, style: `--i:${i};--k:${2 - (i % 3)}` }, gBulbs);
+        el('circle', { r: 7.5, fill: t.bulbOff }, b);
+        const on = el('g', { class: 'on' }, b);
+        el('circle', { r: 21, fill: 'url(#gHalo)' }, on);
+        el('circle', { r: 7.5, fill: t.bulb }, on);
+        el('circle', { r: 2.6, cx: -2.2, cy: -2.4, fill: '#fff', opacity: 0.85 }, on);
+      }
+    }
+  }
+  ghosts = []; needleRot = needleSway = flapRot = null;
+  gGhosts.style.display = spinning ? '' : 'none';
+  if (!isWheel()) {
+    const L = R * 0.64;
+    const shape = (parent, fill) => {
+      el('path', { d: `M-12 0L-4.5 ${-L + 58}L4.5 ${-L + 58}L12 0Z`, fill, stroke: fill, 'stroke-width': 3, 'stroke-linejoin': 'round' }, parent);
+      el('path', { d: `M0 ${-L}L-21 ${-L + 54}L21 ${-L + 54}Z`, fill, stroke: fill, 'stroke-width': 10, 'stroke-linejoin': 'round' }, parent);
+    };
+    for (let i = 0; i < 4; i++) {
+      const g = el('g', { opacity: [0.2, 0.13, 0.08, 0.04][i] }, gGhosts);
+      shape(g, t.needle); ghosts.push(g);
+    }
+    needleRot = el('g', {}, gNeedle);
+    needleSway = el('g', { filter: t.lineArt ? '' : 'url(#fSoft)' }, needleRot);
+    shape(needleSway, t.needle);
+    if (!t.lineArt) el('path', { d: `M0 -20L0 ${-L + 66}`, stroke: t.needleHi, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.7 }, needleSway);
+  } else {
+    flapRot = el('g', {}, gFlap);
+    const fg = el('g', { filter: t.lineArt ? '' : 'url(#fSoft)' }, flapRot);
+    el('path', { d: 'M-24 0L24 0L0 86Z', fill: t.accent, stroke: t.lineArt ? t.accent : '#fff', 'stroke-width': 5, 'stroke-linejoin': 'round' }, fg);
+    el('circle', { r: 11, fill: t.lineArt ? '#fff' : t.rim, stroke: t.accent, 'stroke-width': 5 }, fg);
+  }
+  setSway(!spinning);
+  applyPose();
+}
+
+function colorOf(s, n) {
+  const t = THEMES[cfg.theme], len = t.secs.length;
+  if (isWheel() && n > 1 && n % len === 1 && s.k === n - 1 && !t.lineArt) return [t.fix, t.fixLabel];
+  return [t.secs[s.k % len], t.labels[(s.k % len) % t.labels.length]];
+}
+
+function labelPlan() {
+  if (!cfg.labels || !layout.length) return { mode: 'none' };
+  const scale = Math.max(0.25, (dial.getBoundingClientRect().width || 600) / 1000);
+  const fsMin = 12 / scale, fsMax = Math.min(46, 27 / scale);
+  const rIn = PLATE + 26, rOut = R - 20;
+  const secs = layout.filter(s => s.c === 0);
+  const rT = R * 0.8;
+  let fsA = fsMax;
+  secs.forEach(s => { fsA = Math.min(fsA, rT * (s.a1 - s.a0) * Math.PI / 180 * 0.82 / Math.max(textEm(s.it.name), 1.4)); });
+  fsA = Math.min(fsA, (rOut - rIn) * 0.3);
+  if (fsA >= Math.max(fsMin * 1.1, 18)) return { mode: 'arc', fs: fsA, r: rT };
+  const k = Math.min(...secs.map(s => s.a1 - s.a0)) * Math.PI / 180;
+  const fs = Math.min(fsMax * 0.9, k * R * 0.82 * 0.6);
+  if (fs < 9 / scale) return { mode: 'none' };
+  return { mode: 'radial', fs, rIn, rOut };
+}
+
+function renderSectors(fade) {
+  gSecs.textContent = ''; arcDefs.textContent = '';
+  dial.classList.remove('landed');
+  const t = THEMES[cfg.theme];
+  if (!layout.length) {
+    el('path', { d: arcD(R - 40, -90, 90), fill: 'none', stroke: t.muted, 'stroke-width': 3, 'stroke-dasharray': '2 14', 'stroke-linecap': 'round', opacity: 0.6 }, gSecs);
+    el('text', { x: CX, y: CY - 190, 'text-anchor': 'middle', 'font-size': 40, 'font-weight': 700, fill: t.muted }, gSecs).textContent =
+      items.length ? '全部抽完了' : '名单还是空的';
     return;
   }
-  const drawn = drawnSet(), gray = cfg.after === 'gray';
-  layout.forEach((s, k) => {
-    let fill = 'none';
-    if (st === 'mono') fill = mix(c, (n % 2 && k === n - 1 && n > 1) ? 0.22 : k % 2 ? 0.3 : 0.14);
-    else if (st === 'rainbow') fill = PAL[(n > 1 && n % PAL.length === 1 && k === n - 1) ? 3 : k % PAL.length];
-    if (gray && drawn.has(s.it.id)) fill = st === 'line' ? '#f2f0ed' : '#e4e1dd';
-    if (fill === 'none') return;
-    el('path', { d: sectorPath(s.a0, s.a1), fill, stroke: st === 'line' ? 'none' : '#fff', 'stroke-width': st === 'line' ? 0 : (n > 60 ? 0.8 : 2), 'stroke-linejoin': 'round' }, gS);
+  const n = layout.length / (isWheel() ? 2 : 1), drawn = drawnSet(), gray = cfg.after === 'gray';
+  const plan = labelPlan();
+  if (fade) gSecs.classList.add('fadein'); else gSecs.classList.remove('fadein');
+  layout.forEach((s, idx) => {
+    const g = el('g', { class: 'sec' }, gSecs);
+    s.g = g;
+    let [fill, lab] = colorOf(s, n);
+    const off = gray && drawn.has(s.it.id);
+    if (off) { fill = t.gone; lab = t.goneLabel; }
+    el('path', { d: sectorD(R, s.a0, s.a1), fill, stroke: t.lineArt ? 'none' : t.sep, 'stroke-width': n > 40 ? 1 : 2.5, 'stroke-linejoin': 'round' }, g);
+    if (plan.mode !== 'none') drawLabel(g, s, idx, plan, lab, off);
   });
-  if (st === 'line' && n > 1) layout.forEach(s => {
+  if (t.lineArt) layout.forEach(s => {
+    if (!isWheel() && s.a0 <= -90) return;
     const [x, y] = pt(R, s.a0);
-    el('line', { x1: 0, y1: 0, x2: f2(x), y2: f2(y), stroke: c, 'stroke-width': sw, 'stroke-linecap': 'round' }, gS);
+    el('line', { x1: CX, y1: CY, x2: x, y2: y, stroke: t.sep, 'stroke-width': n > 40 ? 2 : 5, 'stroke-linecap': 'round' }, gSecs);
   });
-  el('circle', { r: R, fill: 'none', stroke: c, 'stroke-width': st === 'line' ? sw : 5 }, gS);
-  layout.forEach(s => {
-    if (highlight.has(s.it.id)) el('path', { d: sectorPath(s.a0, s.a1), class: 'hl', fill: c, 'fill-opacity': 0.18, stroke: c, 'stroke-width': 5, 'stroke-linejoin': 'round' }, gS);
-  });
-  if (cfg.labels) drawLabels(drawn, gray);
+  el('circle', { class: 'veil', cx: CX, cy: CY, r: R + 1, fill: t.bg }, gSecs);
+  layout.forEach(s => { if (highlight.has(s.it.id)) markWin(s, true); });
+  cur.setAttribute('fill', t.glow);
+  curIdx = -1;
+  setSway(!spinning);
 }
 
-function drawLabels(drawn, gray) {
-  const n = layout.length, inner = cfg.spinner === 'wheel' ? 50 : 26, outer = R - 16;
-  layout.forEach(s => {
-    const span = s.a1 - s.a0, mid = (s.a0 + s.a1) / 2;
-    const off = gray && drawn.has(s.it.id), on = highlight.has(s.it.id);
-    const attrs = {
-      fill: off ? '#b9b3ac' : (on && cfg.style === 'line' ? cfg.color : '#3a342e'),
-      'font-weight': on ? 700 : 500, 'dominant-baseline': 'central'
-    };
-    if (off) attrs['text-decoration'] = 'line-through';
-    let name = s.it.name, fs;
-    const em = textEm(name);
-    if (n === 1) {
-      fs = Math.min(36, R * 1.4 / Math.max(em, 1));
-      if (fs < 12) { fs = 12; name = cut(name, R * 1.4 / fs); }
-      Object.assign(attrs, { x: 0, y: -R * 0.7, 'text-anchor': 'middle', 'font-size': f2(fs) });
-    } else {
-      const k = 2 * Math.PI * span / 360;
-      fs = Math.min(30, k * R * 0.78 * 0.62);
-      if (fs < 8) return;
-      const roomFor = f => Math.min(outer - inner, outer - f * 1.15 / k);
-      let room = roomFor(fs);
-      if (em * fs > room) {
-        const fit = Math.max(11, Math.min(fs, room / em));
-        if (fit < fs) { fs = fit; room = roomFor(fs); }
-        if (em * fs > room) name = cut(name, room / fs);
-      }
-      if (room < fs * 1.2) return;
-      const right = mid <= 180;
-      Object.assign(attrs, {
-        transform: `rotate(${f2(right ? mid - 90 : mid + 90)})`,
-        x: right ? outer : -outer, y: 0, 'text-anchor': right ? 'end' : 'start', 'font-size': f2(fs)
-      });
-    }
-    el('text', attrs, gL).textContent = name;
+function drawLabel(g, s, idx, plan, color, off) {
+  const span = s.a1 - s.a0, mid = (s.a0 + s.a1) / 2;
+  let name = s.it.name;
+  const attrs = { fill: color, 'font-weight': 700, 'font-size': f2(plan.fs) };
+  if (off) attrs['text-decoration'] = 'line-through';
+  if (plan.mode === 'arc') {
+    const rr = plan.r - plan.fs * 0.36, id = 'arc' + idx;
+    el('path', { id, d: arcD(rr, s.a0, s.a1) }, arcDefs);
+    const maxEm = rr * span * Math.PI / 180 * 0.9 / plan.fs;
+    if (textEm(name) > maxEm) name = cut(name, maxEm);
+    attrs['letter-spacing'] = '0.04em';
+    const tp = el('textPath', { startOffset: '50%', 'text-anchor': 'middle' }, el('text', attrs, g));
+    tp.setAttribute('href', '#' + id);
+    tp.setAttributeNS(XL, 'xlink:href', '#' + id);
+    tp.textContent = name;
+    return;
+  }
+  const k = span * Math.PI / 180;
+  const room = Math.min(plan.rOut - plan.rIn, plan.rOut - plan.fs * 1.15 / k);
+  if (room < plan.fs * 1.2) return;
+  if (textEm(name) * plan.fs > room) name = cut(name, room / plan.fs);
+  const right = mid >= 0 && mid <= 180;
+  Object.assign(attrs, {
+    transform: `rotate(${f2(right ? mid - 90 : mid + 90)} ${CX} ${CY})`,
+    x: right ? CX + plan.rOut : CX - plan.rOut, y: CY, dy: '0.36em', 'text-anchor': right ? 'end' : 'start'
   });
+  el('text', attrs, g).textContent = name;
 }
 
-function drawPointer() {
-  gPtr.textContent = ''; gFixed.textContent = ''; gHub.textContent = '';
-  const c = cfg.color;
-  if (cfg.spinner === 'pointer') {
-    const L = R * 0.5;
-    el('path', { d: `M-4.5 0L-2.4 ${-L + 22}L2.4 ${-L + 22}L4.5 0Z`, fill: c, stroke: c, 'stroke-width': 2, 'stroke-linejoin': 'round' }, gPtr);
-    el('path', { d: `M0 ${-L}L-9 ${-L + 22}L9 ${-L + 22}Z`, fill: c, stroke: c, 'stroke-width': 7, 'stroke-linejoin': 'round' }, gPtr);
-    el('circle', { r: 8, fill: c }, gPtr);
+function markWin(s, on) {
+  if (!s.g) return;
+  s.g.classList.toggle('win', on);
+  if (on) {
+    const mid = (s.a0 + s.a1) / 2 * Math.PI / 180, d = THEMES[cfg.theme].lineArt ? 0 : 16;
+    s.g.style.transform = `translate(${f2(Math.sin(mid) * d)}px,${f2(-Math.cos(mid) * d)}px)`;
+    s.g.setAttribute('filter', THEMES[cfg.theme].lineArt ? '' : 'url(#fSoft)');
+    s.g.parentNode.appendChild(s.g);
+  } else { s.g.style.transform = ''; s.g.removeAttribute('filter'); }
+}
+
+function setSway(on) {
+  if (!needleSway) return;
+  const old = needleSway.querySelector('animateTransform');
+  if (old) old.remove();
+  if (!on || !layout.length || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // 待机轻摆不能越过所在扇区的边界，否则看起来像指着别的项
+  const th = needleAngle(), s = layout[sectorIndex(th)];
+  const amp = Math.min(2.2, th - s.a0 - 0.5, s.a1 - th - 0.5);
+  if (amp < 0.4) return;
+  el('animateTransform', { attributeName: 'transform', type: 'rotate', values: `${-amp};${amp};${-amp}`, dur: '3.6s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '.45 0 .55 1;.45 0 .55 1', keyTimes: '0;.5;1' }, needleSway);
+}
+function homePose() {
+  st.wr = 0; st.ph = 0;
+  if (isWheel() || !layout.length) return;
+  const s = layout[Math.floor((layout.length - 1) / 2)];
+  st.ph = Math.asin(((s.a0 + s.a1) / 2) / 90) * 180 / Math.PI;
+}
+const needleAngle = () => 90 * Math.sin(st.ph * Math.PI / 180);
+let trail = [], lastWr = 0, lastT = 0, curIdx = -1, lastTick = 0;
+function applyPose() {
+  if (needleRot) needleRot.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(needleAngle())})`);
+  gWheel.setAttribute('transform', isWheel() ? `rotate(${f2(st.wr)} ${CX} ${CY})` : '');
+  if (flapRot) flapRot.setAttribute('transform', `translate(${CX} 16)`);
+}
+function pointedLocal() { return isWheel() ? mod(-st.wr + 90, 360) - 90 : needleAngle(); }
+function sectorIndex(a) {
+  for (let i = 0; i < layout.length; i++) if (a < layout[i].a1) return i;
+  return layout.length - 1;
+}
+function frameUpdate() {
+  const now = performance.now();
+  if (!isWheel()) {
+    const th = needleAngle();
+    needleRot.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(th)})`);
+    trail.unshift(th); if (trail.length > 9) trail.length = 9;
+    ghosts.forEach((g, i) => g.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(trail[Math.min(trail.length - 1, (i + 1) * 2)])})`));
   } else {
-    el('path', { d: `M0 ${-R + 26}L-17 ${-R - 18}L17 ${-R - 18}Z`, fill: c, stroke: '#fff', 'stroke-width': 3, 'stroke-linejoin': 'round' }, gFixed);
-    el('circle', { r: 42, fill: '#fff', stroke: c, 'stroke-width': 4 }, gHub);
-    el('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 21, 'font-weight': 600, fill: c }, gHub).textContent = '开始';
+    gWheel.setAttribute('transform', `rotate(${f2(st.wr)} ${CX} ${CY})`);
+    const v = Math.abs(st.wr - lastWr) / Math.max(8, now - lastT) * 1000;
+    lastWr = st.wr; lastT = now;
+    gSecs.style.setProperty('--lab', String(Math.max(0.28, Math.min(1, 1.25 - v / 1300))));
+    const a = pointedLocal(), s = layout[sectorIndex(a)];
+    let flap = 0;
+    if (s) { const d = a - s.a0, dz = Math.min(7, (s.a1 - s.a0) * 0.45); if (d < dz) flap = -(1 - d / dz) * 26; }
+    flapRot.setAttribute('transform', `translate(${CX} 16) rotate(${f2(flap)})`);
+  }
+  const idx = sectorIndex(pointedLocal());
+  if (idx !== curIdx && layout[idx]) {
+    curIdx = idx;
+    cur.setAttribute('d', sectorD(R, layout[idx].a0, layout[idx].a1));
+    liveName(layout[idx].it.name);
+    if (now - lastTick > 26) { lastTick = now; tick(); }
   }
 }
-function applyRot() {
-  gWheel.setAttribute('transform', `rotate(${f2(rot.wheel)})`);
-  gPtr.setAttribute('transform', `rotate(${f2(rot.pointer)})`);
+function setMotion(on) {
+  dial.classList.toggle('spinning', on);
+  gGhosts.style.display = on ? '' : 'none';
+  setSway(!on);
+  if (on) { trail = []; lastWr = st.wr; lastT = performance.now(); }
+  else gSecs.style.setProperty('--lab', '1');
+  if (cfg.lights) { clearTimeout(idleTimer); gBulbs.dataset.mode = on ? 'chase' : 'idle'; }
 }
 
 /* ---------- 转 ---------- */
@@ -453,120 +736,177 @@ const EASE = {
   accel: t => 1 - Math.pow(1 - t * t, 3),
   bounce: outCubic
 };
-let lastSec = -1, lastTick = 0;
-function pointedIndex() {
-  const a = cfg.spinner === 'pointer' ? mod(rot.pointer, 360) : mod(-rot.wheel, 360);
-  for (let i = 0; i < layout.length; i++) if (a < layout[i].a1) return i;
-  return layout.length - 1;
-}
-function tickCheck() {
-  const i = pointedIndex();
-  if (i === lastSec) return;
-  lastSec = i;
-  const now = performance.now();
-  if (now - lastTick > 30) { lastTick = now; tick(); }
-}
-function spinTo(it) {
-  let s = layout.find(x => x.it.id === it.id);
-  if (!s) { computeLayout(); renderWheel(); s = layout.find(x => x.it.id === it.id); }
-  const span = s.a1 - s.a0;
-  const target = s.a0 + span * (cfg.stopAt === 'center' ? 0.5 : 0.12 + 0.76 * rand());
-  const key = cfg.spinner, from = rot[key];
-  const dist = cfg.turns * 360 + mod((key === 'pointer' ? target : -target) - from, 360);
-  const over = cfg.easing === 'bounce' ? Math.max(6, Math.min(span * 0.7, 24)) : 0;
-  const ease = EASE[cfg.easing], dur = cfg.duration * 1000;
-  lastSec = pointedIndex();
+function animate(dist, dur, over, step) {
   return new Promise(done => {
-    const t0 = performance.now();
+    const ease = EASE[cfg.easing], t0 = performance.now();
     const frame = now => {
       const t = Math.min(1, (now - t0) / dur);
       let p;
       if (over) {
-        const o = over / dist, k = 0.82;
+        const o = over / dist, k = 0.8;
         p = t < k ? (1 + o) * outCubic(t / k) : 1 + o * (1 - inOutSine((t - k) / (1 - k)));
       } else p = ease(t);
-      rot[key] = from + dist * p;
-      applyRot(); tickCheck();
-      if (t < 1) requestAnimationFrame(frame);
-      else { rot[key] = mod(from + dist, 360); applyRot(); done(); }
+      step(p);
+      if (t < 1) requestAnimationFrame(frame); else done();
     };
     requestAnimationFrame(frame);
   });
+}
+async function spinTo(it) {
+  const cands = layout.filter(s => s.it.id === it.id);
+  const s = cands[randInt(cands.length)];
+  const span = s.a1 - s.a0;
+  const target = s.a0 + span * (cfg.stopAt === 'center' ? 0.5 : 0.14 + 0.72 * rand());
+  const dur = cfg.duration * 1000;
+  setMotion(true);
+  if (!isWheel()) {
+    const sd = Math.asin(Math.max(-1, Math.min(1, target / 90))) * 180 / Math.PI;
+    const goal = randInt(2) ? sd : 180 - sd;
+    const from = st.ph, dist = cfg.turns * 360 + mod(goal - from, 360);
+    await animate(dist, dur, cfg.easing === 'bounce' ? 24 : 0, p => { st.ph = from + dist * p; frameUpdate(); });
+    st.ph = mod(from + dist, 360);
+  } else {
+    const from = st.wr, dist = cfg.turns * 360 + mod(-target - from, 360);
+    await animate(dist, dur, cfg.easing === 'bounce' ? Math.max(5, Math.min(span * 0.7, 18)) : 0, p => { st.wr = from + dist * p; frameUpdate(); });
+    st.wr = mod(from + dist, 360);
+  }
+  frameUpdate();
+  setMotion(false);
+  applyPose();
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function spin() {
   if (spinning) return;
-  if (!items.length) { location.hash = 'settings'; return; }
+  if (!items.length) { openDrawer('list'); return; }
   if (!pool().length) { resetDraw(); return; }
   unlockAudio();
   clearTimeout(relayTimer);
+  closeModal();
   spinning = true;
-  highlight.clear(); computeLayout(); renderWheel();
-  showResult([]); updateStatus();
+  highlight.clear(); computeLayout(); renderSectors(false);
   const n = Math.min(cfg.count, pool().length);
   const picked = [], ex = new Set();
   const take = it => { picked.push(it); ex.add(it.id); if (cfg.after !== 'keep') run.drawn.push(it.id); };
-  if (n > 1 && cfg.multi === 'once') {
+  const multi = n > 1;
+  paintResult([], multi, true);
+  updateStatus();
+  if (multi && cfg.multi === 'once') {
     for (let k = 0; k < n; k++) { const it = pickOne(ex); if (!it) break; take(it); }
     await spinTo(picked[0]);
     picked.forEach(it => highlight.add(it.id));
-    renderWheel(); showResult(picked.map(i => i.name));
+    renderSectors(false);
   } else {
     for (let k = 0; k < n; k++) {
       const it = pickOne(ex);
       if (!it) break;
       await spinTo(it);
       take(it); highlight.add(it.id);
-      renderWheel(); showResult(picked.map(i => i.name));
+      renderSectors(false);
       if (k < n - 1) {
-        await wait(cfg.after === 'remove' ? 900 : 600);
-        if (cfg.after === 'remove') { highlight.delete(it.id); computeLayout(); renderWheel(); await wait(200); }
+        ding();
+        paintResult(picked.map(i => i.name), true, true);
+        await wait(cfg.after === 'remove' ? 950 : 650);
+        if (cfg.after === 'remove') { highlight.delete(it.id); computeLayout(); renderSectors(true); await wait(260); }
       }
     }
   }
-  finish(picked);
+  finish(picked, multi);
 }
-function finish(picked) {
+function finish(picked, multi) {
   spinning = false;
   const names = picked.map(i => i.name);
+  dial.classList.add('landed');
+  paintResult(names, multi, false);
   run.last = names;
   run.history.unshift({ t: Date.now(), names });
-  if (run.history.length > 100) run.history.length = 100;
-  save(); renderHistory(); updateStatus();
-  if (cfg.sound) chime();
+  if (run.history.length > 200) run.history.length = 200;
+  save(); renderRecent(); updateStatus();
+  if (cfg.lights) { gBulbs.dataset.mode = 'win'; idleTimer = setTimeout(() => { gBulbs.dataset.mode = 'idle'; }, 2600); }
+  if (cfg.sound) fanfare();
   if (cfg.confetti && !matchMedia('(prefers-reduced-motion: reduce)').matches) confetti();
-  if (cfg.popup) openModal(picked);
-  if (cfg.after === 'remove') relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderWheel(); }, 1800);
+  if (cfg.popup) setTimeout(() => openModal(picked), 650);
+  if (cfg.after === 'remove') relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderSectors(true); }, 2200);
 }
 function resetDraw() {
   run.drawn = []; run.bag = [];
-  highlight.clear(); computeLayout(); renderWheel(); updateStatus(); save();
+  highlight.clear(); computeLayout(); renderSectors(true); updateStatus(); save();
+}
+
+/* ---------- 结果显示 ---------- */
+const res = $('res');
+let liveEl = null;
+function paintResult(names, multi, live) {
+  res.textContent = ''; liveEl = null;
+  res.classList.toggle('multi', multi);
+  if (multi) {
+    names.forEach((nm, i) => {
+      const t = document.createElement('span');
+      t.className = 'tag' + (live && i < names.length - 1 ? '' : ' pop');
+      if (!live) t.style.animationDelay = (i * 0.08) + 's';
+      t.textContent = nm; res.append(t);
+    });
+  } else if (!live && names[0]) {
+    const t = document.createElement('span'); t.className = 'name land'; t.textContent = names[0]; res.append(t);
+  }
+  if (live) {
+    liveEl = document.createElement('span');
+    liveEl.className = multi ? 'tag live' : 'live';
+    liveEl.textContent = '…';
+    res.append(liveEl);
+  }
+  if (!names.length && !live) {
+    const t = document.createElement('span'); t.className = 'ph'; t.textContent = '？'; res.append(t);
+  }
+}
+function liveName(name) {
+  if (!liveEl || !spinning) return;
+  liveEl.textContent = name;
+  if (liveEl.animate) liveEl.animate([{ transform: 'translateY(-28%)', opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 140, easing: 'ease-out' });
+}
+function showLast() {
+  if (!run.last.length) { paintResult([], false, false); return; }
+  res.textContent = '';
+  res.classList.toggle('multi', run.last.length > 1);
+  run.last.forEach(nm => { const t = document.createElement('span'); t.className = run.last.length > 1 ? 'tag' : 'name'; t.textContent = nm; res.append(t); });
 }
 
 /* ---------- 声音 ---------- */
-let ac = null;
+let ac = null, noise = null;
 function unlockAudio() {
   if (!cfg.sound) return;
   try {
-    if (!ac) { const A = window.AudioContext || window.webkitAudioContext; if (A) ac = new A(); }
-    if (ac && ac.state === 'suspended') ac.resume();
+    if (!ac) {
+      const A = window.AudioContext || window.webkitAudioContext;
+      if (!A) return;
+      ac = new A();
+      noise = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.04), ac.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+    }
+    if (ac.state === 'suspended') ac.resume();
   } catch (e) { ac = null; }
+}
+function tick() {
+  if (!cfg.sound || !ac) return;
+  const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain();
+  src.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 2300 + Math.random() * 600; bp.Q.value = 2.2; g.gain.value = 0.55;
+  src.connect(bp); bp.connect(g); g.connect(ac.destination); src.start();
 }
 function tone(freq, at, len, vol, type) {
   const o = ac.createOscillator(), g = ac.createGain();
   o.type = type; o.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, at);
-  g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+  g.gain.exponentialRampToValueAtTime(vol, at + 0.012);
   g.gain.exponentialRampToValueAtTime(0.0001, at + len);
   o.connect(g); g.connect(ac.destination);
-  o.start(at); o.stop(at + len + 0.02);
+  o.start(at); o.stop(at + len + 0.05);
 }
-function tick() { if (cfg.sound && ac) tone(1500, ac.currentTime, 0.045, 0.12, 'triangle'); }
-function chime() {
+function ding() { if (cfg.sound && ac) { const t = ac.currentTime + 0.01; tone(1046.5, t, 0.35, 0.12, 'sine'); tone(1568, t + 0.06, 0.4, 0.08, 'sine'); } }
+function fanfare() {
   if (!ac) return;
   const t = ac.currentTime + 0.02;
-  [784, 988, 1319].forEach((f, i) => tone(f, t + i * 0.1, 0.5, 0.18, 'sine'));
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { tone(f, t + i * 0.09, i === 3 ? 1 : 0.32, 0.13, 'triangle'); tone(f * 2, t + i * 0.09, i === 3 ? 0.8 : 0.25, 0.04, 'sine'); });
 }
 
 /* ---------- 彩带 ---------- */
@@ -575,72 +915,104 @@ function confetti() {
   const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
   cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   cv.hidden = false;
-  const box = $('wheel').getBoundingClientRect();
-  const ox = box.left + box.width / 2, oy = box.top + box.height * 0.4;
-  const cols = [cfg.color, mix(cfg.color, 0.45), '#ffc94a', '#5bb8d6', '#7cc68d'];
-  const ps = Array.from({ length: 140 }, () => {
-    const a = (-90 + (Math.random() - 0.5) * 150) * Math.PI / 180, v = 7 + Math.random() * 9;
-    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4,
-      w: 6 + Math.random() * 6, h: 4 + Math.random() * 4, c: cols[Math.floor(Math.random() * cols.length)] };
-  });
-  const t0 = performance.now();
+  const t = THEMES[cfg.theme];
+  const cols = t.secs.filter(c => c !== 'transparent').concat([t.accent, t.bulb, t.accent]);
+  const hub = $('hub').getBoundingClientRect();
+  const ps = [];
+  const shoot = (x, y, ang, spread, sp, count) => {
+    for (let i = 0; i < count; i++) {
+      const a = (ang + (Math.random() - 0.5) * spread) * Math.PI / 180, v = sp * (0.55 + Math.random() * 0.6);
+      const kind = Math.random();
+      ps.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 9,
+        flip: Math.random() * 6.3, vf: 6 + Math.random() * 8, wob: Math.random() * 6.3,
+        kind: kind < 0.55 ? 0 : kind < 0.8 ? 1 : 2, s: 5 + Math.random() * 5, c: cols[Math.floor(Math.random() * cols.length)] });
+    }
+  };
+  const sp = Math.max(900, H * 1.45);
+  shoot(0, H * 0.95, -62, 26, sp, 70);
+  shoot(W, H * 0.95, -118, 26, sp, 70);
+  shoot(hub.left + hub.width / 2, hub.top, -90, 70, sp * 0.62, 50);
+  let prev = performance.now();
+  const t0 = prev;
   const step = now => {
+    const dt = Math.min(0.033, (now - prev) / 1000); prev = now;
     ctx.clearRect(0, 0, W, H);
     let alive = 0;
     for (const p of ps) {
-      p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.32; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-      if (p.y < H + 20) alive++;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+      p.vy += 1500 * dt; p.vx *= Math.pow(0.4, dt); p.vy *= Math.pow(0.55, dt);
+      p.wob += dt * 5; p.x += (p.vx + Math.sin(p.wob) * 40) * dt; p.y += p.vy * dt;
+      p.r += p.vr * dt; p.flip += p.vf * dt;
+      if (p.y > H + 30) continue;
+      alive++;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.flip));
+      ctx.fillStyle = p.c;
+      if (p.kind === 0) ctx.fillRect(-p.s, -p.s * 0.6, p.s * 2, p.s * 1.2);
+      else if (p.kind === 1) { ctx.beginPath(); ctx.arc(0, 0, p.s * 0.7, 0, 6.3); ctx.fill(); }
+      else ctx.fillRect(-1.6, -p.s * 1.6, 3.2, p.s * 3.2);
+      ctx.restore();
     }
-    if (alive && now - t0 < 4000) requestAnimationFrame(step);
+    if (alive && now - t0 < 6000) requestAnimationFrame(step);
     else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
   };
   requestAnimationFrame(step);
 }
 
-/* ---------- 抽签页 ---------- */
-function showResult(names) { $('res').textContent = names.join('、'); }
+/* ---------- 主界面状态 ---------- */
+const hub = $('hub');
 function updateStatus() {
   const total = items.length, left = pool().length;
-  let s = total ? `共 ${total} 项` : '名单是空的';
+  let s = total ? `共 ${total} 项` : '名单还是空的';
   let canReset = false;
   if (total && cfg.after !== 'keep') { s += ` · 还剩 ${left} 项`; canReset = run.drawn.length > 0; }
   if (total && cfg.after === 'keep' && cfg.rng === 'bag') {
     const inBag = run.bag.length || total;
-    s += ` · 本轮还有 ${inBag} 项没抽到`; canReset = inBag < total;
+    s += ` · 这一轮还有 ${inBag} 项没抽到`; canReset = inBag < total;
   }
+  if (total && left && cfg.count > 1) s += ` · 每次抽 ${Math.min(cfg.count, left)} 个`;
   $('statusText').textContent = s;
   $('resetBtn').hidden = !canReset || spinning;
-  const go = $('goBtn');
-  go.disabled = spinning;
-  go.textContent = spinning ? '转动中…'
-    : !total ? '添加名单'
-    : !left ? '全部抽完了，重新开始'
-    : cfg.count > 1 ? `抽 ${Math.min(cfg.count, left)} 个`
-    : '开始抽签';
-  $('gearBtn').disabled = spinning;
+  hub.disabled = spinning;
+  if (spinning) { hub.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>'; hub.setAttribute('aria-label', '转动中'); }
+  else {
+    const label = !total ? '添加' : !left ? '重来' : '开始';
+    hub.textContent = label;
+    hub.setAttribute('aria-label', !total ? '添加名单' : !left ? '全部抽完了，重新开始' : '开始抽签');
+  }
+  $('gearBtn').disabled = spinning; $('histBtn').disabled = spinning;
+  $('titleText').textContent = cfg.title || '抽签转盘';
+  document.title = cfg.title ? `${cfg.title} · 抽签转盘` : '抽签转盘';
 }
 function fmtTime(t) {
   const d = new Date(t), now = new Date(), p = n => String(n).padStart(2, '0');
   const hm = `${p(d.getHours())}:${p(d.getMinutes())}`;
   return d.toDateString() === now.toDateString() ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
 }
-function renderHistory() {
-  const h = run.history, list = $('histList');
-  $('hist').hidden = !h.length;
-  $('histCount').textContent = h.length ? `（${h.length}）` : '';
+function renderRecent() {
+  const box = $('recent');
+  box.textContent = '';
+  run.history.slice(0, 6).forEach(r => {
+    const s = document.createElement('span');
+    s.textContent = r.names.map(String).join('、');
+    s.title = fmtTime(r.t);
+    box.append(s);
+  });
+}
+function renderHistoryList() {
+  const list = $('histList');
   list.textContent = '';
-  h.forEach(r => {
+  run.history.forEach(r => {
     const li = document.createElement('li'), t = document.createElement('time'), s = document.createElement('span');
     t.textContent = fmtTime(r.t); s.textContent = r.names.map(String).join('、');
     li.append(t, s); list.append(li);
   });
+  $('histEmpty').hidden = run.history.length > 0;
+  $('histClear').hidden = !run.history.length;
 }
 
-/* ---------- 结果弹窗 ---------- */
+/* ---------- 结果卡片 ---------- */
 function openModal(picked) {
+  if (spinning || !picked.length) return;
   modalPicked = picked;
-  $('mLead').textContent = cfg.heading.replace(/[:：]\s*$/, '') || '抽中';
   const names = $('mNames');
   names.textContent = picked.map(i => i.name).join('、');
   names.classList.toggle('many', picked.length > 3);
@@ -650,14 +1022,17 @@ function openModal(picked) {
 }
 function closeModal() { $('modal').hidden = true; }
 $('mOk').onclick = closeModal;
+$('mAgain').onclick = () => { closeModal(); spin(); };
 $('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 $('mRemove').onclick = () => {
   const ids = new Set(modalPicked.map(i => i.id));
-  setList(items.filter(i => !ids.has(i.id)).map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n'));
+  setList(listText(items.filter(i => !ids.has(i.id))));
   closeModal();
 };
 
-/* ---------- 设置页 ---------- */
+/* ---------- 设置抽屉 ---------- */
+const drawer = $('drawer');
+let curTab = 'list', openedHere = false;
 const refs = {};
 function h(tag, attrs, ...kids) {
   const e = document.createElement(tag);
@@ -665,136 +1040,159 @@ function h(tag, attrs, ...kids) {
   kids.forEach(k => e.append(k));
   return e;
 }
+const val = (x) => typeof x === 'function' ? x() : x;
+
+function miniDial(t, mode) {
+  const c = 60, y = 64, r1 = 44, r2 = 51;
+  const P = (r, a) => [f2(c + r * Math.sin(a * Math.PI / 180)), f2(y - r * Math.cos(a * Math.PI / 180))];
+  let s = `<svg viewBox="0 0 120 78" aria-hidden="true"><rect width="120" height="78" fill="${t.bg}"/>`;
+  if (!t.lineArt) s += `<path d="M${c - r2} ${y}A${r2} ${r2} 0 0 1 ${c + r2} ${y}Z" fill="${t.rim}"/>`;
+  for (let k = 0; k < 6; k++) {
+    const [x0, y0] = P(r1, -90 + 30 * k), [x1, y1] = P(r1, -60 + 30 * k);
+    s += `<path d="M${c} ${y}L${x0} ${y0}A${r1} ${r1} 0 0 1 ${x1} ${y1}Z" fill="${t.lineArt ? 'none' : t.secs[k % t.secs.length]}" stroke="${t.sep}" stroke-width="${t.lineArt ? 1.6 : 0.8}"/>`;
+  }
+  if (t.lineArt) s += `<path d="M${c - r1} ${y}A${r1} ${r1} 0 0 1 ${c + r1} ${y}" fill="none" stroke="${t.rim}" stroke-width="2"/>`;
+  else for (let i = 0; i < 7; i++) { const [x, yy] = P(47.5, -78 + 26 * i); s += `<circle cx="${x}" cy="${yy}" r="1.6" fill="${t.bulb}"/>`; }
+  if (mode === 'wheel') {
+    s += `<path d="M${c - 5} 6L${c + 5} 6L${c} 19Z" fill="${t.accent}"/>`;
+    s += `<path d="M${c + 30} ${y - 46}A55 55 0 0 1 ${c + 50} ${y - 22}" fill="none" stroke="${t.accent}" stroke-width="2.5" stroke-linecap="round"/><path d="M${c + 50} ${y - 22}l-6 -1.5 4 -4.5z" fill="${t.accent}"/>`;
+  } else {
+    const [nx, ny] = P(34, 24);
+    s += `<path d="M${c} ${y}L${nx} ${ny}" stroke="${t.needle}" stroke-width="3.2" stroke-linecap="round"/>`;
+    if (mode === 'pointer') s += `<path d="M${c - 22} ${y - 40}A40 40 0 0 1 ${c + 22} ${y - 40}" fill="none" stroke="${t.accent}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 5"/>`;
+  }
+  s += `<circle cx="${c}" cy="${y}" r="7" fill="${t.hub[0]}" stroke="${t.hub[2]}" stroke-width="2"/>`;
+  if (!t.lineArt) s += `<rect x="${c - r2 - 4}" y="${y - 1}" width="${2 * r2 + 8}" height="9" rx="3" fill="${t.rim}"/>`;
+  return s + '</svg>';
+}
+
 function buildSettings() {
-  const host = $('setCards');
-  SECTIONS.forEach(sec => {
-    const card = h('section', { class: 'card' }, h('h2', {}, sec.title));
-    if (sec.note) card.append(h('p', { class: 'note' }, sec.note));
-    sec.fields.forEach(f => {
-      const id = 'f-' + f.key, row = h('div', { class: 'row' });
-      const r = refs[f.key] = { row };
-      const lbl = h(['switch', 'text', 'range'].includes(f.type) ? 'label' : 'div', { class: 'lbl' }, f.label);
-      if (lbl.tagName === 'LABEL') lbl.htmlFor = id;
-      let ctl;
-      if (f.type === 'seg') {
-        ctl = h('div', { class: 'seg', role: 'group', 'aria-label': f.label });
-        f.opts.forEach(([v, t]) => {
-          const b = h('button', { type: 'button', 'data-v': v }, t);
-          b.onclick = () => set(f.key, v);
-          ctl.append(b);
-        });
-      } else if (f.type === 'switch') {
-        r.inp = h('input', { type: 'checkbox', class: 'sw', id });
-        r.inp.onchange = () => set(f.key, r.inp.checked);
-        ctl = h('div', {}, r.inp);
-      } else if (f.type === 'range') {
-        r.inp = h('input', { type: 'range', id, min: f.min, max: f.max, step: f.step });
-        r.out = h('output', {});
-        r.inp.oninput = () => set(f.key, parseFloat(r.inp.value));
-        ctl = h('div', { class: 'rng' }, r.inp, r.out);
-      } else if (f.type === 'text') {
-        r.inp = h('input', { type: 'text', class: 'txt', id, maxlength: f.max });
-        r.inp.oninput = () => set(f.key, r.inp.value);
-        ctl = r.inp;
-      } else if (f.type === 'stepper') {
-        const minus = h('button', { type: 'button', 'aria-label': '减一' }, '−');
-        const plus = h('button', { type: 'button', 'aria-label': '加一' }, '+');
-        r.inp = h('input', { type: 'number', inputmode: 'numeric', min: f.min, max: f.max, 'aria-label': f.label });
-        const put = v => { set(f.key, Math.min(f.max, Math.max(f.min, Math.round(v) || f.min))); r.inp.value = cfg[f.key]; };
-        minus.onclick = () => put(cfg[f.key] - 1);
-        plus.onclick = () => put(cfg[f.key] + 1);
-        r.inp.onchange = () => put(parseFloat(r.inp.value));
-        ctl = h('div', { class: 'stepper' }, minus, r.inp, plus);
-      } else if (f.type === 'color') {
-        ctl = h('div', { class: 'swatches', role: 'group', 'aria-label': f.label });
-        r.sw = SWATCHES.map(col => {
-          const b = h('button', { type: 'button', class: 'swatch', 'aria-label': col, style: `background:${col}` });
-          b.onclick = () => set(f.key, col);
-          ctl.append(b);
-          return b;
-        });
-        r.inp = h('input', { type: 'color', 'aria-label': '自定义颜色' });
-        r.inp.oninput = () => set(f.key, r.inp.value.toLowerCase());
-        r.custom = h('span', { class: 'swatch custom', title: '自定义颜色' }, r.inp);
-        ctl.append(r.custom);
-      }
-      row.append(lbl, h('div', {}, ctl));
-      if (f.hint) { r.hint = h('p', { class: 'hint' }); row.append(r.hint); }
-      card.append(row);
-    });
-    host.append(card);
+  FIELDS.forEach(f => {
+    const pane = document.querySelector(`[data-pane="${f.tab}"]`);
+    if (f.group) pane.append(h('div', { class: 'grp' }, f.group));
+    const id = 'f-' + f.key;
+    const inline = f.type === 'switch' || f.type === 'stepper';
+    const row = h('div', { class: 'row' + (inline ? ' inline' : '') });
+    const r = refs[f.key] = { row };
+    r.lbl = h(f.type === 'switch' || f.type === 'range' ? 'label' : 'div', { class: 'lbl' });
+    if (r.lbl.tagName === 'LABEL') r.lbl.htmlFor = id;
+    let ctl;
+    if (f.type === 'seg') {
+      ctl = h('div', { class: 'seg', role: 'group' });
+      f.opts.forEach(([v, t]) => { const b = h('button', { type: 'button', 'data-v': v }, t); b.onclick = () => set(f.key, v); ctl.append(b); });
+    } else if (f.type === 'switch') {
+      r.inp = ctl = h('input', { type: 'checkbox', class: 'sw', id });
+      r.inp.onchange = () => set(f.key, r.inp.checked);
+    } else if (f.type === 'range') {
+      r.inp = h('input', { type: 'range', id, min: f.min, max: f.max, step: f.step });
+      r.out = h('output', {});
+      r.inp.oninput = () => set(f.key, parseFloat(r.inp.value));
+      ctl = h('div', { class: 'rng' }, r.inp, r.out);
+    } else if (f.type === 'stepper') {
+      const minus = h('button', { type: 'button', 'aria-label': '减一' }, '−'), plus = h('button', { type: 'button', 'aria-label': '加一' }, '+');
+      r.inp = h('input', { type: 'number', inputmode: 'numeric', min: f.min, max: f.max, 'aria-label': val(f.label) });
+      const put = v => { set(f.key, Math.min(f.max, Math.max(f.min, Math.round(v) || f.min))); r.inp.value = cfg[f.key]; };
+      minus.onclick = () => put(cfg[f.key] - 1);
+      plus.onclick = () => put(cfg[f.key] + 1);
+      r.inp.onchange = () => put(parseFloat(r.inp.value));
+      ctl = h('div', { class: 'stepper' }, minus, r.inp, plus);
+    } else if (f.type === 'themes') {
+      ctl = h('div', { class: 'cards' });
+      r.cards = THEME_ORDER.map(k => {
+        const b = h('button', { type: 'button', class: 'card-opt', 'data-v': k });
+        b.innerHTML = miniDial(THEMES[k], 'theme');
+        b.append(THEMES[k].name);
+        b.onclick = () => set('theme', k);
+        ctl.append(b); return b;
+      });
+    } else if (f.type === 'spinner') {
+      ctl = h('div', { class: 'cards two' });
+      r.cards = [['pointer', '指针摆动', '转盘不动，指针来回摆'], ['wheel', '转盘旋转', '指针不动，转盘转圈']].map(([v, name, sub]) => {
+        const b = h('button', { type: 'button', class: 'card-opt', 'data-v': v });
+        b.dataset.name = name; b.dataset.sub = sub;
+        b.onclick = () => set('spinner', v);
+        ctl.append(b); return b;
+      });
+    }
+    row.append(r.lbl, ctl);
+    if (f.hint) { r.hint = h('p', { class: 'hint' }); row.append(r.hint); }
+    pane.append(row);
   });
 }
 function syncSettings() {
-  for (const k in FIELDS) {
-    const f = FIELDS[k], r = refs[k], v = cfg[k];
-    if (f.show) r.row.hidden = !f.show();
+  FIELDS.forEach(f => {
+    const r = refs[f.key], v = cfg[f.key];
+    r.row.hidden = f.show ? !f.show() : false;
+    r.lbl.textContent = val(f.label);
     if (f.type === 'seg') r.row.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
     else if (f.type === 'switch') r.inp.checked = v;
-    else if (f.type === 'range') { r.inp.value = v; r.out.textContent = v + f.unit; }
-    else if (f.type === 'text' || f.type === 'stepper') { if (document.activeElement !== r.inp) r.inp.value = v; }
-    else if (f.type === 'color') {
-      const preset = SWATCHES.includes(v);
-      r.sw.forEach((b, i) => b.setAttribute('aria-pressed', String(SWATCHES[i] === v)));
-      r.custom.setAttribute('aria-pressed', String(!preset));
-      r.inp.value = v;
-    }
+    else if (f.type === 'range') { r.inp.value = v; r.out.textContent = v + val(f.unit); }
+    else if (f.type === 'stepper') { if (document.activeElement !== r.inp) r.inp.value = v; }
+    else if (f.type === 'themes') r.cards.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    else if (f.type === 'spinner') r.cards.forEach(b => {
+      b.setAttribute('aria-pressed', String(b.dataset.v === v));
+      b.innerHTML = miniDial(THEMES[cfg.theme], b.dataset.v);
+      b.append(b.dataset.name, h('small', {}, b.dataset.sub));
+    });
     if (r.hint) { r.hint.textContent = f.hint(); r.hint.hidden = !r.hint.textContent; }
-  }
+  });
   updateListMeta();
 }
 function updateListMeta() {
   $('listCount').textContent = `${items.length} 项`;
-  const box = $('probs');
-  box.hidden = cfg.rng !== 'weight' || !items.length;
-  if (box.hidden) return;
-  const tot = items.reduce((s, i) => s + i.w, 0);
+  const show = cfg.rng === 'weight' && items.length > 0;
+  $('probRow').hidden = !show;
+  if (!show) return;
+  const box = $('probs'), tot = items.reduce((s, i) => s + i.w, 0);
   box.textContent = '';
   items.slice(0, 60).forEach(i => {
     const pct = i.w / tot * 100;
     box.append(h('span', {}, i.name, h('b', {}, (pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)) + '%')));
   });
-  if (items.length > 60) box.append(h('span', {}, `…等 ${items.length} 项`));
+  if (items.length > 60) box.append(h('span', {}, `…共 ${items.length} 项`));
+}
+function applyTheme() {
+  const t = THEMES[cfg.theme], s = document.documentElement.style;
+  const vars = { '--bg': t.bg, '--bg2': t.bg2, '--ink': t.ink, '--muted': t.muted, '--line': t.line, '--card': t.card,
+    '--accent': t.accent, '--on-accent': t.onAccent, '--rim': t.rim, '--bulb': t.bulb, '--win': t.win,
+    '--hub-bg': t.hub[0], '--hub-ink': t.hub[1], '--hub-ring': t.hub[2] };
+  for (const k in vars) s.setProperty(k, vars[k]);
+  document.body.dataset.theme = cfg.theme;
+  document.querySelector('meta[name=theme-color]').setAttribute('content', t.bg);
 }
 function applyAll() {
-  const s = document.documentElement.style, c = cfg.color, n = parseInt(c.slice(1), 16);
-  const lum = (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255;
-  s.setProperty('--c', c); s.setProperty('--c1', mix(c, 0.1)); s.setProperty('--c2', mix(c, 0.25));
-  s.setProperty('--on-c', lum > 0.68 ? '#2d2a26' : '#fff');
-  $('hText').textContent = cfg.heading;
-  computeLayout(); drawPointer(); renderWheel(); applyRot(); updateStatus();
+  applyTheme(); computeLayout(); renderFrame(); renderSectors(false); updateStatus();
 }
 function set(key, v) {
   if (spinning || cfg[key] === v) return;
   cfg[key] = v;
-  if (key === 'spinner') rot = { pointer: 0, wheel: 0 };
   if (key === 'after' || key === 'rng') { run.drawn = []; run.bag = []; }
   highlight.clear();
-  applyAll(); syncSettings(); save();
+  applyAll();
+  if (key === 'spinner') { homePose(); applyPose(); setSway(true); }
+  syncSettings(); save();
 }
 function setList(text) {
   cfg.list = text;
   $('listTA').value = text;
-  parse(); highlight.clear(); computeLayout(); renderWheel(); updateStatus(); updateListMeta(); save();
+  listChanged();
+}
+function listChanged() {
+  parse(); highlight.clear(); computeLayout(); renderSectors(true); updateStatus(); updateListMeta(); save();
 }
 
 let listTimer = 0;
 $('listTA').addEventListener('input', () => {
   clearTimeout(listTimer);
-  listTimer = setTimeout(() => {
-    cfg.list = $('listTA').value;
-    parse(); highlight.clear(); computeLayout(); renderWheel(); updateStatus(); updateListMeta(); save();
-  }, 200);
+  listTimer = setTimeout(() => { cfg.list = $('listTA').value; listChanged(); }, 220);
 });
+$('titleInp').addEventListener('input', () => { cfg.title = $('titleInp').value.trim(); updateStatus(); save(); });
 $('shuffleBtn').onclick = () => {
   const lines = $('listTA').value.split(/\r?\n/).filter(l => l.trim());
   for (let i = lines.length - 1; i > 0; i--) { const j = randInt(i + 1); [lines[i], lines[j]] = [lines[j], lines[i]]; }
   setList(lines.join('\n'));
 };
-$('dedupeBtn').onclick = () => {
-  const seen = new Set();
-  setList(items.filter(i => !seen.has(i.name) && seen.add(i.name)).map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n'));
-};
+$('dedupeBtn').onclick = () => { const seen = new Set(); setList(listText(items.filter(i => !seen.has(i.name) && seen.add(i.name)))); };
 $('genBtn').onclick = () => {
   let a = Math.round(parseFloat($('genFrom').value)), b = Math.round(parseFloat($('genTo').value));
   if (!Number.isFinite(a) || !Number.isFinite(b)) return;
@@ -805,35 +1203,58 @@ $('genBtn').onclick = () => {
   for (let i = a; i <= b; i++) out.push(String(i));
   setList(out.join('\n'));
 };
-$('resetCfgBtn').onclick = () => {
-  if (!confirm('把设置恢复成默认？名单和抽签记录会保留。')) return;
-  cfg = Object.assign({}, DEF, { list: cfg.list });
-  rot = { pointer: 0, wheel: 0 };
-  run.drawn = []; run.bag = []; highlight.clear();
-  applyAll(); syncSettings(); save();
-};
+$('histClear').onclick = () => { run.history = []; save(); renderHistoryList(); renderRecent(); };
 
-/* ---------- 页面切换与操作 ---------- */
-function route() {
-  const s = location.hash === '#settings' && !spinning;
-  $('front').hidden = s; $('settings').hidden = !s;
-  if (s) { $('listTA').value = cfg.list; syncSettings(); window.scrollTo(0, 0); }
+const TABS = ['list', 'draw', 'look', 'history'];
+function showTab(tab) {
+  curTab = tab;
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  document.querySelectorAll('.pane').forEach(p => { p.hidden = p.dataset.pane !== tab; });
+  $('pBody').scrollTop = 0;
 }
-addEventListener('hashchange', route);
-$('gearBtn').onclick = () => { location.hash = 'settings'; };
-$('backBtn').onclick = () => { location.hash = ''; };
-$('goBtn').onclick = spin;
-$('wheel').addEventListener('click', spin);
+function route() {
+  const tab = location.hash.slice(1);
+  const open = TABS.includes(tab) && !spinning;
+  drawer.classList.toggle('open', open);
+  if (open) drawer.removeAttribute('inert'); else drawer.setAttribute('inert', '');
+  $('app').toggleAttribute('inert', open);
+  if (!open) return;
+  showTab(tab);
+  $('listTA').value = cfg.list; $('titleInp').value = cfg.title;
+  syncSettings(); renderHistoryList();
+}
+function openDrawer(tab) { openedHere = true; location.hash = tab; }
+function closeDrawer() {
+  if (openedHere) { openedHere = false; history.back(); }
+  else location.hash = '';
+}
+document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { history.replaceState(null, '', '#' + b.dataset.tab); route(); }; });
+addEventListener('hashchange', () => { if (!TABS.includes(location.hash.slice(1))) openedHere = false; route(); });
+$('gearBtn').onclick = () => openDrawer(curTab === 'history' ? 'list' : curTab);
+$('histBtn').onclick = () => openDrawer('history');
+$('closeBtn').onclick = closeDrawer;
+$('scrim').onclick = closeDrawer;
+
+/* ---------- 操作 ---------- */
+hub.onclick = spin;
+dial.addEventListener('click', spin);
 $('resetBtn').onclick = resetDraw;
-$('histClear').onclick = () => { run.history = []; save(); renderHistory(); };
 document.addEventListener('keydown', e => {
   if (!$('modal').hidden) { if (e.key === 'Escape') closeModal(); return; }
-  if ($('front').hidden || (e.key !== ' ' && e.key !== 'Enter')) return;
-  if (e.target.closest && e.target.closest('button,input,textarea,summary,a')) return;
+  if (drawer.classList.contains('open')) { if (e.key === 'Escape') closeDrawer(); return; }
+  if (e.key !== ' ' && e.key !== 'Enter') return;
+  if (e.target.closest && e.target.closest('button,input,textarea,a')) return;
   e.preventDefault(); spin();
 });
+let rsTimer = 0, lastW = 0;
+const onResize = () => {
+  clearTimeout(rsTimer);
+  rsTimer = setTimeout(() => { const w = Math.round(dial.getBoundingClientRect().width); if (w && w !== lastW && !spinning) { lastW = w; renderSectors(false); } }, 160);
+};
+if (window.ResizeObserver) new ResizeObserver(onResize).observe($('stage')); else addEventListener('resize', onResize);
 
-load(); parse(); buildSettings(); applyAll(); renderHistory(); showResult(run.last); route();
+load(); parse(); buildSettings(); applyAll(); homePose(); applyPose(); setSway(true); showLast(); renderRecent(); route();
+lastW = Math.round(dial.getBoundingClientRect().width);
 })();
 </script>
 </body>
