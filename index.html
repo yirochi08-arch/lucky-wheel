@@ -286,6 +286,37 @@ textarea:focus{outline:none;border-color:var(--red)}
 .toast.show{transform:translate(-50%,0)}
 #fx{position:fixed;inset:0;z-index:55;width:100%;height:100%;pointer-events:none}
 
+/* ===== 分享 / 换头像 / 访客 ===== */
+.head,.sign-head{position:relative}
+.head .title{padding-right:54px}
+.icon-btn{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:15px;background:#fff;color:var(--ink);box-shadow:0 8px 18px -12px rgba(130,60,20,.6);transition:transform .2s}
+.icon-btn:active{transform:scale(.9)}
+.head .share-btn{position:absolute;top:28px;right:0}
+.sign-head .share-btn{position:absolute;top:30px;right:0;background:rgba(255,226,166,.14);color:#FFE2A6;box-shadow:inset 0 0 0 1.5px rgba(255,226,166,.45)}
+.sign-name{display:inline-block;max-width:70%;margin-bottom:12px;padding:4px 14px;border-radius:999px;background:rgba(255,226,166,.14);color:#FFE2A6;font-size:13px;font-weight:700;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.share-chip{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;margin-top:16px;border:0;border-radius:15px;background:var(--green-l);color:var(--green-d);font-size:15px;font-weight:800;transition:transform .2s}
+.share-chip:active{transform:scale(.97)}
+.share-note{margin:12px 2px 0;padding:10px 12px;border-radius:12px;background:var(--gold-l);color:#7A5300;font-size:12.5px;line-height:1.7}
+.link-box{display:flex;gap:8px;margin-top:14px;padding:6px;border-radius:16px;background:#FFF5E8}
+.link-box input{flex:1;min-width:0;padding:0 10px;border:0;background:transparent;font-size:13.5px;color:var(--ink)}
+.link-box input:focus{outline:none}
+.link-box button{flex:none;height:40px;padding:0 16px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:700}
+.ava-btn{flex:none;position:relative;padding:0;border:0;border-radius:50%;background:none;transition:transform .2s}
+.ava-btn:active{transform:scale(.9)}
+.ava-btn::after{content:"";position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A3876F' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 20l4-1 11-11-3-3L5 16z'/%3E%3C/svg%3E") center/10px no-repeat;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.ava.is-emo{font-size:24px;font-weight:400}
+.who .ava.is-emo{font-size:18px}
+.big-ava.is-emo{font-size:66px;font-weight:400}
+.who-opt .ava.is-emo{font-size:26px}
+.emo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin-top:16px}
+.emo{height:52px;border:2px solid transparent;border-radius:16px;background:#FFF7EE;font-size:28px;line-height:1;animation:pop .4s cubic-bezier(.2,1.5,.35,1) both;transition:transform .15s}
+.emo:active{transform:scale(.88)}
+.emo[aria-pressed=true]{border-color:var(--green);background:var(--green-l)}
+.bad-link{padding-top:28vh;text-align:center}
+body.guest .tabbar,body.guest .share-btn,body.guest #wReset,body.guest #sReset,body.guest #recent{display:none!important}
+body.guest .app{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+body.guest .head .title{padding-right:0}
+
 @media (prefers-reduced-motion:reduce){
   #bulbs .on,.cta::after,.amb i,.flake,.who.empty,.sign-result::before{animation:none!important}
 }
@@ -302,6 +333,7 @@ textarea:focus{outline:none;border-color:var(--red)}
       <h1 class="title" id="wTitle"></h1>
       <p class="sub" id="wSub"></p>
       <button class="who" id="whoW" hidden></button>
+      <button class="icon-btn share-btn" id="shareW" aria-label="分享这个抽签" title="分享这个抽签"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12M7 8l5-5 5 5"/></svg></button>
     </header>
     <div class="wheel-card" id="wheelCard">
       <div class="hero">
@@ -346,9 +378,11 @@ textarea:focus{outline:none;border-color:var(--red)}
   <!-- 上上签 -->
   <section class="view" id="v-sign" hidden>
     <header class="sign-head">
+      <span class="sign-name" id="sName"></span>
       <h2>抽一支上上签</h2>
       <p>《 摇 一 摇 · 抽 好 运 》</p>
       <button class="who gold" id="whoS" hidden></button>
+      <button class="icon-btn share-btn" id="shareS" aria-label="分享这个抽签" title="分享这个抽签"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12M7 8l5-5 5 5"/></svg></button>
     </header>
     <svg id="signSvg" viewBox="0 0 600 680" aria-hidden="true">
       <defs>
@@ -385,11 +419,17 @@ textarea:focus{outline:none;border-color:var(--red)}
         <span><b>抽之前先选「我是谁」</b><small>每个人先在名单里选中自己，抽签时不会抽到自己</small></span>
         <input type="checkbox" class="sw" id="gIdentity">
       </label>
+      <button class="share-chip share-btn" id="shareG"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12M7 8l5-5 5 5"/></svg>分享这个抽签</button>
     </div>
     <div class="add-row"><input id="addInp" placeholder="输入名字，可用逗号一次加多个" enterkeyhint="done"><button id="addBtn">＋ 添加</button></div>
     <div class="list-meta"><span id="listMeta"></span><span><button class="chip" id="bulkBtn">批量编辑</button><button class="chip" id="shuffleBtn">打乱顺序</button></span></div>
     <div class="items" id="itemList"></div>
     <button class="danger" id="delGroup">删除这个名单组</button>
+  </section>
+
+  <section class="view bad-link" id="v-bad" hidden>
+    <h1 class="title">链接打不开</h1>
+    <p class="sub">这个抽签链接不完整，找发链接的人重新要一个吧。</p>
   </section>
 
   <!-- 设置 -->
@@ -432,6 +472,31 @@ textarea:focus{outline:none;border-color:var(--red)}
       <div class="res-name" id="rName"></div>
       <div class="res-actions"><button class="btn-o" id="rAgain">再抽一次</button><button class="btn-f" id="rOk">就它了！</button></div>
     </div>
+  </div>
+</div>
+
+<div class="sheet" id="sh-share" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="shareH">
+    <div class="grab"></div>
+    <h3 id="shareH">分享</h3>
+    <p class="sh-sub">收到链接的人只能看到这一个抽签页面</p>
+    <div class="row"><div class="lbl">对方看到的形式</div><div class="cards" id="shareFormBox"></div></div>
+    <label class="row inline" id="onceRow" for="shareOnce"><span class="lbl">每人只能抽一次</span><input type="checkbox" class="sw" id="shareOnce"></label>
+    <p class="share-note" id="shareNote"></p>
+    <div class="link-box"><input id="shareUrl" readonly aria-label="分享链接"><button id="copyBtn">复制</button></div>
+    <div class="res-actions"><button class="btn-o" id="previewBtn">预览</button><button class="btn-f" id="sendBtn">发给朋友</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="sh-emo" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="emoH">
+    <div class="grab"></div>
+    <h3 id="emoH">换个头像</h3>
+    <div class="emo-grid" id="emoGrid"></div>
+    <div class="link-box"><input id="emoInp" placeholder="或者自己输入一个 emoji" maxlength="16" aria-label="自定义 emoji"><button id="emoUse">用这个</button></div>
+    <div class="res-actions"><button class="btn-o" id="emoReset">改回名字首字</button></div>
   </div>
 </div>
 
@@ -564,9 +629,16 @@ function cleanGroup(g) {
   if (!g || !Array.isArray(g.items)) return null;
   const rules = Object.assign({}, RULE_DEF);
   if (g.rules) RULE_KEYS.forEach(k => { if (validRule(k, g.rules[k])) rules[k] = g.rules[k]; });
+  const sh = g.share && typeof g.share.code === 'string' && typeof g.share.sig === 'string'
+    ? { code: g.share.code, sig: g.share.sig, d: Array.isArray(g.share.d) ? g.share.d.filter(Number.isInteger) : null } : null;
   return {
     id: String(g.id || uid()), name: String(g.name || '名单组').slice(0, 20), identity: !!g.identity, rules,
-    items: g.items.filter(i => i && i.name).map(i => ({ id: String(i.id || uid()), name: String(i.name).slice(0, 30), w: Number(i.w) > 0 ? Number(i.w) : 1, on: i.on !== false }))
+    share: sh, shareForm: g.shareForm === 'sign' ? 'sign' : 'wheel', shareOnce: g.shareOnce !== false,
+    items: g.items.filter(i => i && i.name).map(i => {
+      const it = { id: String(i.id || uid()), name: String(i.name).slice(0, 30), w: Number(i.w) > 0 ? Number(i.w) : 1, on: i.on !== false };
+      if (typeof i.emo === 'string' && i.emo) it.emo = i.emo.slice(0, 8);
+      return it;
+    })
   };
 }
 function parseLines(text) {
@@ -610,7 +682,87 @@ function load() {
   if (!groups.some(g => g.id === activeId)) activeId = groups[0].id;
 }
 function save() {
+  if (SHARE) { saveGuest(); return; }
   try { localStorage.setItem(KEY, JSON.stringify({ cfg, groups, activeId, runs, history })); } catch (e) { /* 无痕模式存不了 */ }
+}
+
+/* ---------- 分享链接 ----------
+   整个抽签（名单、规则、外观）编码进链接的 # 后面，不经过任何服务器。
+   「先选我是谁 + 抽中后不放回」的组在生成链接时就配好一套「没人抽到自己」的对应关系，
+   所以大家各自在自己手机上抽也不会撞。 */
+let SHARE = null, guestDone = false;
+const VIEW_KEYS = Object.keys(VIEW_DEF);
+function b64e(str) {
+  let bin = '';
+  new TextEncoder().encode(str).forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function b64d(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  return new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+}
+function derange(n) {
+  let p;
+  do { p = shuffled([...Array(n).keys()]); } while (p.some((v, i) => v === i));
+  return p;
+}
+function shareLink(g, form, once) {
+  const its = g.items.filter(i => i.on);
+  const pair = g.identity && g.rules.after !== 'keep' && its.length > 1;
+  const sig = JSON.stringify([its.map(i => i.name), pair]);
+  if (!g.share || g.share.sig !== sig) g.share = { code: uid(), sig, d: pair ? derange(its.length) : null };
+  const p = {
+    v: 1, c: g.share.code, n: g.name, f: form, o: once ? 1 : 0, id: g.identity ? 1 : 0,
+    i: its.map(i => i.emo ? [i.name, i.w, i.emo] : i.w !== 1 ? [i.name, i.w] : i.name),
+    r: RULE_KEYS.map(k => g.rules[k]), w: VIEW_KEYS.map(k => cfg[k])
+  };
+  if (g.share.d) p.d = g.share.d;
+  return location.origin + location.pathname + '#s=' + b64e(JSON.stringify(p));
+}
+function parseShare() {
+  const m = location.hash.match(/^#s=([A-Za-z0-9_-]+)/);
+  if (!m) return null;
+  try {
+    const p = JSON.parse(b64d(m[1]));
+    if (p.v !== 1 || !Array.isArray(p.i) || !p.i.length) throw new Error('bad');
+    const items = p.i.map((x, k) => {
+      const [name, w, emo] = Array.isArray(x) ? x : [x, 1];
+      const it = { id: 'g' + k, name: String(name).slice(0, 30), w: Number(w) > 0 ? Number(w) : 1, on: true };
+      if (typeof emo === 'string' && emo) it.emo = emo.slice(0, 8);
+      return it;
+    });
+    const rules = Object.assign({}, RULE_DEF), view = {}, n = items.length;
+    if (Array.isArray(p.r)) RULE_KEYS.forEach((k, i) => { if (validRule(k, p.r[i])) rules[k] = p.r[i]; });
+    if (Array.isArray(p.w)) VIEW_KEYS.forEach((k, i) => { if (validView(k, p.w[i])) view[k] = p.w[i]; });
+    const d = Array.isArray(p.d) && p.d.length === n && new Set(p.d).size === n && p.d.every((v, i) => Number.isInteger(v) && v >= 0 && v < n && v !== i) ? p.d : null;
+    return { code: String(p.c || 'x').slice(0, 20), name: String(p.n || '抽签').slice(0, 20), form: p.f === 'sign' ? 'sign' : 'wheel',
+      once: !!p.o, identity: !!p.id, items, rules, view, d };
+  } catch (e) { return { bad: true }; }
+}
+const gKey = () => 'lucky-wheel:g:' + SHARE.code;
+function saveGuest() {
+  try { const r = RN(); localStorage.setItem(gKey(), JSON.stringify({ me: r.me, done: guestDone, res: r.last, who: r.lastWho })); } catch (e) { /* 存不了就算了 */ }
+}
+function initGuest() {
+  document.body.classList.add('guest');
+  if (SHARE.bad) {
+    ['v-wheel', 'v-sign', 'v-list', 'v-settings'].forEach(id => { $(id).hidden = true; });
+    $('v-bad').hidden = false;
+    return false;
+  }
+  groups = [{ id: 'guest', name: SHARE.name, identity: SHARE.identity, rules: SHARE.rules, items: SHARE.items }];
+  activeId = 'guest';
+  Object.assign(cfg, SHARE.view);
+  cfg.tab = SHARE.form;
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem(gKey())) || {}; } catch (e) { s = {}; }
+  const ok = SHARE.items.some(i => i.id === s.me);
+  guestDone = !!s.done;
+  runs.guest = { drawn: [], bag: [], done: guestDone && ok ? [s.me] : [], me: ok ? s.me : null,
+    last: Array.isArray(s.res) ? s.res.map(String) : [], lastWho: s.who ? String(s.who) : null };
+  document.title = SHARE.name;
+  return true;
 }
 
 /* ---------- 随机 ---------- */
@@ -632,6 +784,7 @@ function shuffled(arr) {
 }
 function pickOne(ex) {
   const rules = RU(), m = me();
+  if (SHARE && SHARE.d && m) return G().items[SHARE.d[G().items.indexOf(m)]];
   let p = pool().filter(i => !ex.has(i.id));
   if (m && rules.after !== 'keep') {
     // 交换礼物防死锁：不能让最后一个没抽的人只剩自己可抽
@@ -696,7 +849,8 @@ function split(name) {
 function avatar(it, cls) {
   const idx = Math.max(0, G().items.indexOf(it)), [bg, fg] = AVA[idx % AVA.length], sp = split(it.name);
   const a = h('span', { class: cls || 'ava', style: `background:${bg};color:${fg}` });
-  a.textContent = sp.emo || [...sp.text][0] || '?';
+  a.textContent = it.emo || sp.emo || [...sp.text][0] || '?';
+  if (it.emo || sp.emo) a.classList.add('is-emo');
   return a;
 }
 let toastT = 0;
@@ -1043,6 +1197,12 @@ async function introHand() {
 /* ---------- 抽签流程 ---------- */
 let busy = false, relayTimer = 0, idleTimer = 0;
 function guard() {
+  if (SHARE) {
+    if (guestDone) { toast('你已经抽过啦'); return false; }
+    if (idOn() && !me()) { openWho(); return false; }
+    if (!pool().length) { toast('没有可以抽的了'); return false; }
+    return true;
+  }
   if (!items().length) { toast('名单是空的，先添加几个吧'); go('list'); return false; }
   if (idOn()) {
     if (!drawersLeft().length) { askRestart(); return false; }
@@ -1103,6 +1263,11 @@ function commit(picked, mode) {
   if (m) r.done.push(m.id);
   r.last = picked.map(i => i.name);
   r.lastWho = m ? m.name : null;
+  if (SHARE) {
+    if (SHARE.once || SHARE.identity) guestDone = true;
+    save();
+    return m;
+  }
   history.unshift({ t: Date.now(), g: G().name, mode, who: m ? m.name : '', names: r.last });
   if (history.length > 300) history.length = 300;
   save(); renderHistory();
@@ -1171,9 +1336,9 @@ function openResult(picked, who) {
     box.append(a);
   });
   $('rName').textContent = picked.map(i => split(i.name).text).join('、');
-  $('rAgain').hidden = !!who;
-  $('rOk').textContent = who ? '我记住了，下一位' : '就它了！';
-  openSheet('sh-result', who ? nextPerson : null);
+  $('rAgain').hidden = !!who || (SHARE && guestDone);
+  $('rOk').textContent = SHARE ? '好的' : who ? '我记住了，下一位' : '就它了！';
+  openSheet('sh-result', who && !SHARE ? nextPerson : null);
 }
 $('rOk').onclick = () => closeSheet();
 $('rAgain').onclick = () => { closeSheet(true); spinWheel(); };
@@ -1244,8 +1409,8 @@ function openSign(it, who) {
   const h0 = $('signCard').getBoundingClientRect().height || 440;
   box.style.fontSize = Math.max(18, Math.min(46, Math.floor((h0 - 190) / Math.max(1, len) / 1.16))) + 'px';
   $('scWho').textContent = who ? `${split(who.name).text}，这是你的签` : '支支都是上上签';
-  $('scAgain').hidden = !!who;
-  $('scOk').textContent = who ? '我记住了，下一位' : '收下好运';
+  $('scAgain').hidden = !!who || (SHARE && guestDone);
+  $('scOk').textContent = who && !SHARE ? '我记住了，下一位' : '收下好运';
   const sr = $('signRes'), card = $('signCard');
   sr.hidden = false;
   card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
@@ -1255,7 +1420,7 @@ function closeSign(again) {
   const sr = $('signRes');
   if (sr.hidden) return;
   sr.hidden = true;
-  if (signWho) { signWho = null; nextPerson(); return; }
+  if (signWho) { signWho = null; if (!SHARE) { nextPerson(); return; } }
   renderSticks(true);
   if (again) setTimeout(shakeSign, 500);
 }
@@ -1377,6 +1542,8 @@ function closeSheet(silent) {
 }
 document.querySelectorAll('.sheet .scrim').forEach(sc => { sc.onclick = () => closeSheet(); });
 function openWho() {
+  if (busy) return;
+  if (SHARE && guestDone) { toast('抽完就不能换人啦'); return; }
   const grid = $('whoGrid'), r = RN(), done = new Set(r.done);
   grid.textContent = '';
   items().forEach((it, i) => {
@@ -1400,14 +1567,16 @@ function whoBtn(btn) {
   const on = idOn() && items().length > 0;
   btn.hidden = !on;
   if (!on) return;
-  const m = me();
+  const m = me(), locked = SHARE && guestDone && itemById(RN().me);
   btn.textContent = '';
-  btn.classList.toggle('empty', !m);
-  if (m) btn.append(avatar(m), h('span', {}, `我是 ${split(m.name).text}`), h('small', {}, '换人'));
+  btn.classList.toggle('empty', !m && !locked);
+  if (locked) btn.append(avatar(locked), h('span', {}, `我是 ${split(locked.name).text}`));
+  else if (m) btn.append(avatar(m), h('span', {}, `我是 ${split(m.name).text}`), h('small', {}, '换人'));
   else btn.append(h('span', { class: 'ava' }, '?'), h('span', {}, drawersLeft().length ? '点这里选你是谁' : '所有人都抽完了'));
 }
 function statusText() {
   const total = items().length, r = RN(), rules = RU();
+  if (SHARE) return [SHARE.identity ? '不会抽到你自己 · 每人只能抽一次' : SHARE.once ? '每人只能抽一次' : `共 ${total} 项`, false];
   if (!total) return ['名单还是空的', false];
   if (idOn()) {
     const done = total - drawersLeft().length;
@@ -1422,6 +1591,11 @@ function statusText() {
 }
 function ctaLabel(sign) {
   if (busy) return sign ? '求签中…' : '转动中…';
+  if (SHARE) {
+    if (guestDone) return '你已经抽过啦';
+    if (idOn()) return me() ? `我是${split(me().name).text}，${sign ? '求签' : '开始抽'}！` : '先选你是谁';
+    return sign ? '摇一摇 · 求签' : RU().count > 1 ? `抽 ${RU().count} 个！` : '开始抽取！';
+  }
   if (!items().length) return '去添加名单';
   if (idOn()) {
     if (!drawersLeft().length) return '全部抽完，重新开始';
@@ -1433,12 +1607,15 @@ function ctaLabel(sign) {
 function updateUI() {
   const g = G(), r = RN();
   $('wTitle').textContent = g.name;
-  $('wSub').textContent = idOn() ? (me() ? '转一下，看看你要给谁准备礼物' : '先选你是谁，再转转盘') : '转动转盘，让命运决定！';
+  $('wSub').textContent = SHARE && guestDone ? '你已经抽过啦，结果在下面'
+    : idOn() ? (me() ? '转一下，看看你要给谁准备礼物' : '先选你是谁，再转转盘') : '转动转盘，让命运决定！';
+  $('sName').textContent = g.name;
   $('kicker').textContent = idOn() ? (r.lastWho ? `${split(r.lastWho).text} 抽中的是` : me() ? `${split(me().name).text}，你会抽到…` : '你抽中的是') : '你抽中的是';
   whoBtn($('whoW')); whoBtn($('whoS'));
   $('spinLabel').textContent = ctaLabel(false);
   $('shakeLabel').textContent = ctaLabel(true);
-  $('spinBtn').disabled = busy; $('shakeBtn').disabled = busy;
+  $('spinBtn').disabled = $('shakeBtn').disabled = busy || !!(SHARE && guestDone);
+  document.querySelectorAll('.share-btn').forEach(b => { b.disabled = busy; });
   $('spinBtn').classList.toggle('wait', busy); $('shakeBtn').classList.toggle('wait', busy);
   const [s, can] = statusText();
   $('wStatus').textContent = s; $('sStatus').textContent = s;
@@ -1497,7 +1674,9 @@ function renderList(enter) {
     nm.value = it.name;
     nm.onchange = () => { const v = nm.value.trim(); if (!v) { nm.value = it.name; return; } it.name = v; itemsChanged(true); };
     nm.onkeydown = e => { if (e.key === 'Enter') nm.blur(); };
-    row.append(avatar(it), nm);
+    const face = h('button', { class: 'ava-btn', type: 'button', 'aria-label': `给${it.name}换头像`, title: '换头像' }, avatar(it));
+    face.onclick = () => openEmo(it);
+    row.append(face, nm);
     if (g.identity && r.me === it.id && !done.has(it.id)) row.append(h('span', { class: 'st me' }, '我'));
     else if (g.identity && done.has(it.id)) row.append(h('span', { class: 'st' }, '已抽签'));
     else if (!g.identity && RU().after !== 'keep' && drawn.has(it.id)) row.append(h('span', { class: 'st' }, '已抽中'));
@@ -1708,10 +1887,114 @@ $('resetCfg').onclick = () => {
   computeLayout(); renderFrame(); homePose(); applyPose(); renderSectors(true); renderSticks(true); showLast(); updateUI(); syncSettings(); save();
 };
 
+/* ---------- 分享弹层 ---------- */
+let shareForm = 'wheel';
+function miniSign() {
+  let s = '<svg viewBox="0 0 120 82" aria-hidden="true"><rect width="120" height="82" fill="#A8111C"/>';
+  for (let i = 0; i < 5; i++) {
+    const off = i - 2;
+    s += `<g transform="translate(${60 + off * 8} 66) rotate(${off * 7})"><path d="M-4.5 0V-42L0 -48L4.5 -42V0Z" fill="#E0413F" stroke="#F3CF8A" stroke-width="1"/><circle cy="-39" r="2.3" fill="#FBE7C2"/></g>`;
+  }
+  return s + '<path d="M37 52 L41 77 Q60 82 79 77 L83 52Z" fill="#D52630" stroke="#F3CF8A" stroke-width="1.2"/><ellipse cx="60" cy="52" rx="23" ry="4" fill="none" stroke="#E9A23B" stroke-width="1.8"/></svg>';
+}
+function openShare(form) {
+  if (busy) return;
+  const g = G();
+  if (!items().length) { toast('名单是空的，先添加几个吧'); return; }
+  shareForm = form || g.shareForm || 'wheel';
+  $('shareH').textContent = `分享「${g.name}」`;
+  $('shareOnce').checked = g.shareOnce !== false;
+  const box = $('shareFormBox');
+  box.textContent = '';
+  [['wheel', '转盘', miniDial(cfg.spinner)], ['sign', '上上签', miniSign()]].forEach(([v, name, svg]) => {
+    const b = h('button', { type: 'button', class: 'card-opt', 'data-v': v });
+    b.innerHTML = svg;
+    b.append(name);
+    b.onclick = () => { shareForm = v; refreshShare(); };
+    box.append(b);
+  });
+  refreshShare();
+  openSheet('sh-share');
+}
+function refreshShare() {
+  const g = G(), n = items().length, pair = g.identity && g.rules.after !== 'keep';
+  g.shareForm = shareForm;
+  g.shareOnce = $('shareOnce').checked;
+  $('shareFormBox').querySelectorAll('.card-opt').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === shareForm)));
+  $('onceRow').hidden = g.identity;
+  let note;
+  if (pair) note = n < 2 ? '至少要 2 个人才能互抽。' : '已经提前随机配好对：每个人都不会抽到自己，也不会有两个人抽到同一个。每台手机只能抽一次。名单改了要重新分享一次新链接。';
+  else if (g.identity) note = '每个人先选自己，不会抽到自己；每台手机只能抽一次，同一个人可能被不同的人抽到。';
+  else note = (g.shareOnce ? '每台手机只能抽一次，抽完会一直显示自己的结果。' : '对方可以反复抽，每次都是新的随机结果。')
+    + (g.rules.after !== 'keep' ? '「抽中后移出」只在同一台手机上生效，不同人之间不同步。' : '');
+  $('shareNote').textContent = note + '对方看不到设置和名单编辑。';
+  $('shareUrl').value = shareLink(g, shareForm, g.identity || g.shareOnce);
+  save();
+}
+function copyLink() {
+  const url = $('shareUrl').value, ok = () => toast('链接已复制，发给朋友吧');
+  const fallback = () => {
+    const i = $('shareUrl');
+    i.focus(); i.select();
+    try { document.execCommand('copy'); ok(); } catch (e) { toast('请长按链接手动复制'); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, fallback); else fallback();
+}
+$('shareOnce').onchange = refreshShare;
+$('copyBtn').onclick = copyLink;
+$('previewBtn').onclick = () => window.open($('shareUrl').value, '_blank');
+$('sendBtn').onclick = () => {
+  const url = $('shareUrl').value;
+  if (navigator.share) navigator.share({ title: G().name, text: `来抽签：${G().name}`, url }).catch(() => {});
+  else copyLink();
+};
+$('shareW').onclick = () => openShare('wheel');
+$('shareS').onclick = () => openShare('sign');
+$('shareG').onclick = () => openShare();
+
+/* ---------- 换头像 ---------- */
+const EMOJIS = ['🎅', '🤶', '🦌', '⛄', '🎄', '🎁', '🔔', '⭐', '🍪', '🧦', '❄️', '🕯️',
+  '🐶', '🐱', '🐰', '🐻', '🐼', '🐨', '🐯', '🦊', '🐸', '🐧', '🐥', '🦄',
+  '🐹', '🐮', '🐷', '🐵', '🍓', '🍊', '🍑', '🥑', '🍩', '🧁', '🍰', '🍭',
+  '😀', '😎', '🥳', '🤩', '😇', '🤠', '👻', '🤖', '🌈', '🌸', '🌻', '🎈'];
+let emoItem = null;
+function firstGlyph(s) {
+  s = String(s).trim();
+  if (!s) return '';
+  if (window.Intl && Intl.Segmenter) { for (const seg of new Intl.Segmenter('zh', { granularity: 'grapheme' }).segment(s)) return seg.segment; }
+  return [...s].slice(0, 2).join('');
+}
+function openEmo(it) {
+  emoItem = it;
+  $('emoH').textContent = `给「${split(it.name).text}」换个头像`;
+  const grid = $('emoGrid');
+  grid.textContent = '';
+  EMOJIS.forEach((e, i) => {
+    const b = h('button', { type: 'button', class: 'emo', style: `animation-delay:${Math.min(i, 30) * 12}ms`, 'aria-pressed': String(it.emo === e) }, e);
+    b.onclick = () => setEmo(e);
+    grid.append(b);
+  });
+  $('emoInp').value = '';
+  openSheet('sh-emo');
+}
+function setEmo(e) {
+  if (!emoItem) return;
+  if (e) emoItem.emo = e; else delete emoItem.emo;
+  closeSheet(true);
+  itemsChanged(true);
+  const row = document.querySelector(`.item[data-id="${emoItem.id}"] .ava`);
+  if (row && row.animate) row.animate([{ transform: 'scale(.3) rotate(-40deg)' }, { transform: 'scale(1.15)' }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
+  emoItem = null;
+}
+$('emoUse').onclick = () => { const e = firstGlyph($('emoInp').value); if (e) setEmo(e); else $('emoInp').focus(); };
+$('emoInp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('emoUse').click(); } });
+$('emoReset').onclick = () => setEmo('');
+
 /* ---------- 页面切换 ---------- */
 const TABS = ['wheel', 'sign', 'list', 'settings'];
 function go(tab) {
   if (busy) return;
+  if (SHARE) tab = SHARE.form;
   cfg.tab = tab;
   TABS.forEach(t => { $('v-' + t).hidden = t !== tab; });
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
@@ -1760,11 +2043,15 @@ if (window.ResizeObserver) new ResizeObserver(onResize).observe($('stage')); els
   }
 })();
 
-load(); cleanRun(); buildSettings();
-computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true);
-showLast(); renderHistory();
-go(TABS.includes(cfg.tab) ? cfg.tab : 'wheel');
-lastW = Math.round(dial.getBoundingClientRect().width);
+addEventListener('hashchange', () => location.reload());
+SHARE = parseShare();
+if (!SHARE || initGuest()) {
+  if (!SHARE) { load(); cleanRun(); buildSettings(); }
+  computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true);
+  showLast(); renderHistory();
+  go(TABS.includes(cfg.tab) ? cfg.tab : 'wheel');
+  lastW = Math.round(dial.getBoundingClientRect().width);
+}
 })();
 </script>
 </body>
