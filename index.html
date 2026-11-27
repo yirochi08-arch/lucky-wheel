@@ -317,6 +317,37 @@ body.guest .tabbar,body.guest .share-btn,body.guest #wReset,body.guest #sReset,b
 body.guest .app{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 body.guest .head .title{padding-right:0}
 
+/* ===== 在线主持 ===== */
+.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.mode-tabs button{padding:10px 10px 11px;border:2px solid var(--line);border-radius:16px;background:#fff;text-align:left;transition:border-color .2s,background .2s}
+.mode-tabs b{display:block;font-size:15px}
+.mode-tabs small{display:block;margin-top:3px;color:var(--muted);font-size:11.5px;line-height:1.45}
+.mode-tabs button[aria-pressed=true]{border-color:var(--red);background:var(--red-l)}
+#livePart .btn-f{flex:1}
+.live-dot{display:inline-block;width:9px;height:9px;margin-right:7px;border-radius:50%;background:#C9B39A;vertical-align:1px}
+.live-dot.on{background:#2FBF71;box-shadow:0 0 0 0 rgba(47,191,113,.6);animation:livePulse 1.8s ease-out infinite}
+@keyframes livePulse{to{box-shadow:0 0 0 9px rgba(47,191,113,0)}}
+.host-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.host-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);animation:rowIn .4s both}
+.host-row:last-child{border-bottom:0}
+.host-row .ava{width:38px;height:38px;font-size:16px}
+.host-row .ava.is-emo{font-size:21px}
+.host-row .who-n{min-width:0;flex:1;font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.host-row .who-n small{display:block;margin-top:2px;color:var(--muted);font-size:12px;font-weight:500}
+.host-row .got{color:var(--red);font-weight:800;transition:filter .3s}
+#hList.hide .got{filter:blur(7px);user-select:none}
+.host-row .st{flex:none;padding:2px 9px;border-radius:999px;background:var(--line);color:var(--muted);font-size:11.5px;font-weight:700}
+.host-row .st.claimed{background:var(--green-l);color:var(--green-d)}
+.host-row .st.done{background:var(--red-l);color:var(--red-d)}
+.host-row .on-dot{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#2FBF71;vertical-align:2px}
+.host-row .rel{flex:none;padding:5px 10px;border:0;border-radius:10px;background:#FFF5E8;color:var(--muted);font-size:12px;font-weight:700}
+.host-foot{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.chip.stop{background:var(--ink);color:#fff}
+body.hosting .tabbar{display:none!important}
+body.hosting .app{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+.wait-spin{width:44px;height:44px;margin:0 auto 18px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:spin 1s linear infinite}
+.bad-link .chip{margin-top:18px}
+
 @media (prefers-reduced-motion:reduce){
   #bulbs .on,.cta::after,.amb i,.flake,.who.empty,.sign-result::before{animation:none!important}
 }
@@ -428,8 +459,29 @@ body.guest .head .title{padding-right:0}
   </section>
 
   <section class="view bad-link" id="v-bad" hidden>
-    <h1 class="title">链接打不开</h1>
-    <p class="sub">这个抽签链接不完整，找发链接的人重新要一个吧。</p>
+    <div class="wait-spin" id="waitSpin" hidden></div>
+    <h1 class="title" id="badT">链接打不开</h1>
+    <p class="sub" id="badS">这个抽签链接不完整，找发链接的人重新要一个吧。</p>
+    <button class="chip" id="badRetry" hidden>再试一次</button>
+  </section>
+
+  <!-- 在线主持 -->
+  <section class="view" id="v-host" hidden>
+    <header class="head">
+      <h1 class="title" id="hTitle"></h1>
+      <p class="sub"><span class="live-dot" id="hDot"></span><span id="hLine">连接中…</span></p>
+    </header>
+    <p class="share-note">这个页面要一直开着，锁屏或切到别的 App，大家就抽不了。</p>
+    <div class="card">
+      <div class="lbl">把这个链接发给大家</div>
+      <div class="link-box"><input id="hUrl" readonly aria-label="邀请链接"><button id="hCopy">复制</button></div>
+      <div class="res-actions"><button class="btn-o" id="hPreview">预览</button><button class="btn-f" id="hSend">发给朋友</button></div>
+    </div>
+    <div class="card">
+      <div class="host-top"><h2 class="sec-h" id="hCount"></h2><button class="chip" id="hHide">隐藏结果</button></div>
+      <div class="host-list" id="hList"></div>
+    </div>
+    <div class="host-foot"><button class="chip" id="hReset">重新开始</button><button class="chip stop" id="hStop">结束主持</button></div>
   </section>
 
   <!-- 设置 -->
@@ -481,11 +533,25 @@ body.guest .head .title{padding-right:0}
     <div class="grab"></div>
     <h3 id="shareH">分享</h3>
     <p class="sh-sub">收到链接的人只能看到这一个抽签页面</p>
+    <div class="mode-tabs" id="shareMode" role="group"><button type="button" data-v="live"><b>在线主持</b><small>你开着页面，实时看谁抽了谁</small></button><button type="button" data-v="link"><b>只发链接</b><small>不用开着，各自在手机上抽</small></button></div>
     <div class="row"><div class="lbl">对方看到的形式</div><div class="cards" id="shareFormBox"></div></div>
     <label class="row inline" id="onceRow" for="shareOnce"><span class="lbl">每人只能抽一次</span><input type="checkbox" class="sw" id="shareOnce"></label>
     <p class="share-note" id="shareNote"></p>
-    <div class="link-box"><input id="shareUrl" readonly aria-label="分享链接"><button id="copyBtn">复制</button></div>
-    <div class="res-actions"><button class="btn-o" id="previewBtn">预览</button><button class="btn-f" id="sendBtn">发给朋友</button></div>
+    <div id="linkPart">
+      <div class="link-box"><input id="shareUrl" readonly aria-label="分享链接"><button id="copyBtn">复制</button></div>
+      <div class="res-actions"><button class="btn-o" id="previewBtn">预览</button><button class="btn-f" id="sendBtn">发给朋友</button></div>
+    </div>
+    <div class="res-actions" id="livePart"><button class="btn-f" id="hostBtn">开始主持</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="sh-nick" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="nickH">
+    <div class="grab"></div>
+    <h3 id="nickH">你叫什么？</h3>
+    <p class="sh-sub">主持人会看到这个名字和你抽到的结果</p>
+    <div class="link-box"><input id="nickInp" maxlength="16" placeholder="输入你的名字" aria-label="你的名字"><button id="nickOk">开始抽</button></div>
   </div>
 </div>
 
@@ -633,7 +699,7 @@ function cleanGroup(g) {
     ? { code: g.share.code, sig: g.share.sig, d: Array.isArray(g.share.d) ? g.share.d.filter(Number.isInteger) : null } : null;
   return {
     id: String(g.id || uid()), name: String(g.name || '名单组').slice(0, 20), identity: !!g.identity, rules,
-    share: sh, shareForm: g.shareForm === 'sign' ? 'sign' : 'wheel', shareOnce: g.shareOnce !== false,
+    share: sh, shareForm: g.shareForm === 'sign' ? 'sign' : 'wheel', shareOnce: g.shareOnce !== false, shareMode: g.shareMode === 'link' ? 'link' : 'live',
     items: g.items.filter(i => i && i.name).map(i => {
       const it = { id: String(i.id || uid()), name: String(i.name).slice(0, 30), w: Number(i.w) > 0 ? Number(i.w) : 1, on: i.on !== false };
       if (typeof i.emo === 'string' && i.emo) it.emo = i.emo.slice(0, 8);
@@ -846,8 +912,8 @@ function split(name) {
   }
   return { emo: '', text: name };
 }
-function avatar(it, cls) {
-  const idx = Math.max(0, G().items.indexOf(it)), [bg, fg] = AVA[idx % AVA.length], sp = split(it.name);
+function avatar(it, cls, at) {
+  const idx = Number.isInteger(at) ? at : Math.max(0, G().items.indexOf(it)), [bg, fg] = AVA[idx % AVA.length], sp = split(it.name);
   const a = h('span', { class: cls || 'ava', style: `background:${bg};color:${fg}` });
   a.textContent = it.emo || sp.emo || [...sp.text][0] || '?';
   if (it.emo || sp.emo) a.classList.add('is-emo');
@@ -1219,24 +1285,25 @@ function askRestart() {
   resetRound(false);
   toast('新的一轮开始啦');
 }
-async function spinWheel() {
-  if (busy || !guard()) return;
+async function spinWheel(forced) {
+  if (busy || (!forced && !guard())) return;
   unlockAudio(); clearTimeout(relayTimer); closeSheet(true);
   busy = true;
   highlight.clear(); computeLayout(); renderSectors(false);
-  const rules = RU(), m = me();
-  const n = m ? 1 : Math.min(rules.count, pool().length);
+  const rules = RU(), m = me(), local = !ROOM, removes = rules.after === 'remove' && local;
+  const n = forced ? forced.length : m ? 1 : Math.min(rules.count, pool().length);
   const picked = [], ex = new Set(), multi = n > 1;
-  const take = it => { picked.push(it); ex.add(it.id); if (rules.after !== 'keep') RN().drawn.push(it.id); };
+  const take = it => { picked.push(it); ex.add(it.id); if (rules.after !== 'keep' && local) RN().drawn.push(it.id); };
+  const next = k => forced ? forced[k] : pickOne(ex);
   paintResult([], multi, true); updateUI();
   if (multi && rules.multi === 'once') {
-    for (let k = 0; k < n; k++) { const it = pickOne(ex); if (!it) break; take(it); }
+    for (let k = 0; k < n; k++) { const it = next(k); if (!it) break; take(it); }
     await spinTo(picked[0]);
     picked.forEach(it => highlight.add(it.id));
     renderSectors(false);
   } else {
     for (let k = 0; k < n; k++) {
-      const it = pickOne(ex);
+      const it = next(k);
       if (!it) break;
       await spinTo(it);
       take(it); highlight.add(it.id);
@@ -1244,8 +1311,8 @@ async function spinWheel() {
       if (k < n - 1) {
         ding();
         paintResult(picked.map(i => i.name), true, true);
-        await wait(rules.after === 'remove' ? 950 : 650);
-        if (rules.after === 'remove') { highlight.delete(it.id); computeLayout(); renderSectors(false); await wait(260); }
+        await wait(removes ? 950 : 650);
+        if (removes) { highlight.delete(it.id); computeLayout(); renderSectors(false); await wait(260); }
       }
     }
   }
@@ -1255,7 +1322,7 @@ async function spinWheel() {
   paintResult(picked.map(i => i.name), multi, false);
   celebrate(true);
   if (cfg.popup || who) setTimeout(() => openResult(picked, who), 750);
-  if (rules.after === 'remove' && !who) relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderSectors(false); }, 2300);
+  if (removes && !who) relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderSectors(false); }, 2300);
   updateUI();
 }
 function commit(picked, mode) {
@@ -1341,7 +1408,7 @@ function openResult(picked, who) {
   openSheet('sh-result', who && !SHARE ? nextPerson : null);
 }
 $('rOk').onclick = () => closeSheet();
-$('rAgain').onclick = () => { closeSheet(true); spinWheel(); };
+$('rAgain').onclick = () => { closeSheet(true); drawAction(); };
 
 /* ---------- 上上签 ---------- */
 function writeVertical(g, name, y0, fs) {
@@ -1373,12 +1440,12 @@ function renderSticks(animate) {
     drawStick(inner, names[i], 384 + ((i * 37) % 5) * 9);
   }
 }
-async function shakeSign() {
-  if (busy || !guard()) return;
+async function shakeSign(forced) {
+  if (busy || (!forced && !guard())) return;
   unlockAudio(); busy = true; updateUI();
-  const it = pickOne(new Set());
+  const it = forced ? forced[0] : pickOne(new Set());
   if (!it) { busy = false; updateUI(); toast('没有可以抽的了'); return; }
-  if (RU().after !== 'keep') RN().drawn.push(it.id);
+  if (RU().after !== 'keep' && !ROOM) RN().drawn.push(it.id);
   const tube = $('tube');
   tube.classList.add('shaking');
   rattle();
@@ -1422,7 +1489,7 @@ function closeSign(again) {
   sr.hidden = true;
   if (signWho) { signWho = null; if (!SHARE) { nextPerson(); return; } }
   renderSticks(true);
-  if (again) setTimeout(shakeSign, 500);
+  if (again) setTimeout(drawAction, 500);
 }
 $('scOk').onclick = () => closeSign(false);
 $('scAgain').onclick = () => closeSign(true);
@@ -1550,7 +1617,9 @@ function openWho() {
     const b = h('button', { class: 'who-opt', type: 'button', style: `animation-delay:${i * 28}ms`, 'aria-pressed': String(it.id === r.me) });
     b.append(avatar(it), h('span', {}, split(it.name).text));
     if (done.has(it.id)) { b.disabled = true; b.append(h('span', { class: 'tag' }, '已抽')); }
+    else if (ROOM && ROOM.taken.has(i) && it.id !== r.me) { b.disabled = true; b.append(h('span', { class: 'tag' }, '已有人选')); }
     b.onclick = () => {
+      if (ROOM) { roomClaim(it, i); return; }
       RN().me = it.id;
       highlight.clear(); clearTimeout(relayTimer);
       closeSheet(true); paintResult([], false, false);
@@ -1576,7 +1645,8 @@ function whoBtn(btn) {
 }
 function statusText() {
   const total = items().length, r = RN(), rules = RU();
-  if (SHARE) return [SHARE.identity ? '不会抽到你自己 · 每人只能抽一次' : SHARE.once ? '每人只能抽一次' : `共 ${total} 项`, false];
+  if (ROOM && !ROOM.online) return ['主持人暂时不在线，等一下再试', false];
+  if (SHARE) return [(ROOM ? '在线抽签 · ' : '') + (SHARE.identity ? '不会抽到你自己 · 每人只能抽一次' : SHARE.once ? '每人只能抽一次' : `共 ${total} 项`), false];
   if (!total) return ['名单还是空的', false];
   if (idOn()) {
     const done = total - drawersLeft().length;
@@ -1590,9 +1660,11 @@ function statusText() {
   return [s, can];
 }
 function ctaLabel(sign) {
+  if (ROOM && ROOM.waiting) return '等主持人…';
   if (busy) return sign ? '求签中…' : '转动中…';
   if (SHARE) {
     if (guestDone) return '你已经抽过啦';
+    if (ROOM && !ROOM.online) return '主持人不在线';
     if (idOn()) return me() ? `我是${split(me().name).text}，${sign ? '求签' : '开始抽'}！` : '先选你是谁';
     return sign ? '摇一摇 · 求签' : RU().count > 1 ? `抽 ${RU().count} 个！` : '开始抽取！';
   }
@@ -1917,11 +1989,19 @@ function openShare(form) {
   openSheet('sh-share');
 }
 function refreshShare() {
-  const g = G(), n = items().length, pair = g.identity && g.rules.after !== 'keep';
+  const g = G(), n = items().length, pair = g.identity && g.rules.after !== 'keep', live = g.shareMode !== 'link';
   g.shareForm = shareForm;
   g.shareOnce = $('shareOnce').checked;
   $('shareFormBox').querySelectorAll('.card-opt').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === shareForm)));
+  $('shareMode').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === (live ? 'live' : 'link'))));
   $('onceRow').hidden = g.identity;
+  $('linkPart').hidden = live; $('livePart').hidden = !live;
+  if (live) {
+    $('shareNote').textContent = (g.identity ? '大家先认领自己的名字（一个名字只能被一个人认领），不会抽到自己。' : '大家先填名字再抽。')
+      + '每次都由你的页面来抽，你能实时看到谁抽到了谁；其他人只看得到自己抽到谁，结果加密传输。抽签期间你的页面要一直开着。';
+    save();
+    return;
+  }
   let note;
   if (pair) note = n < 2 ? '至少要 2 个人才能互抽。' : '已经提前随机配好对：每个人都不会抽到自己，也不会有两个人抽到同一个。每台手机只能抽一次。名单改了要重新分享一次新链接。';
   else if (g.identity) note = '每个人先选自己，不会抽到自己；每台手机只能抽一次，同一个人可能被不同的人抽到。';
@@ -1941,6 +2021,8 @@ function copyLink() {
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, fallback); else fallback();
 }
 $('shareOnce').onchange = refreshShare;
+$('shareMode').querySelectorAll('button').forEach(b => { b.onclick = () => { G().shareMode = b.dataset.v; refreshShare(); }; });
+$('hostBtn').onclick = () => startHost(shareForm, G().identity || $('shareOnce').checked);
 $('copyBtn').onclick = copyLink;
 $('previewBtn').onclick = () => window.open($('shareUrl').value, '_blank');
 $('sendBtn').onclick = () => {
@@ -1990,10 +2072,529 @@ $('emoUse').onclick = () => { const e = firstGlyph($('emoInp').value); if (e) se
 $('emoInp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('emoUse').click(); } });
 $('emoReset').onclick = () => setEmo('');
 
+/* ---------- 在线主持：联机通道 ----------
+   和「一起玩牌」同一套：免费公共 MQTT，每个页面在 <房间>/p/<自己> 留一条保留消息，掉线时 broker 自动清掉。
+   主持人的消息里放名单、谁认领了哪个名字、给每个人的回复；参与者的消息里放自己最新的一个请求。
+   回复用 ECDH 协商出的密钥加密，只有对应的那台手机解得开。 */
+const NET_ROOT = 'yirochi-wheel/v1/';
+let mqttLoading = null;
+function loadMqtt() {
+  if (window.mqtt) return Promise.resolve();
+  if (!mqttLoading) mqttLoading = new Promise((ok, no) => {
+    const s = document.createElement('script');
+    s.src = 'mqtt.min.js';
+    s.onload = ok;
+    s.onerror = () => { mqttLoading = null; no(new Error('mqtt')); };
+    document.head.append(s);
+  });
+  return mqttLoading;
+}
+const NetRoom = (() => {
+  const LINES = [{ name: '国内线路', url: 'wss://broker-cn.emqx.io:8084/mqtt' }, { name: '海外线路', url: 'wss://broker.emqx.io:8084/mqtt' }];
+  const rid = () => Math.random().toString(36).slice(2, 10);
+  function open(code, asHost) {
+    return new Promise((resolve, reject) => {
+      const peerId = rid(), base = NET_ROOT + code + '/p/', myTopic = base + peerId;
+      const mine = {}, others = new Map(), subs = new Set(), statusSubs = new Set();
+      let active = null, pending = [], closed = false, settled = false, pubTimer = null, lastPub = 0;
+      const peers = () => [...others.values()].map(o => o.pr);
+      const emit = () => { const list = peers(); subs.forEach(fn => setTimeout(() => fn(list), 0)); };
+      function handle(id, text) {
+        const prev = others.get(id);
+        if (!text) { if (prev) { others.delete(id); emit(); } return; }
+        if (prev && prev.text === text) { prev.heard = Date.now(); return; }
+        let pr;
+        try { pr = JSON.parse(text); } catch (e) { return; }
+        if (!pr || typeof pr !== 'object' || Array.isArray(pr)) return;
+        others.set(id, { pr, text, heard: Date.now() });
+        emit();
+      }
+      function publishNow() {
+        clearTimeout(pubTimer); pubTimer = null; lastPub = Date.now();
+        if (closed || !Object.keys(mine).length) return;
+        const payload = JSON.stringify(mine);
+        for (const c of (active ? [active] : pending)) if (c.client.connected) c.client.publish(myTopic, payload, { retain: true, qos: 0 });
+      }
+      const schedule = () => { if (!pubTimer) pubTimer = setTimeout(publishNow, Math.max(0, 80 - (Date.now() - lastPub))); };
+      function drop(c) { try { if (c.client.connected) c.client.publish(myTopic, '', { retain: true, qos: 1 }); c.client.end(false); } catch (e) { /* 已断开 */ } }
+      function adopt(c) {
+        if (active) return;
+        active = c;
+        for (const o of pending) if (o !== c) drop(o);
+        pending = [c];
+        const buf = c.buf; c.buf = null;
+        for (const [id, text] of buf) handle(id, text);
+        publishNow();
+        statusSubs.forEach(f => f(true));
+      }
+      const api = {
+        lineName: () => active ? active.line.name : '',
+        set(obj) { Object.keys(mine).forEach(k => { delete mine[k]; }); Object.assign(mine, obj); schedule(); },
+        peers,
+        onPeers(fn) { subs.add(fn); setTimeout(() => fn(peers()), 0); },
+        onStatus(fn) { statusSubs.add(fn); },
+        connected: () => !!(active && active.client.connected),
+        leave() {
+          if (closed) return;
+          closed = true; clearInterval(hb); clearTimeout(pubTimer);
+          pending.forEach(drop); subs.clear(); statusSubs.clear();
+        }
+      };
+      function start(line) {
+        const client = window.mqtt.connect(line.url, {
+          clientId: 'lw_' + rid() + rid(), keepalive: 20, reconnectPeriod: 2500, connectTimeout: 8000, clean: true,
+          will: { topic: myTopic, payload: '', retain: true, qos: 0 }
+        });
+        const c = { client, line, buf: new Map() };
+        pending.push(c);
+        client.on('connect', () => {
+          if (closed || (active && active !== c)) { drop(c); return; }
+          client.subscribe(base + '+', { qos: 0 });
+          publishNow();
+          if (active === c) statusSubs.forEach(f => f(true));
+          if (!settled) { settled = true; if (asHost) adopt(c); resolve(api); }
+        });
+        client.on('message', (topic, buf) => {
+          if (closed) return;
+          const id = topic.slice(base.length);
+          if (!id || id === peerId) return;
+          const text = buf && buf.length && buf.length < 60000 ? new TextDecoder().decode(buf) : '';
+          if (!active) {
+            c.buf.set(id, text);
+            try { const pr = JSON.parse(text); if (pr && pr.role === 'host' && pr.t === code) adopt(c); } catch (e) { /* 不是主持人的消息 */ }
+            return;
+          }
+          if (c === active) handle(id, text);
+        });
+        client.on('offline', () => { if (active === c) statusSubs.forEach(f => f(false)); });
+        client.on('error', () => {});
+      }
+      let lastBeat = Date.now();
+      const hb = setInterval(() => {
+        if (closed) return;
+        publishNow();
+        const now = Date.now(), slept = now - lastBeat > 25000;
+        lastBeat = now;
+        for (const [id, o] of others) {
+          if (slept) o.heard = now;
+          else if (now - o.heard > 75000) { others.delete(id); emit(); }
+        }
+      }, 15000);
+      if (asHost) { start(LINES[0]); setTimeout(() => { if (!settled && !closed) start(LINES[1]); }, 6000); }
+      else LINES.forEach(start);
+      setTimeout(() => {
+        if (settled) return;
+        closed = true; clearInterval(hb);
+        pending.forEach(c => { try { c.client.end(true); } catch (e) { /* 已断开 */ } });
+        reject(new Error('no broker'));
+      }, 16000);
+    });
+  }
+  return { open };
+})();
+
+/* ---------- 加密 ---------- */
+const EC = { name: 'ECDH', namedCurve: 'P-256' };
+const canCrypto = () => !!(window.crypto && crypto.subtle && window.isSecureContext !== false);
+function u8b64(u) { let s = ''; u.forEach(b => { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function b64u8(s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+async function makeKeys() {
+  const kp = await crypto.subtle.generateKey(EC, true, ['deriveKey']);
+  const priv = await crypto.subtle.exportKey('jwk', kp.privateKey), pub = await crypto.subtle.exportKey('jwk', kp.publicKey);
+  return { priv, pub: { x: pub.x, y: pub.y } };
+}
+async function sharedKey(priv, pub) {
+  const mine = await crypto.subtle.importKey('jwk', priv, EC, false, ['deriveKey']);
+  const theirs = await crypto.subtle.importKey('jwk', { kty: 'EC', crv: 'P-256', x: pub.x, y: pub.y, ext: true }, EC, false, []);
+  return crypto.subtle.deriveKey({ name: 'ECDH', public: theirs }, mine, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function seal(key, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj))));
+  return { iv: u8b64(iv), ct: u8b64(ct) };
+}
+async function unseal(key, box) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u8(box.iv) }, key, b64u8(box.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function roomCode() { return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => (b % 36).toString(36)).join(''); }
+function copyText(text) {
+  const ok = () => toast('链接已复制，发给朋友吧');
+  const fallback = () => {
+    const t = h('textarea', { style: 'position:fixed;opacity:0' });
+    t.value = text; document.body.append(t); t.select();
+    try { document.execCommand('copy'); ok(); } catch (e) { toast('请长按链接手动复制'); }
+    t.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
+function sendLink(title, url) {
+  if (navigator.share) navigator.share({ title, text: `来抽签：${title}`, url }).catch(() => {});
+  else copyText(url);
+}
+
+/* ---------- 在线主持：主持人 ---------- */
+const HOST_KEY = 'lucky-wheel:host';
+let HOST = null, hostNet = null, hostQueue = Promise.resolve(), hostKeys = {}, wakeLock = null, hostOnline = new Set();
+function saveHost() { try { if (HOST) localStorage.setItem(HOST_KEY, JSON.stringify(HOST)); else localStorage.removeItem(HOST_KEY); } catch (e) { /* 存不了 */ } }
+async function startHost(form, once) {
+  const g = G(), its = g.items.filter(i => i.on);
+  if (!its.length) { toast('名单是空的，先添加几个吧'); return; }
+  if (g.identity && its.length < 2) { toast('至少要 2 个人才能互抽'); return; }
+  if (!canCrypto()) { toast('这个浏览器不支持加密，换个浏览器试试'); return; }
+  const keys = await makeKeys();
+  HOST = {
+    code: roomCode(), ep: 1, name: g.name, form, once: !!once, identity: !!g.identity,
+    items: its.map(i => ({ name: i.name, w: i.w, emo: i.emo || '' })), rules: Object.assign({}, g.rules), view: VIEW_KEYS.map(k => cfg[k]),
+    priv: keys.priv, pub: keys.pub, claims: {}, done: {}, res: {}, drawn: [], bag: [], guests: {}, rep: {}, nicks: {}, hide: false
+  };
+  saveHost();
+  closeSheet(true);
+  enterHost();
+}
+function hostLink() { return location.origin + location.pathname + '#r=' + HOST.code; }
+function claimOf(gid) { for (const k in HOST.claims) if (HOST.claims[k] === gid) return +k; return null; }
+function hostState(gid) {
+  const res = HOST.res[gid] || null;
+  return { me: HOST.identity ? claimOf(gid) : null, res, done: !!res && (HOST.once || HOST.identity), nick: HOST.nicks[gid] || '' };
+}
+function hostPick(meIdx, ex) {
+  const rules = HOST.rules, keep = rules.after === 'keep', drawn = new Set(HOST.drawn), all = HOST.items.map((x, i) => i);
+  let p = all.filter(i => (keep || !drawn.has(i)) && i !== meIdx && !ex.includes(i));
+  if (HOST.identity && meIdx !== null && !keep) {
+    const done = new Set(Object.keys(HOST.done).map(Number));
+    const left = all.filter(i => !done.has(i) && i !== meIdx), open = all.filter(i => !drawn.has(i));
+    const safe = p.filter(c => { const rest = open.filter(x => x !== c); return !(left.length === 1 && rest.length === 1 && left[0] === rest[0]); });
+    if (safe.length) p = safe;
+  }
+  if (!p.length) return null;
+  if (rules.rng === 'weight') {
+    let r = rand() * p.reduce((s, i) => s + HOST.items[i].w, 0);
+    for (const i of p) { r -= HOST.items[i].w; if (r < 0) return i; }
+    return p[p.length - 1];
+  }
+  if (rules.rng === 'bag' && keep) {
+    let cand = HOST.bag.filter(i => p.includes(i));
+    if (!cand.length) { HOST.bag = all.slice(); cand = HOST.bag.filter(i => p.includes(i)); }
+    const i = cand[randInt(cand.length)];
+    HOST.bag = HOST.bag.filter(x => x !== i);
+    return i;
+  }
+  return p[randInt(p.length)];
+}
+function hostHandle(gid, q) {
+  const st = extra => Object.assign(hostState(gid), extra || {});
+  if (q.t === 'hello') return st();
+  if (q.t === 'nick') { HOST.nicks[gid] = String(q.name || '').trim().slice(0, 16); return st(); }
+  if (q.t === 'claim') {
+    const i = q.i;
+    if (!HOST.identity || !Number.isInteger(i) || !HOST.items[i]) return st({ err: 'bad' });
+    if (HOST.res[gid]) return st({ err: 'done' });
+    if (HOST.claims[i] !== undefined && HOST.claims[i] !== gid) return st({ err: 'taken' });
+    const old = claimOf(gid);
+    if (old !== null) delete HOST.claims[old];
+    HOST.claims[i] = gid;
+    return st();
+  }
+  if (q.t === 'draw') {
+    if (hostState(gid).done) return st();
+    const meIdx = HOST.identity ? claimOf(gid) : null;
+    if (HOST.identity && meIdx === null) return st({ err: 'who' });
+    const n = HOST.identity ? 1 : HOST.rules.count, picks = [];
+    for (let k = 0; k < n; k++) {
+      const p = hostPick(meIdx, picks);
+      if (p === null) break;
+      picks.push(p);
+      if (HOST.rules.after !== 'keep') HOST.drawn.push(p);
+    }
+    if (!picks.length) return st({ err: 'empty' });
+    HOST.res[gid] = picks;
+    if (HOST.identity) HOST.done[meIdx] = picks;
+    history.unshift({ t: Date.now(), g: HOST.name, mode: 'room', who: HOST.identity ? HOST.items[meIdx].name : (HOST.nicks[gid] || '访客'), names: picks.map(i => HOST.items[i].name) });
+    if (history.length > 300) history.length = 300;
+    save();
+    return st({ ok: 1 });
+  }
+  return st({ err: 'bad' });
+}
+async function hostOnGuest(pr) {
+  if (!HOST || !pr || pr.role !== 'guest' || typeof pr.g !== 'string' || !pr.k || typeof pr.k.x !== 'string' || !pr.q || !Number.isFinite(pr.q.n)) return;
+  const seen = HOST.guests[pr.g];
+  if (seen && (seen.k.x !== pr.k.x || seen.k.y !== pr.k.y)) return;
+  if (seen && pr.q.n <= seen.n) return;
+  let key = hostKeys[pr.g], q;
+  try {
+    if (!key) key = hostKeys[pr.g] = await sharedKey(HOST.priv, pr.k);
+    q = await unseal(key, pr.q);
+  } catch (e) { return; }
+  if (!HOST) return;
+  HOST.guests[pr.g] = { k: { x: pr.k.x, y: pr.k.y }, n: pr.q.n };
+  const reply = hostHandle(pr.g, q);
+  HOST.rep[pr.g] = Object.assign({ n: pr.q.n }, await seal(key, reply));
+  saveHost(); hostPublish(); renderHost();
+}
+function hostPublish() {
+  if (!HOST || !hostNet) return;
+  hostNet.set({
+    role: 'host', t: HOST.code, ep: HOST.ep, n: HOST.name, f: HOST.form, o: HOST.once ? 1 : 0, id: HOST.identity ? 1 : 0,
+    i: HOST.items.map(i => i.emo ? [i.name, i.w, i.emo] : i.w !== 1 ? [i.name, i.w] : i.name),
+    r: RULE_KEYS.map(k => HOST.rules[k]), w: HOST.view, k: HOST.pub, tk: Object.keys(HOST.claims).map(Number), rep: HOST.rep
+  });
+}
+async function keepAwake() {
+  try { if (HOST && 'wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => { if (HOST && document.visibilityState === 'visible') keepAwake(); });
+function hostStatus(on) {
+  $('hDot').classList.toggle('on', !!on);
+  $('hLine').textContent = on ? `在线主持中 · ${hostNet ? hostNet.lineName() : ''}` : '正在连接…';
+}
+async function enterHost() {
+  document.body.classList.add('hosting');
+  ['v-wheel', 'v-sign', 'v-list', 'v-settings'].forEach(id => { $(id).hidden = true; });
+  document.body.classList.remove('signing');
+  $('v-host').hidden = false;
+  $('hTitle').textContent = HOST.name;
+  $('hUrl').value = hostLink();
+  hostStatus(false);
+  renderHost();
+  keepAwake();
+  try {
+    await loadMqtt();
+    hostNet = await NetRoom.open(HOST.code, true);
+  } catch (e) {
+    $('hLine').textContent = '连不上联机服务器，检查一下网络再刷新';
+    return;
+  }
+  if (!HOST) { hostNet.leave(); hostNet = null; return; }
+  hostNet.onStatus(hostStatus);
+  hostNet.onPeers(list => {
+    hostOnline = new Set(list.filter(p => p.role === 'guest').map(p => p.g));
+    list.forEach(p => { if (p.role === 'guest') hostQueue = hostQueue.then(() => hostOnGuest(p)).catch(() => {}); });
+    renderHost();
+  });
+  hostStatus(true);
+  hostPublish();
+}
+function renderHost() {
+  if (!HOST) return;
+  const list = $('hList');
+  list.textContent = '';
+  list.classList.toggle('hide', !!HOST.hide);
+  $('hHide').textContent = HOST.hide ? '显示结果' : '隐藏结果';
+  const ava = (i) => avatar({ name: HOST.items[i].name, emo: HOST.items[i].emo }, 'ava', i);
+  const names = idxs => idxs.map(i => split(HOST.items[i].name).text).join('、');
+  if (HOST.identity) {
+    const total = HOST.items.length, doneN = Object.keys(HOST.done).length, claimed = Object.keys(HOST.claims).length;
+    $('hCount').textContent = `已抽 ${doneN}/${total} 人 · 已认领 ${claimed}`;
+    HOST.items.forEach((it, i) => {
+      const gid = HOST.claims[i], res = HOST.done[i];
+      const row = h('div', { class: 'host-row', style: `animation-delay:${Math.min(i, 12) * 30}ms` }, ava(i));
+      const nm = h('div', { class: 'who-n' }, split(it.name).text);
+      if (gid !== undefined && hostOnline.has(gid)) nm.append(h('span', { class: 'on-dot', title: '在线' }));
+      if (res) nm.append(h('small', {}, '抽到 ', h('span', { class: 'got' }, names(res))));
+      row.append(nm);
+      if (res) row.append(h('span', { class: 'st done' }, '已抽'));
+      else if (gid !== undefined) {
+        row.append(h('span', { class: 'st claimed' }, '已认领'));
+        const rel = h('button', { class: 'rel', type: 'button' }, '释放');
+        rel.onclick = () => { if (confirm(`释放「${it.name}」？认领它的人需要重新选。`)) { delete HOST.claims[i]; saveHost(); hostPublish(); renderHost(); } };
+        row.append(rel);
+      } else row.append(h('span', { class: 'st' }, '未认领'));
+      list.append(row);
+    });
+  } else {
+    const gids = Object.keys(HOST.guests).filter(g => HOST.res[g] || HOST.nicks[g]);
+    $('hCount').textContent = `${gids.length} 人参与 · 已抽 ${gids.filter(g => HOST.res[g]).length}`;
+    if (!gids.length) list.append(h('p', { class: 'blank' }, '还没有人进来，把链接发出去吧'));
+    gids.forEach((g, k) => {
+      const nm = h('div', { class: 'who-n' }, HOST.nicks[g] || `访客 ${k + 1}`);
+      if (hostOnline.has(g)) nm.append(h('span', { class: 'on-dot', title: '在线' }));
+      if (HOST.res[g]) nm.append(h('small', {}, '抽到 ', h('span', { class: 'got' }, names(HOST.res[g]))));
+      list.append(h('div', { class: 'host-row' }, h('span', { class: 'ava', style: 'background:#FFF0C7;color:#A87204' }, (HOST.nicks[g] || '访')[0]), nm,
+        h('span', { class: 'st' + (HOST.res[g] ? ' done' : '') }, HOST.res[g] ? '已抽' : '没抽')));
+    });
+  }
+}
+function stopHost() {
+  if (!confirm('结束主持？结束后大家就不能再抽了（抽签记录里还留着）。')) return;
+  if (hostNet) hostNet.leave();
+  hostNet = null; HOST = null; hostKeys = {};
+  saveHost();
+  try { if (wakeLock) wakeLock.release(); } catch (e) { /* 已释放 */ }
+  document.body.classList.remove('hosting');
+  $('v-host').hidden = true;
+  go('wheel');
+}
+$('hCopy').onclick = () => copyText(hostLink());
+$('hSend').onclick = () => sendLink(HOST.name, hostLink());
+$('hPreview').onclick = () => window.open(hostLink(), '_blank');
+$('hHide').onclick = () => { HOST.hide = !HOST.hide; saveHost(); renderHost(); };
+$('hReset').onclick = () => {
+  if (!confirm('重新开始？已认领的名字和抽到的结果都会清空，大家要重新抽。')) return;
+  Object.assign(HOST, { ep: HOST.ep + 1, claims: {}, done: {}, res: {}, drawn: [], bag: [], rep: {} });
+  saveHost(); hostPublish(); renderHost();
+};
+$('hStop').onclick = stopHost;
+
+/* ---------- 在线主持：参与者 ---------- */
+let ROOM = null;
+function roomFail(title, sub, retry) {
+  ['v-wheel', 'v-sign', 'v-list', 'v-settings'].forEach(id => { $(id).hidden = true; });
+  $('v-bad').hidden = false;
+  $('waitSpin').hidden = !!retry || title !== '正在连接主持人…';
+  $('badT').textContent = title; $('badS').textContent = sub;
+  $('badRetry').hidden = !retry;
+}
+$('badRetry').onclick = () => location.reload();
+async function initRoom(code) {
+  document.body.classList.add('guest');
+  roomFail('正在连接主持人…', '稍等几秒', false);
+  if (!canCrypto()) { roomFail('这个浏览器打不开', '换个浏览器（比如系统自带的浏览器）再试。', false); return; }
+  const lk = 'lucky-wheel:rk:' + code;
+  let rk = null;
+  try { rk = JSON.parse(localStorage.getItem(lk)); } catch (e) { rk = null; }
+  if (!rk || !rk.priv || !rk.gid) {
+    rk = Object.assign({ gid: uid() + uid() }, await makeKeys());
+    try { localStorage.setItem(lk, JSON.stringify(rk)); } catch (e) { /* 存不了就只在这一页有效 */ }
+  }
+  ROOM = { code, gid: rk.gid, keys: rk, key: null, online: false, ready: false, waiting: false, taken: new Set(), pending: null, ep: 0, nick: '', lastN: 0 };
+  try {
+    await loadMqtt();
+    ROOM.net = await NetRoom.open(code, false);
+  } catch (e) {
+    roomFail('连不上联机服务器', '检查一下网络，或者换个网络再试。', true);
+    return;
+  }
+  ROOM.net.onPeers(list => {
+    const host = list.find(p => p.role === 'host' && p.t === code);
+    roomOnHost(host || null);
+  });
+  setTimeout(() => { if (ROOM && !ROOM.ready) roomFail('主持人还没开始', '主持人打开页面后这里会自动进入，也可以等一会儿再刷新。', true); }, 15000);
+}
+async function roomOnHost(pr) {
+  if (!pr) {
+    if (ROOM.online) { ROOM.online = false; if (ROOM.ready) { updateUI(); toast('主持人暂时离线了'); } }
+    return;
+  }
+  const wasOnline = ROOM.online;
+  ROOM.online = true;
+  ROOM.taken = new Set(Array.isArray(pr.tk) ? pr.tk : []);
+  if (!ROOM.ready) {
+    try { ROOM.key = await sharedKey(ROOM.keys.priv, pr.k); } catch (e) { return; }
+    if (ROOM.ready) return;
+    const items = (Array.isArray(pr.i) ? pr.i : []).map((x, k) => {
+      const [name, w, emo] = Array.isArray(x) ? x : [x, 1];
+      const it = { id: 'g' + k, name: String(name).slice(0, 30), w: Number(w) > 0 ? Number(w) : 1, on: true };
+      if (typeof emo === 'string' && emo) it.emo = emo.slice(0, 8);
+      return it;
+    });
+    if (!items.length) return;
+    const rules = Object.assign({}, RULE_DEF), view = {};
+    if (Array.isArray(pr.r)) RULE_KEYS.forEach((k, i) => { if (validRule(k, pr.r[i])) rules[k] = pr.r[i]; });
+    if (Array.isArray(pr.w)) VIEW_KEYS.forEach((k, i) => { if (validView(k, pr.w[i])) view[k] = pr.w[i]; });
+    SHARE = { code: ROOM.code, name: String(pr.n || '抽签').slice(0, 20), form: pr.f === 'sign' ? 'sign' : 'wheel', once: !!pr.o, identity: !!pr.id, items, rules, view, d: null, room: true };
+    initGuest();
+    $('v-bad').hidden = true;
+    ROOM.ready = true;
+    ROOM.ep = pr.ep;
+    computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true); showLast();
+    go(SHARE.form);
+    lastW = Math.round(dial.getBoundingClientRect().width);
+    roomAsk({ t: 'hello' }).then(s => { if (s) applyRoomState(s); });
+  } else if (pr.ep !== ROOM.ep) {
+    ROOM.ep = pr.ep;
+    roomAsk({ t: 'hello' }).then(s => { if (s) { applyRoomState(s); toast('主持人重新开始了一轮'); } });
+  }
+  const rep = pr.rep && pr.rep[ROOM.gid];
+  if (rep && ROOM.pending && rep.n === ROOM.pending.n) {
+    const p = ROOM.pending;
+    ROOM.pending = null;
+    clearTimeout(p.timer);
+    try { p.resolve(await unseal(ROOM.key, rep)); } catch (e) { p.resolve(null); }
+  }
+  if (ROOM.ready && !wasOnline) updateUI();
+}
+function roomAsk(q) {
+  return new Promise(resolve => {
+    if (!ROOM || !ROOM.key) { resolve(null); return; }
+    const n = Math.max(Date.now(), ROOM.lastN + 1);
+    ROOM.lastN = n;
+    seal(ROOM.key, q).then(box => {
+      if (ROOM.pending) { clearTimeout(ROOM.pending.timer); ROOM.pending.resolve(null); }
+      ROOM.pending = { n, resolve, timer: setTimeout(() => { if (ROOM.pending && ROOM.pending.n === n) { ROOM.pending = null; resolve(null); } }, 12000) };
+      ROOM.net.set({ role: 'guest', g: ROOM.gid, k: ROOM.keys.pub, q: Object.assign({ n }, box) });
+    });
+  });
+}
+function applyRoomState(s) {
+  const r = RN(), its = G().items;
+  r.me = Number.isInteger(s.me) && its[s.me] ? its[s.me].id : null;
+  if (Array.isArray(s.res) && s.res.length) {
+    r.last = s.res.filter(i => its[i]).map(i => its[i].name);
+    guestDone = !!s.done;
+    r.lastWho = r.me ? itemById(r.me).name : null;
+    r.done = guestDone && r.me ? [r.me] : [];
+  } else { r.last = []; r.lastWho = null; r.done = []; guestDone = false; }
+  ROOM.nick = s.nick || '';
+  saveGuest(); showLast(); computeLayout(); renderSectors(false); updateUI();
+}
+async function roomClaim(it, i) {
+  if (!ROOM.online) { toast('主持人暂时不在线，等一下再试'); return; }
+  closeSheet(true);
+  ROOM.waiting = busy = true; updateUI();
+  const s = await roomAsk({ t: 'claim', i });
+  ROOM.waiting = busy = false;
+  if (!s) { toast('主持人没有回应，等一下再试'); updateUI(); return; }
+  if (s.err === 'taken') { ROOM.taken.add(i); toast('这个名字已经有人选了'); updateUI(); openWho(); return; }
+  applyRoomState(s);
+  if (me()) toast(`你好，${split(me().name).text}！`);
+}
+async function roomDraw() {
+  if (busy || !ROOM || !ROOM.ready) return;
+  if (!ROOM.online) { toast('主持人暂时不在线，等一下再试'); return; }
+  if (guestDone) { toast('你已经抽过啦'); return; }
+  if (idOn() && !me()) { openWho(); return; }
+  if (!idOn() && !ROOM.nick) { $('nickInp').value = ''; openSheet('sh-nick'); setTimeout(() => $('nickInp').focus(), 300); return; }
+  unlockAudio();
+  ROOM.waiting = busy = true; updateUI();
+  const s = await roomAsk({ t: 'draw' });
+  ROOM.waiting = busy = false;
+  if (!s) { toast('主持人没有回应，等一下再试'); updateUI(); return; }
+  if (s.err) {
+    applyRoomState(s);
+    toast(s.err === 'who' ? '主持人释放了你的名字，请重新选' : s.err === 'empty' ? '没有可以抽的了' : '没抽成，再试一次');
+    if (s.err === 'who') openWho();
+    return;
+  }
+  if (s.done === false && !s.res) { applyRoomState(s); return; }
+  const its = (s.res || []).map(i => G().items[i]).filter(Boolean);
+  if (!its.length) { applyRoomState(s); return; }
+  if (cfg.tab === 'sign') await shakeSign(its); else await spinWheel(its);
+  ROOM.nick = s.nick || ROOM.nick;
+}
+$('nickOk').onclick = async () => {
+  const name = $('nickInp').value.trim().slice(0, 16);
+  if (!name) { $('nickInp').focus(); return; }
+  closeSheet(true);
+  ROOM.waiting = busy = true; updateUI();
+  const s = await roomAsk({ t: 'nick', name });
+  ROOM.waiting = busy = false;
+  if (!s) { toast('主持人没有回应，等一下再试'); updateUI(); return; }
+  ROOM.nick = s.nick || name;
+  updateUI();
+  roomDraw();
+};
+$('nickInp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('nickOk').click(); } });
+function drawAction() {
+  if (ROOM) return roomDraw();
+  return cfg.tab === 'sign' ? shakeSign() : spinWheel();
+}
+
 /* ---------- 页面切换 ---------- */
 const TABS = ['wheel', 'sign', 'list', 'settings'];
 function go(tab) {
-  if (busy) return;
+  if (busy || HOST) return;
   if (SHARE) tab = SHARE.form;
   cfg.tab = tab;
   TABS.forEach(t => { $('v-' + t).hidden = t !== tab; });
@@ -2010,10 +2611,10 @@ function go(tab) {
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('.tab').forEach(b => { b.onclick = () => go(b.dataset.tab); });
-$('spinBtn').onclick = spinWheel;
-dial.addEventListener('click', spinWheel);
-$('shakeBtn').onclick = shakeSign;
-$('signSvg').addEventListener('click', shakeSign);
+$('spinBtn').onclick = () => drawAction();
+dial.addEventListener('click', () => drawAction());
+$('shakeBtn').onclick = () => drawAction();
+$('signSvg').addEventListener('click', () => drawAction());
 $('whoW').onclick = openWho;
 $('whoS').onclick = openWho;
 $('wReset').onclick = () => resetRound(idOn());
@@ -2022,8 +2623,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (!$('signRes').hidden) closeSign(false); else closeSheet(); return; }
   if (sheetId || !$('signRes').hidden || (e.key !== ' ' && e.key !== 'Enter')) return;
   if (e.target.closest && e.target.closest('button,input,textarea,a')) return;
-  if (cfg.tab === 'wheel') { e.preventDefault(); spinWheel(); }
-  else if (cfg.tab === 'sign') { e.preventDefault(); shakeSign(); }
+  if (HOST) return;
+  if (cfg.tab === 'wheel' || cfg.tab === 'sign') { e.preventDefault(); drawAction(); }
 });
 let rsTimer = 0, lastW = 0;
 const onResize = () => {
@@ -2044,13 +2645,21 @@ if (window.ResizeObserver) new ResizeObserver(onResize).observe($('stage')); els
 })();
 
 addEventListener('hashchange', () => location.reload());
-SHARE = parseShare();
-if (!SHARE || initGuest()) {
-  if (!SHARE) { load(); cleanRun(); buildSettings(); }
-  computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true);
-  showLast(); renderHistory();
-  go(TABS.includes(cfg.tab) ? cfg.tab : 'wheel');
-  lastW = Math.round(dial.getBoundingClientRect().width);
+const roomMatch = location.hash.match(/^#r=([a-z0-9]{6,20})$/);
+if (roomMatch) initRoom(roomMatch[1]);
+else {
+  SHARE = parseShare();
+  if (!SHARE || initGuest()) {
+    if (!SHARE) {
+      load(); cleanRun(); buildSettings();
+      try { HOST = JSON.parse(localStorage.getItem(HOST_KEY)); } catch (e) { HOST = null; }
+      if (HOST && (!HOST.code || !Array.isArray(HOST.items) || !HOST.priv)) HOST = null;
+    }
+    computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true);
+    showLast(); renderHistory();
+    if (HOST) enterHost(); else go(TABS.includes(cfg.tab) ? cfg.tab : 'wheel');
+    lastW = Math.round(dial.getBoundingClientRect().width);
+  }
 }
 })();
 </script>
