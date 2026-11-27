@@ -345,6 +345,11 @@ body.guest .head .title{padding-right:0}
 .chip.stop{background:var(--ink);color:#fff}
 body.hosting .tabbar{display:none!important}
 body.hosting .app{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+body.embedded .head .title{display:none}
+body.embedded .head{padding-top:12px}
+.host-tabs{margin-top:14px}
+.host-tabs button{text-align:center}
+#hSelf iframe{display:block;width:calc(100% + 36px);height:calc(100vh - 170px);height:calc(100dvh - 170px);min-height:560px;margin:10px -18px 0;border:0;background:transparent}
 .wait-spin{width:44px;height:44px;margin:0 auto 18px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:spin 1s linear infinite}
 .bad-link .chip{margin-top:18px}
 
@@ -471,17 +476,21 @@ body.hosting .app{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
       <h1 class="title" id="hTitle"></h1>
       <p class="sub"><span class="live-dot" id="hDot"></span><span id="hLine">连接中…</span></p>
     </header>
-    <p class="share-note">这个页面要一直开着，锁屏或切到别的 App，大家就抽不了。</p>
-    <div class="card">
-      <div class="lbl">把这个链接发给大家</div>
-      <div class="link-box"><input id="hUrl" readonly aria-label="邀请链接"><button id="hCopy">复制</button></div>
-      <div class="res-actions"><button class="btn-o" id="hPreview">预览</button><button class="btn-f" id="hSend">发给朋友</button></div>
+    <div class="mode-tabs host-tabs" id="hostTabs" role="tablist"><button type="button" data-v="board"><b>看大家进度</b></button><button type="button" data-v="self"><b>我也要抽</b></button></div>
+    <div id="hBoard">
+      <p class="share-note">这个页面要一直开着，锁屏或切到别的 App，大家就抽不了。</p>
+      <div class="card">
+        <div class="lbl">把这个链接发给大家</div>
+        <div class="link-box"><input id="hUrl" readonly aria-label="邀请链接"><button id="hCopy">复制</button></div>
+        <div class="res-actions"><button class="btn-f" id="hSend">发给朋友</button></div>
+      </div>
+      <div class="card">
+        <div class="host-top"><h2 class="sec-h" id="hCount"></h2><button class="chip" id="hHide">隐藏结果</button></div>
+        <div class="host-list" id="hList"></div>
+      </div>
+      <div class="host-foot"><button class="chip" id="hReset">重新开始</button><button class="chip stop" id="hStop">结束主持</button></div>
     </div>
-    <div class="card">
-      <div class="host-top"><h2 class="sec-h" id="hCount"></h2><button class="chip" id="hHide">隐藏结果</button></div>
-      <div class="host-list" id="hList"></div>
-    </div>
-    <div class="host-foot"><button class="chip" id="hReset">重新开始</button><button class="chip stop" id="hStop">结束主持</button></div>
+    <div id="hSelf" hidden><iframe id="hFrame" title="我也要抽"></iframe></div>
   </section>
 
   <!-- 设置 -->
@@ -2354,6 +2363,7 @@ async function enterHost() {
   ['v-wheel', 'v-sign', 'v-list', 'v-settings'].forEach(id => { $(id).hidden = true; });
   document.body.classList.remove('signing');
   $('v-host').hidden = false;
+  setHostTab('board');
   $('hTitle').textContent = HOST.name;
   $('hUrl').value = hostLink();
   hostStatus(false);
@@ -2424,11 +2434,21 @@ function stopHost() {
   try { if (wakeLock) wakeLock.release(); } catch (e) { /* 已释放 */ }
   document.body.classList.remove('hosting');
   $('v-host').hidden = true;
+  $('hFrame').replaceWith(h('iframe', { id: 'hFrame', title: '我也要抽' }));
   go('wheel');
 }
 $('hCopy').onclick = () => copyText(hostLink());
 $('hSend').onclick = () => sendLink(HOST.name, hostLink());
-$('hPreview').onclick = () => window.open(hostLink(), '_blank');
+// 「我也要抽」= 在主持页里嵌一个和大家一样的参与者页面，主持页自己不离开、不掉线
+function setHostTab(tab) {
+  $('hBoard').hidden = tab !== 'board';
+  $('hSelf').hidden = tab !== 'self';
+  $('hostTabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === tab)));
+  const f = $('hFrame');
+  if (tab === 'self' && HOST && !f.getAttribute('src')) f.setAttribute('src', hostLink());
+  window.scrollTo(0, 0);
+}
+$('hostTabs').querySelectorAll('button').forEach(b => { b.onclick = () => setHostTab(b.dataset.v); });
 $('hHide').onclick = () => { HOST.hide = !HOST.hide; saveHost(); renderHost(); };
 $('hReset').onclick = () => {
   if (!confirm('重新开始？已认领的名字和抽到的结果都会清空，大家要重新抽。')) return;
@@ -2449,6 +2469,7 @@ function roomFail(title, sub, retry) {
 $('badRetry').onclick = () => location.reload();
 async function initRoom(code) {
   document.body.classList.add('guest');
+  try { if (window.top !== window.self) document.body.classList.add('embedded'); } catch (e) { /* 跨域时拿不到 top */ }
   roomFail('正在连接主持人…', '稍等几秒', false);
   if (!canCrypto()) { roomFail('这个浏览器打不开', '换个浏览器（比如系统自带的浏览器）再试。', false); return; }
   const lk = 'lucky-wheel:rk:' + code;
