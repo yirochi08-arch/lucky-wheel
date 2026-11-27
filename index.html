@@ -4,446 +4,613 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>抽签转盘</title>
-<meta name="description" content="输入名单，转一下，抽出结果。">
-<meta name="theme-color" content="#f5eee3">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 50a28 28 0 0 1 56 0z' fill='%232e221c'/%3E%3Cpath d='M10 50a22 22 0 0 1 44 0z' fill='%23f7d48c'/%3E%3Cpath d='M32 50 13 39a22 22 0 0 1 11-10z' fill='%23f3a083'/%3E%3Cpath d='M32 50 40 29a22 22 0 0 1 11 10z' fill='%23a2c5df'/%3E%3Cpath d='M32 50 40 20' stroke='%23e8553e' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='50' r='7' fill='%23e8553e'/%3E%3C/svg%3E">
+<meta name="description" content="转盘抽签、上上签、交换礼物互抽。">
+<meta name="theme-color" content="#FFF7EC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M3 52a29 29 0 0 1 58 0z' fill='%2317603C'/%3E%3Cpath d='M9 52a23 23 0 0 1 46 0z' fill='%23FFF4E2'/%3E%3Cpath d='M32 52 12 40a23 23 0 0 1 9-9z' fill='%23E0413F'/%3E%3Cpath d='M32 52 43 31a23 23 0 0 1 9 9z' fill='%2324935C'/%3E%3Cpath d='M32 52 26 30a23 23 0 0 1 12 0z' fill='%23F5B935'/%3E%3Ccircle cx='32' cy='52' r='8' fill='%23D9343A' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#f5eee3;--bg2:#fffaf2;--ink:#2a1f1a;--muted:#8b7b6d;--line:#e6dbca;--card:#fffcf7;
-  --accent:#e8553e;--on-accent:#fff;--rim:#2e221c;--bulb:#ffd36e;--win:#fff;
-  --hub-bg:#e8553e;--hub-ink:#fff;--hub-ring:#2e221c;
+  --red:#D9343A;--red-d:#B21F28;--red-l:#FDE4E0;
+  --green:#1F8A55;--green-d:#13623C;--green-l:#E2F3E8;
+  --gold:#F5BB33;--gold-d:#D9970F;--gold-l:#FFF2CC;
+  --bg:#FFF7EC;--card:#fff;--ink:#3A2316;--muted:#A3876F;--line:#F2E3CF;
+  --shadow:0 14px 34px -16px rgba(130,60,20,.32);
+  --serif:"Songti SC","STSongti-SC-Bold","Noto Serif SC","Source Han Serif SC","SimSun",serif;
   font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
+  color:var(--ink);
 }
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;min-height:100vh;color:var(--ink);background:radial-gradient(130% 75% at 50% 80%,var(--bg2) 0%,var(--bg) 64%) fixed,var(--bg);transition:color .4s;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overflow-x:hidden}
-body[data-theme=night]::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.75;background-image:
-  radial-gradient(1.6px 1.6px at 8% 14%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 38%,#fff 50%,transparent 51%),
-  radial-gradient(1.8px 1.8px at 36% 9%,#ffe9a8 50%,transparent 51%),radial-gradient(1.1px 1.1px at 47% 27%,#fff 50%,transparent 51%),
-  radial-gradient(1.5px 1.5px at 63% 12%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 74% 33%,#cfc6ff 50%,transparent 51%),
-  radial-gradient(1.9px 1.9px at 88% 18%,#fff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 94% 46%,#fff 50%,transparent 51%),
-  radial-gradient(1.3px 1.3px at 4% 58%,#cfc6ff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 16% 82%,#fff 50%,transparent 51%),
-  radial-gradient(1.2px 1.2px at 84% 76%,#fff 50%,transparent 51%),radial-gradient(1.6px 1.6px at 96% 90%,#ffe9a8 50%,transparent 51%)}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#FFFAF3 0%,#FFEFDC 100%) fixed,var(--bg);-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overflow-x:hidden}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 [hidden]{display:none!important}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+:focus-visible{outline:2.5px solid var(--gold);outline-offset:3px}
 
-/* ===== 主界面 ===== */
-.app{position:relative;max-width:1040px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:0 16px calc(20px + env(safe-area-inset-bottom))}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 0}
-.brand{display:flex;align-items:center;gap:10px;min-width:0;font-size:17px;font-weight:700;letter-spacing:.02em}
-.brand svg{flex:none}
-.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.actions{display:flex;gap:8px;flex:none}
-.icon-btn{width:42px;height:42px;padding:0;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;transition:transform .15s,border-color .2s,color .2s}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
-.icon-btn:active{transform:scale(.92)}
-.icon-btn:disabled{opacity:.35;pointer-events:none}
+/* ===== 背景氛围 ===== */
+.amb{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.amb i{position:absolute;border-radius:50%;filter:blur(48px);opacity:.42;animation:drift 16s ease-in-out infinite alternate}
+.amb .a1{width:300px;height:300px;background:#FFB4A2;top:-90px;right:-90px}
+.amb .a2{width:260px;height:260px;background:#BDE8CB;top:40%;left:-130px;animation-delay:-5s}
+.amb .a3{width:240px;height:240px;background:#FFE08A;bottom:-70px;right:-50px;animation-delay:-9s}
+@keyframes drift{to{transform:translate(34px,44px) scale(1.14)}}
+.amb-sign{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .55s;background:radial-gradient(120% 80% at 50% 28%,#C8202B 0%,#9E111B 55%,#6A0911 100%)}
+.amb-sign::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,214,140,.13) 0 1.6px,transparent 2.4px),radial-gradient(circle,rgba(255,214,140,.08) 0 1.2px,transparent 2px);background-size:58px 58px,86px 86px;background-position:0 0,29px 40px}
+body.signing .amb-sign{opacity:1}
 
-.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:3vh}
-.hero{text-align:center;padding-top:clamp(14px,4vh,44px)}
-@media (max-width:640px){
-  .main .stage{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px}
-  .main{padding-bottom:8vh}
-}
-.kicker{display:inline-flex;align-items:center;gap:12px;color:var(--muted);font-size:clamp(13px,1.7vw,16px);letter-spacing:.38em;padding-left:.38em}
-.kicker::before,.kicker::after{content:"";width:clamp(18px,4vw,36px);height:1px;background:currentColor;opacity:.55}
-.result{min-height:1.3em;margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.18em .32em;font-size:clamp(40px,8.6vw,92px);font-weight:800;line-height:1.18;letter-spacing:.02em;color:var(--accent);overflow-wrap:anywhere}
-.result .ph{color:var(--muted);opacity:.45;font-weight:600}
+/* ===== 框架 ===== */
+.app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 18px calc(112px + env(safe-area-inset-bottom));min-height:100vh}
+.view{animation:viewIn .5s cubic-bezier(.2,.9,.25,1) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(18px)}}
+.head{padding:30px 2px 0}
+.title{margin:0;font-size:clamp(26px,7.4vw,32px);font-weight:800;line-height:1.2;letter-spacing:.01em}
+.sub{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+.ava{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;font-weight:800;font-size:18px;line-height:1}
+
+.who{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:5px 16px 5px 5px;border:0;border-radius:999px;background:#fff;box-shadow:0 8px 18px -12px rgba(130,60,20,.6);font-size:14.5px;font-weight:700;transition:transform .2s}
+.who:active{transform:scale(.96)}
+.who .ava{width:32px;height:32px;font-size:15px}
+.who small{color:var(--muted);font-weight:500}
+.who.empty{background:var(--green);color:#fff;animation:nudge 2.6s ease-in-out infinite}
+.who.empty .ava{background:rgba(255,255,255,.22);color:#fff}
+.who.empty small{color:rgba(255,255,255,.8)}
+@keyframes nudge{0%,78%,100%{transform:none}84%{transform:translateX(-3px) rotate(-1.5deg)}90%{transform:translateX(3px) rotate(1.5deg)}96%{transform:translateX(-1px)}}
+
+/* ===== 转盘页 ===== */
+.wheel-card{position:relative;margin-top:18px;padding:20px 6px 12px;border-radius:30px;background:linear-gradient(180deg,#fff 0%,#FFF8EF 100%);box-shadow:var(--shadow);overflow:hidden}
+.flake{position:absolute;top:-12px;border-radius:50%;background:#FFD9A3;opacity:.7;animation:fall linear infinite;pointer-events:none}
+@keyframes fall{to{transform:translate(26px,460px)}}
+.hero{position:relative;z-index:1;text-align:center;min-height:104px;padding:0 10px}
+.kicker{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--red-l);color:var(--red-d);font-size:13px;font-weight:700;letter-spacing:.1em}
+.result{min-height:1.3em;margin-top:6px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.16em .3em;font-size:clamp(34px,10vw,58px);font-weight:900;line-height:1.2;color:var(--red);overflow-wrap:anywhere}
+.result .ph{color:var(--muted);opacity:.4;font-weight:700}
 .result .live{color:var(--ink);opacity:.42;display:inline-block}
 .result .name{display:inline-block;position:relative}
 .result .name.land{animation:land .7s cubic-bezier(.18,1.35,.32,1) both}
-.result .name.land::after{content:"";position:absolute;left:8%;right:8%;bottom:-.04em;height:.09em;border-radius:1em;background:var(--accent);opacity:.28;transform-origin:left;animation:swash .5s .35s ease-out both}
-.result.multi{font-size:clamp(22px,4.6vw,42px);gap:10px;padding:0 4px}
-.result .tag{display:inline-block;padding:.14em .62em;border-radius:999px;background:var(--accent);color:var(--on-accent)}
+.result .name.land::after{content:"";position:absolute;left:6%;right:6%;bottom:-.02em;height:.1em;border-radius:1em;background:var(--gold);opacity:.55;transform-origin:left;animation:swash .5s .35s ease-out both}
+.result.multi{font-size:clamp(20px,5vw,30px);gap:8px}
+.result .tag{display:inline-block;padding:.16em .66em;border-radius:999px;background:var(--red);color:#fff}
 .result .tag.pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
-.result .tag.live{background:transparent;color:var(--ink);opacity:.45;border:2px dashed var(--line)}
+.result .tag.live{background:transparent;color:var(--ink);border:2px dashed var(--line)}
 @keyframes land{0%{transform:scale(1.7);opacity:0;filter:blur(10px)}55%{opacity:1;filter:blur(0)}100%{transform:none}}
 @keyframes swash{from{transform:scaleX(0)}}
 @keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
-
-.stage{position:relative;width:min(100%,max(300px,min(960px,calc((100vh - 330px) * 1.786))));margin:clamp(10px,3vh,30px) auto 0}
+.stage{position:relative;z-index:1;margin-top:4px}
 #dial{display:block;width:100%;height:auto;overflow:visible;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #dial text{pointer-events:none}
-#dial .sec{transition:opacity .4s,transform .55s cubic-bezier(.2,1.5,.35,1)}
-#dial .veil{opacity:0;transition:opacity .45s;pointer-events:none}
-#dial.landed .veil{opacity:.62}
-#dial .sec.win>path{stroke:var(--win);stroke-width:7px}
+#dial .sec{transition:transform .55s cubic-bezier(.2,1.5,.35,1)}
+#gSecs.enter .sec{animation:secIn .65s cubic-bezier(.2,1.25,.35,1) both}
+@keyframes secIn{from{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.9)}}
+#dial .sec.win>path:first-child{stroke:var(--gold);stroke-width:8px}
 #dial .sec text{opacity:var(--lab,1)}
-#dial .fadein{animation:fadein .45s ease-out both}
-@keyframes fadein{from{opacity:0}}
+#dial .veil{opacity:0;transition:opacity .45s;pointer-events:none}
+#dial.landed .veil{opacity:.6}
 #cur{transition:opacity .2s}
 #dial:not(.spinning) #cur{opacity:0}
-#bulbs .on{animation:twinkle 2.8s ease-in-out infinite;animation-delay:calc(var(--i) * -.31s)}
+#bulbs .on{animation:bulbOn .4s ease-out both,twinkle 2.8s ease-in-out infinite;animation-delay:calc(var(--i) * 55ms),calc(var(--i) * -.31s)}
 #bulbs[data-mode=chase] .on{animation:chase .39s steps(1,end) infinite;animation-delay:calc(var(--k) * -.13s)}
 #bulbs[data-mode=win] .on{animation:flash .26s steps(1,end) 9 both}
+@keyframes bulbOn{from{opacity:0}}
 @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes chase{0%{opacity:1}33.3%,100%{opacity:.1}}
 @keyframes flash{0%{opacity:1}50%{opacity:.08}}
 
-.hub{position:absolute;left:50%;top:91.07%;width:17%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;border:0;padding:0;
-  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.5),rgba(255,255,255,0) 46%),var(--hub-bg);color:var(--hub-ink);
-  box-shadow:0 0 0 clamp(4px,.7vw,7px) var(--hub-ring),0 14px 30px -8px rgba(0,0,0,.45),inset 0 -7px 14px rgba(0,0,0,.18);
-  font-size:clamp(15px,2.6vw,27px);font-weight:800;letter-spacing:.14em;text-indent:.14em;transition:transform .18s cubic-bezier(.3,1.6,.5,1),filter .2s}
-.hub::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--hub-bg);animation:ripple 2.4s ease-out infinite;pointer-events:none}
-.hub:hover{filter:brightness(1.06)}
-.hub:active{transform:translate(-50%,-50%) scale(.92)}
-.hub:disabled{cursor:default}
-.hub:disabled::before{display:none}
-.hub .dots{display:inline-flex;gap:.18em}
-.hub .dots i{width:.24em;height:.24em;border-radius:50%;background:currentColor;animation:dot 1s ease-in-out infinite}
-.hub .dots i:nth-child(2){animation-delay:.15s}.hub .dots i:nth-child(3){animation-delay:.3s}
-@keyframes ripple{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(1.55);opacity:0}}
-@keyframes dot{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-.25em);opacity:1}}
+.cta{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:min(100%,330px);height:60px;margin:22px auto 0;border:0;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,#EF5B50 0%,#D2303A 100%);color:#fff;font-size:18px;font-weight:900;letter-spacing:.06em;box-shadow:0 14px 26px -12px rgba(210,48,58,.75),inset 0 -4px 0 rgba(0,0,0,.12),inset 0 2px 0 rgba(255,255,255,.3);transition:transform .2s cubic-bezier(.3,1.6,.5,1),filter .2s}
+.cta::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:shine 3.4s ease-in-out infinite}
+.cta:active{transform:scale(.95)}
+.cta:disabled{filter:saturate(.7) brightness(.97);cursor:default}
+.cta:disabled::after{display:none}
+.cta svg{flex:none}
+.cta.gold{background:linear-gradient(180deg,#FFDA7A 0%,#F0AE22 100%);color:#6B1A0E;box-shadow:0 14px 28px -12px rgba(0,0,0,.55),inset 0 -4px 0 rgba(0,0,0,.1),inset 0 2px 0 rgba(255,255,255,.5)}
+.cta.wait span{animation:breathe 1s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-40%}85%,100%{left:130%}}
+@keyframes breathe{50%{opacity:.55}}
+.status{margin-top:14px;text-align:center;color:var(--muted);font-size:13.5px}
+.link{border:0;background:none;padding:0 2px;color:var(--red);font-size:13.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.recent{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+.recent span{max-width:200px;padding:5px 12px;border-radius:999px;background:#fff;box-shadow:0 4px 10px -8px rgba(130,60,20,.5);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:pop .4s both}
 
-.below{display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:clamp(28px,5.5vw,56px)}
-.status{color:var(--muted);font-size:14px;text-align:center}
-.link{border:0;background:none;padding:0 2px;color:var(--accent);font-size:14px;text-decoration:underline;text-underline-offset:3px}
-.recent{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:720px}
-.recent span{padding:5px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--ink);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recent span:first-child{border-color:var(--accent);color:var(--accent)}
+/* ===== 上上签页 ===== */
+.sign-head{text-align:center;padding-top:38px;color:#FBE3B4}
+.sign-head h2{margin:0;font-family:var(--serif);font-size:clamp(30px,8.6vw,42px);font-weight:900;letter-spacing:.2em;padding-left:.2em;color:#FFE2A6;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.sign-head p{margin:10px 0 0;font-family:var(--serif);font-size:15px;letter-spacing:.34em;color:rgba(255,226,170,.85)}
+.who.gold{background:rgba(255,226,166,.14);color:#FFE2A6;box-shadow:inset 0 0 0 1.5px rgba(255,226,166,.5)}
+.who.gold small{color:rgba(255,226,166,.7)}
+.who.gold.empty{background:#FFD873;color:#6B1A0E;box-shadow:none}
+.who.gold.empty .ava{background:rgba(107,26,14,.12);color:#6B1A0E}
+.who.gold.empty small{color:rgba(107,26,14,.65)}
+#signSvg{display:block;width:min(100%,420px);margin:0 auto;overflow:visible;cursor:pointer}
+#tube.shaking{animation:tubeShake .15s ease-in-out 10 alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes tubeShake{0%{transform:rotate(-6deg) translateX(-8px)}100%{transform:rotate(6deg) translateX(8px)}}
+.stk.in{animation:stkIn .75s cubic-bezier(.2,1.3,.35,1) both;animation-delay:var(--d)}
+#tube.shaking .stk{animation:jig .11s ease-in-out infinite alternate;animation-delay:var(--d)}
+.stk.rise{animation:rise .95s cubic-bezier(.2,1.25,.35,1) forwards}
+@keyframes stkIn{from{transform:translateY(250px)}}
+@keyframes jig{to{transform:translateY(-16px)}}
+@keyframes rise{to{transform:translateY(-215px)}}
+.status.light{color:rgba(255,226,180,.82)}
+.status.light .link{color:#FFD873}
 
-/* ===== 设置抽屉 ===== */
-.drawer{position:fixed;inset:0;z-index:30;visibility:hidden;transition:visibility 0s .4s}
-.drawer.open{visibility:visible;transition:none}
-.scrim{position:absolute;inset:0;background:rgba(18,12,8,.3);opacity:0;transition:opacity .35s}
-.drawer.open .scrim{opacity:1}
-.panel{position:absolute;top:0;right:0;bottom:0;width:min(450px,100%);display:flex;flex-direction:column;background:var(--card);color:var(--ink);box-shadow:-24px 0 60px -24px rgba(0,0,0,.4);transform:translateX(104%);transition:transform .42s cubic-bezier(.2,.9,.2,1)}
-.drawer.open .panel{transform:none}
-@media (max-width:640px){
-  .panel{top:auto;left:0;width:100%;height:92vh;border-radius:24px 24px 0 0;transform:translateY(104%)}
-  .panel::before{content:"";position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:var(--line)}
-}
-.p-head{display:flex;align-items:center;gap:8px;padding:18px 16px 0 20px}
-.tabs{flex:1;display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--line)}
-.tabs button{flex:1;height:36px;border:0;border-radius:10px;background:transparent;font-size:14.5px;color:var(--muted);transition:background .2s,color .2s}
-.tabs button[aria-selected=true]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 2px 8px -3px rgba(0,0,0,.25)}
-.p-body{flex:1;overflow-y:auto;padding:6px 20px 40px;-webkit-overflow-scrolling:touch}
-.pane{animation:paneIn .3s ease-out}
-@keyframes paneIn{from{opacity:0;transform:translateY(6px)}}
-.grp{margin-top:18px;font-size:12px;letter-spacing:.2em;color:var(--muted)}
-.row{display:flex;flex-direction:column;gap:9px;padding:15px 0;border-bottom:1px solid var(--line)}
-.row.inline{flex-direction:row;align-items:center;justify-content:space-between}
-.lbl{font-size:14.5px;font-weight:600}
+.sign-result{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px 16px calc(20px + env(safe-area-inset-bottom));overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(160,12,22,.9),rgba(55,3,7,.95));animation:fadeIn .35s both}
+.sign-result::before{content:"";position:absolute;left:50%;top:42%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;background:repeating-conic-gradient(rgba(255,210,120,.12) 0 6deg,transparent 6deg 18deg);animation:spin 48s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}}
+.sign-card{position:relative;width:148px;height:min(460px,60vh);filter:drop-shadow(0 26px 40px rgba(0,0,0,.5));animation:cardIn 1s cubic-bezier(.18,1.3,.3,1) both}
+.sign-card>div{position:absolute;clip-path:polygon(0 12%,50% 0,100% 12%,100% 100%,0 100%)}
+.sign-card .l1{inset:0;background:linear-gradient(90deg,#8F0D17,#DA2A33 50%,#8F0D17)}
+.sign-card .l2{inset:8px;background:#F3CF8A}
+.sign-card .l3{inset:11px;display:flex;flex-direction:column;align-items:center;padding-top:58px;overflow:hidden;background:linear-gradient(90deg,#A1111B,#D52630 50%,#A1111B)}
+.sign-card .l3::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-80%;width:50%;background:linear-gradient(100deg,transparent,rgba(255,235,190,.35),transparent);transform:skewX(-16deg);animation:shine2 2.6s 1s ease-in-out infinite}
+@keyframes shine2{0%{left:-80%}60%,100%{left:140%}}
+@keyframes cardIn{0%{transform:translateY(180px) scale(.35) rotate(-12deg);opacity:0}100%{transform:none;opacity:1}}
+.seal{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:#FBE7C2;color:#C21C26;font-family:var(--serif);font-size:30px;font-weight:900;box-shadow:inset 0 0 0 3px #E9B85E}
+.sc-line{width:74%;height:2px;margin:18px 0 16px;background:#F3CF8A}
+.sc-name{writing-mode:vertical-rl;font-family:var(--serif);font-weight:900;letter-spacing:.14em;color:#FFE6B5;text-shadow:0 2px 0 rgba(0,0,0,.22);white-space:nowrap}
+.sc-foot{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-family:var(--serif);font-size:14px;letter-spacing:.3em;padding-left:.3em;color:#F3CF8A}
+.sc-who{position:relative;margin:0;font-family:var(--serif);font-size:17px;letter-spacing:.08em;color:#FFE2A6;text-align:center;animation:fadeIn .5s .6s both}
+.sc-actions{position:relative;display:flex;gap:12px;width:min(100%,360px);animation:fadeIn .5s .8s both}
+
+/* ===== 名单页 ===== */
+.groups{display:flex;gap:8px;overflow-x:auto;padding:16px 2px 8px;margin:0 -2px;scrollbar-width:none}
+.groups::-webkit-scrollbar{display:none}
+.gchip{flex:none;padding:9px 16px;border:0;border-radius:999px;background:#fff;box-shadow:0 5px 12px -9px rgba(130,60,20,.55);font-size:14px;font-weight:700;transition:background .25s,color .25s,transform .2s}
+.gchip:active{transform:scale(.95)}
+.gchip[aria-pressed=true]{background:var(--ink);color:#fff}
+.gchip.add{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted);color:var(--muted)}
+.card{margin-top:14px;padding:16px 18px;border-radius:24px;background:#fff;box-shadow:var(--shadow)}
+.gname{width:100%;padding:2px 0 8px;border:0;border-bottom:1.5px dashed var(--line);background:transparent;font-size:20px;font-weight:800}
+.gname:focus{outline:none;border-bottom-color:var(--red)}
+.opt-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:14px}
+.opt-row b{display:block;font-size:15px}
+.opt-row small{display:block;margin-top:3px;color:var(--muted);font-size:12.5px;line-height:1.55}
+.add-row{display:flex;gap:8px;margin-top:14px;padding:6px;border-radius:20px;background:#fff;box-shadow:var(--shadow)}
+.add-row input{flex:1;min-width:0;padding:0 12px;border:0;background:transparent;font-size:16px}
+.add-row input:focus{outline:none}
+.add-row button{flex:none;height:44px;padding:0 18px;border:0;border-radius:15px;background:var(--red);color:#fff;font-weight:800;transition:transform .2s}
+.add-row button:active{transform:scale(.94)}
+.list-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:16px 4px 10px;color:var(--muted);font-size:13px}
+.chip{padding:6px 13px;border:0;border-radius:999px;background:#fff;box-shadow:0 4px 10px -8px rgba(130,60,20,.6);font-size:13px;font-weight:600}
+.chip+.chip{margin-left:6px}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:20px;background:#fff;box-shadow:0 6px 16px -12px rgba(130,60,20,.5);transition:opacity .3s,transform .3s}
+.items.enter .item{animation:rowIn .45s cubic-bezier(.2,1,.3,1) both;animation-delay:var(--d)}
+.item.new{animation:rowNew .9s ease-out}
+.item.bye{opacity:0;transform:translateX(50px) scale(.95)}
+.item.off .ava,.item.off .nm{opacity:.45}
+.item .nm{flex:1;min-width:4.5em;padding:6px 2px;border:0;background:transparent;font-size:15.5px;font-weight:700}
+.item .nm:focus{outline:none;border-bottom:1.5px dashed var(--red)}
+.item .st{flex:none;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--muted);font-size:11px;font-weight:700}
+.item .st.me{background:var(--green-l);color:var(--green-d)}
+.item .del{flex:none;width:34px;height:34px;padding:0;border:0;border-radius:11px;background:var(--red-l);color:var(--red);display:grid;place-items:center}
+.wstep{flex:none;display:inline-flex;align-items:center;border-radius:10px;background:#FFF4E6;font-size:13px;font-weight:700}
+.wstep button{width:26px;height:30px;padding:0;border:0;background:none;font-size:15px}
+@keyframes rowIn{from{opacity:0;transform:translateY(16px)}}
+@keyframes rowNew{0%{background:var(--gold-l);transform:scale(1.03)}100%{background:#fff}}
+.blank{padding:36px 0;text-align:center;color:var(--muted);font-size:14px}
+.danger{display:block;margin:22px auto 0;border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+
+/* ===== 设置页 ===== */
+.sec-h{margin:0 0 2px;font-size:16px;font-weight:800}
+.sec-h small{margin-left:6px;color:var(--muted);font-size:12.5px;font-weight:500}
+.row{display:flex;flex-direction:column;gap:9px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row.inline{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.row.inline .hint{flex-basis:100%}
+.lbl{font-size:14.5px;font-weight:700}
 .hint{margin:0;color:var(--muted);font-size:12.5px;line-height:1.65}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{min-height:36px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:transparent;font-size:14px;transition:border-color .2s,background .2s,color .2s}
-.seg button[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--on-accent);font-weight:600}
+.seg button{min-height:36px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:14px;transition:background .2s,color .2s,border-color .2s}
+.seg button[aria-pressed=true]{border-color:var(--red);background:var(--red);color:#fff;font-weight:700}
 .rng{display:flex;align-items:center;gap:14px}
-.rng input{flex:1;min-width:0;accent-color:var(--accent)}
-.rng output{flex:none;min-width:48px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600}
-.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;margin:0;border-radius:14px;background:var(--line);position:relative;cursor:pointer;transition:background .2s}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .22s cubic-bezier(.3,1.5,.5,1)}
-.sw:checked{background:var(--accent)}
-.sw:checked::after{transform:translateX(18px)}
-.txt{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:transparent;font-size:16px}
-.txt:focus,textarea:focus{outline:none;border-color:var(--accent)}
-.stepper{display:inline-flex;align-items:center;width:max-content;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
-.stepper button{width:42px;height:40px;border:0;background:transparent;font-size:19px}
-.stepper button:active{background:var(--line)}
-.stepper input{width:56px;height:40px;border:0;background:transparent;text-align:center;font-size:16px;font-weight:600;-moz-appearance:textfield;appearance:textfield}
+.rng input{flex:1;min-width:0;accent-color:var(--red)}
+.rng output{flex:none;min-width:46px;text-align:right;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.sw{appearance:none;-webkit-appearance:none;flex:none;position:relative;width:48px;height:28px;margin:0;border-radius:14px;background:#E9DCCB;cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.2);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.sw:checked{background:var(--green)}
+.sw:checked::after{transform:translateX(20px)}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.stepper button{width:42px;height:40px;border:0;background:#fff;font-size:19px}
+.stepper input{width:54px;height:40px;border:0;background:#fff;text-align:center;font-size:16px;font-weight:700;-moz-appearance:textfield;appearance:textfield}
 .stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
-.cards.two{grid-template-columns:1fr 1fr}
-.card-opt{position:relative;padding:6px 6px 8px;border:1.5px solid var(--line);border-radius:14px;background:transparent;text-align:center;font-size:13.5px;transition:border-color .2s,transform .15s}
-.card-opt svg{display:block;width:100%;height:auto;border-radius:9px;margin-bottom:6px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card-opt{padding:6px 6px 9px;border:2px solid var(--line);border-radius:16px;background:#fff;font-size:13.5px;font-weight:700;text-align:center;transition:border-color .2s,transform .15s}
 .card-opt:active{transform:scale(.97)}
-.card-opt[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);font-weight:700}
-.card-opt small{display:block;margin-top:2px;color:var(--muted);font-size:11.5px;font-weight:400}
-textarea{display:block;width:100%;min-height:230px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:transparent;font-size:16px;line-height:1.65;resize:vertical}
-.tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13.5px}
-.list-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
-.list-meta .count{color:var(--muted);font-size:13.5px}
-.chip{padding:6px 13px;border:1.5px solid var(--line);border-radius:999px;background:transparent;font-size:13.5px;transition:border-color .2s,color .2s}
-.chip:hover{border-color:var(--accent);color:var(--accent)}
-.gen input{width:68px;padding:6px 8px;border:1.5px solid var(--line);border-radius:9px;background:transparent;text-align:center;font-size:15px}
-.probs{display:flex;flex-wrap:wrap;gap:6px}
-.probs span{padding:3px 9px;border-radius:7px;border:1px solid var(--line);font-size:12.5px}
-.probs b{margin-left:4px;color:var(--accent)}
+.card-opt svg{display:block;width:100%;height:auto;margin-bottom:6px;border-radius:10px}
+.card-opt small{display:block;margin-top:2px;color:var(--muted);font-size:11.5px;font-weight:500}
+.card-opt[aria-pressed=true]{border-color:var(--red);box-shadow:0 0 0 2px var(--red-l)}
 .hist{list-style:none;margin:0;padding:0}
-.hist li{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5}
-.hist li span{overflow-wrap:anywhere}
-.hist time{flex:none;color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px;padding-top:1px}
-.empty{padding:40px 0;color:var(--muted);text-align:center;font-size:14px}
+.hist li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}
+.hist li:last-child{border-bottom:0}
+.hist time{flex:none;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;padding-top:1px}
+.hist em{font-style:normal;color:var(--muted);font-size:12.5px;margin-right:4px}
+.reset-all{display:block;width:100%;margin-top:14px;padding:14px;border:0;border-radius:18px;background:#fff;color:var(--muted);font-size:14px;box-shadow:var(--shadow)}
 
-/* ===== 结果弹窗 ===== */
-.modal{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(18,12,8,.38);animation:fadein .25s}
-.box{position:relative;width:min(100%,430px);padding:34px 26px 24px;border-radius:26px;background:var(--card);color:var(--ink);text-align:center;box-shadow:0 30px 80px -24px rgba(0,0,0,.5);animation:boxIn .5s cubic-bezier(.2,1.4,.35,1) both}
-.box::before{content:"";position:absolute;left:24px;right:24px;top:0;height:6px;border-radius:0 0 6px 6px;background:var(--accent)}
-@keyframes boxIn{from{transform:translateY(30px) scale(.86);opacity:0}}
-.box .k{color:var(--muted);font-size:14px;letter-spacing:.3em;padding-left:.3em}
-.box .names{margin:12px 0 26px;color:var(--accent);font-size:clamp(30px,9vw,48px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
-.box .names.many{font-size:clamp(20px,5.6vw,28px)}
-.m-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
-.m-actions button{min-width:104px;height:46px;padding:0 18px;border-radius:23px;font-size:15px;font-weight:600}
-.btn{border:0;background:var(--accent);color:var(--on-accent)}
-.btn-ghost{border:1.5px solid var(--line);background:transparent}
-#fx{position:fixed;inset:0;z-index:50;width:100%;height:100%;pointer-events:none}
+/* ===== 底部标签栏 ===== */
+.tabbar{position:fixed;z-index:20;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);display:grid;grid-template-columns:repeat(4,1fr);width:min(524px,calc(100% - 24px));height:70px;padding:8px;border-radius:26px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 16px 40px -18px rgba(120,50,10,.45);transition:background .45s}
+.tab-ind{position:absolute;top:8px;left:8px;bottom:8px;width:calc((100% - 16px) / 4);border-radius:19px;background:var(--red);box-shadow:0 8px 16px -8px var(--red);transition:transform .5s cubic-bezier(.3,1.35,.45,1),background .45s}
+.tab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--muted);font-size:11.5px;font-weight:700;transition:color .3s}
+.tab svg{width:22px;height:22px;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.tab[aria-selected=true]{color:#fff}
+.tab[aria-selected=true] svg{transform:translateY(-1px) scale(1.1)}
+body.signing .tabbar{background:rgba(88,8,14,.72)}
+body.signing .tab-ind{background:#FFD873;box-shadow:none}
+body.signing .tab{color:rgba(255,226,180,.72)}
+body.signing .tab[aria-selected=true]{color:#6B1A0E}
+
+/* ===== 底部弹层 ===== */
+.sheet{position:fixed;inset:0;z-index:40;visibility:hidden;transition:visibility 0s .45s}
+.sheet.open{visibility:visible;transition:none}
+.sheet .scrim{position:absolute;inset:0;background:rgba(58,35,22,.36);opacity:0;transition:opacity .3s}
+.sheet.open .scrim{opacity:1}
+.sheet .panel{position:absolute;left:50%;bottom:0;width:min(560px,100%);max-height:90vh;overflow-y:auto;padding:12px 20px calc(24px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:var(--card);transform:translate(-50%,105%);transition:transform .45s cubic-bezier(.2,1.1,.3,1)}
+.sheet.open .panel{transform:translate(-50%,0)}
+@media (min-width:720px){
+  .sheet .panel{top:50%;bottom:auto;border-radius:28px;opacity:0;transform:translate(-50%,-44%) scale(.92);transition:transform .45s cubic-bezier(.2,1.3,.3,1),opacity .25s}
+  .sheet.open .panel{opacity:1;transform:translate(-50%,-50%)}
+}
+.grab{width:42px;height:5px;margin:0 auto 14px;border-radius:3px;background:var(--line)}
+.sheet h3{margin:0;font-size:22px;font-weight:900;text-align:center}
+.sheet .sh-sub{margin:6px 0 0;color:var(--muted);font-size:13.5px;text-align:center}
+.who-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:18px}
+.who-opt{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px 12px;border:2px solid transparent;border-radius:20px;background:#FFF7EE;font-size:14px;font-weight:700;animation:pop .45s cubic-bezier(.2,1.5,.35,1) both;transition:transform .15s,border-color .2s}
+.who-opt:active{transform:scale(.94)}
+.who-opt[aria-pressed=true]{border-color:var(--green);background:var(--green-l)}
+.who-opt:disabled{opacity:.42;cursor:default}
+.who-opt .tag{position:absolute;top:6px;right:6px;padding:1px 7px;border-radius:999px;background:var(--muted);color:#fff;font-size:10.5px}
+.res{padding:4px 2px 2px;text-align:center}
+.res-title{font-size:28px;font-weight:900}
+.res-sub{margin-top:6px;color:var(--muted);font-size:14px}
+.res-avas{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:26px 0 16px}
+.big-ava{position:relative;display:grid;place-items:center;width:128px;height:128px;border-radius:50%;font-size:58px;font-weight:900;box-shadow:0 16px 30px -14px rgba(130,60,20,.55);animation:avaIn .75s cubic-bezier(.2,1.5,.35,1) both}
+.big-ava::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--gold);animation:ring 1.3s ease-out .35s both}
+.big-ava i{position:absolute;color:var(--gold);font-style:normal;font-size:20px;animation:twk 1.6s ease-in-out infinite}
+.big-ava i:nth-child(1){top:-4px;right:2px}.big-ava i:nth-child(2){bottom:6px;left:-10px;font-size:15px;animation-delay:.5s}.big-ava i:nth-child(3){top:24px;left:-14px;font-size:12px;animation-delay:1s}
+.res-avas.many .big-ava{width:78px;height:78px;font-size:34px}
+.res-avas.many .big-ava i{display:none}
+@keyframes avaIn{from{transform:scale(0) rotate(-30deg)}}
+@keyframes ring{from{transform:scale(.85);opacity:1}to{transform:scale(1.55);opacity:0}}
+@keyframes twk{50%{transform:scale(.5) rotate(40deg);opacity:.4}}
+.res-name{font-size:clamp(28px,9vw,40px);font-weight:900;line-height:1.25;color:var(--red);overflow-wrap:anywhere;animation:pop .5s .2s cubic-bezier(.2,1.5,.35,1) both}
+.res-actions{display:flex;gap:12px;margin-top:26px}
+.btn-o,.btn-f{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:54px;border-radius:18px;font-size:16px;font-weight:800;transition:transform .18s}
+.btn-o{border:2px solid var(--red);background:#fff;color:var(--red)}
+.btn-f{border:0;background:linear-gradient(180deg,#EF5B50,#D2303A);color:#fff;box-shadow:0 10px 20px -10px rgba(210,48,58,.8)}
+.btn-o:active,.btn-f:active{transform:scale(.96)}
+.btn-f.gold{background:linear-gradient(180deg,#FFDA7A,#F0AE22);color:#6B1A0E;box-shadow:0 10px 22px -10px rgba(0,0,0,.6)}
+.btn-o.light{border-color:rgba(255,226,170,.6);background:transparent;color:#FFE2A6}
+textarea{display:block;width:100%;min-height:240px;margin-top:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:16px;background:#FFFCF8;font-size:16px;line-height:1.65;resize:vertical}
+textarea:focus{outline:none;border-color:var(--red)}
+.gen{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+.gen input{width:64px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;text-align:center;font-size:15px}
+
+.toast{position:fixed;z-index:60;left:50%;top:calc(16px + env(safe-area-inset-top));max-width:calc(100% - 32px);padding:10px 18px;border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;box-shadow:0 12px 24px -12px rgba(0,0,0,.5);transform:translate(-50%,-160%);transition:transform .45s cubic-bezier(.2,1.4,.35,1);pointer-events:none}
+.toast.show{transform:translate(-50%,0)}
+#fx{position:fixed;inset:0;z-index:55;width:100%;height:100%;pointer-events:none}
 
 @media (prefers-reduced-motion:reduce){
-  #bulbs .on,.hub::before{animation:none!important}
+  #bulbs .on,.cta::after,.amb i,.flake,.who.empty,.sign-result::before{animation:none!important}
 }
 </style>
 </head>
-<body data-theme="cream">
+<body>
+<div class="amb" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
+<div class="amb-sign" aria-hidden="true"></div>
 
-<div class="app" id="app">
-  <header class="topbar">
-    <div class="brand">
-      <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 50a28 28 0 0 1 56 0z" fill="var(--rim)"/><path d="M10 50a22 22 0 0 1 44 0z" fill="var(--bulb)"/><path d="M32 50 40 22" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="50" r="7" fill="var(--accent)"/></svg>
-      <span id="titleText"></span>
+<div class="app">
+  <!-- 转盘 -->
+  <section class="view" id="v-wheel">
+    <header class="head">
+      <h1 class="title" id="wTitle"></h1>
+      <p class="sub" id="wSub"></p>
+      <button class="who" id="whoW" hidden></button>
+    </header>
+    <div class="wheel-card" id="wheelCard">
+      <div class="hero">
+        <span class="kicker" id="kicker">你抽中的是</span>
+        <div class="result" id="res" aria-live="polite"></div>
+      </div>
+      <div class="stage" id="stage">
+        <svg id="dial" viewBox="0 0 1000 580" aria-hidden="true">
+          <defs>
+            <clipPath id="clipUpper"><rect x="-40" y="-120" width="1080" height="630"/></clipPath>
+            <radialGradient id="gVig" gradientUnits="userSpaceOnUse" cx="500" cy="510" r="430">
+              <stop offset=".55" stop-color="#5a1a00" stop-opacity="0"/><stop offset="1" stop-color="#5a1a00" stop-opacity=".12"/>
+            </radialGradient>
+            <linearGradient id="gTop" gradientUnits="userSpaceOnUse" x1="0" y1="80" x2="0" y2="510">
+              <stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="hR"><stop offset="0" stop-color="#FF6B6B" stop-opacity=".85"/><stop offset="1" stop-color="#FF6B6B" stop-opacity="0"/></radialGradient>
+            <radialGradient id="hG"><stop offset="0" stop-color="#FFD45E" stop-opacity=".85"/><stop offset="1" stop-color="#FFD45E" stop-opacity="0"/></radialGradient>
+            <radialGradient id="hW"><stop offset="0" stop-color="#FFF4CF" stop-opacity=".85"/><stop offset="1" stop-color="#FFF4CF" stop-opacity="0"/></radialGradient>
+            <pattern id="hatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="16" fill="#3A2316" opacity=".16"/></pattern>
+            <filter id="fDrop" x="-10%" y="-15%" width="120%" height="140%"><feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#6b2a00" flood-opacity=".26"/></filter>
+            <filter id="fSoft" x="-60%" y="-30%" width="220%" height="170%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#3A2316" flood-opacity=".3"/></filter>
+            <g id="arcDefs"></g>
+          </defs>
+          <g id="gBack"></g>
+          <g clip-path="url(#clipUpper)"><g id="gWheel"><g id="gSecs"></g><path id="cur"/></g></g>
+          <g id="gOver"></g>
+          <g id="bulbs" data-mode="idle"></g>
+          <g id="gBase"></g>
+          <g id="gGhosts"></g>
+          <g id="gNeedle"></g>
+          <g id="gHub"></g>
+          <g id="gFlap"></g>
+        </svg>
+      </div>
     </div>
-    <div class="actions">
-      <button class="icon-btn" id="histBtn" aria-label="抽签记录" title="抽签记录">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
-      </button>
-      <button class="icon-btn" id="gearBtn" aria-label="设置" title="设置">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
-      </button>
-    </div>
-  </header>
-
-  <main class="main">
-  <section class="hero">
-    <div class="kicker">你抽中的是</div>
-    <div class="result" id="res" aria-live="polite"></div>
-  </section>
-
-  <section class="stage" id="stage">
-    <svg id="dial" viewBox="0 0 1000 560" aria-hidden="true">
-      <defs>
-        <clipPath id="clipUpper"><rect x="-40" y="-40" width="1080" height="550"/></clipPath>
-        <radialGradient id="gVig" gradientUnits="userSpaceOnUse" cx="500" cy="510" r="430">
-          <stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/>
-        </radialGradient>
-        <linearGradient id="gTop" gradientUnits="userSpaceOnUse" x1="0" y1="80" x2="0" y2="510">
-          <stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
-        </linearGradient>
-        <radialGradient id="gHalo"><stop offset="0" style="stop-color:var(--bulb)" stop-opacity=".8"/><stop offset="1" style="stop-color:var(--bulb)" stop-opacity="0"/></radialGradient>
-        <filter id="fDrop" x="-10%" y="-15%" width="120%" height="135%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".24"/></filter>
-        <filter id="fSoft" x="-60%" y="-20%" width="220%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".3"/></filter>
-        <g id="arcDefs"></g>
-      </defs>
-      <g id="gBack"></g>
-      <g clip-path="url(#clipUpper)"><g id="gWheel"><g id="gSecs"></g><path id="cur"/></g></g>
-      <g id="gOver"></g>
-      <g id="bulbs" data-mode="idle"></g>
-      <g id="gGhosts"></g>
-      <g id="gNeedle"></g>
-      <g id="gFlap"></g>
-      <g id="gBase"></g>
-    </svg>
-    <button class="hub" id="hub" aria-label="开始抽签">开始</button>
-  </section>
-
-  <footer class="below">
-    <div class="status"><span id="statusText"></span> <button class="link" id="resetBtn" hidden>重置</button></div>
+    <button class="cta" id="spinBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18M12 9c-2-4-6-4-6-1.5S10 9 12 9c2 0 6 .5 6-1.5S14 5 12 9z"/></svg><span id="spinLabel">开始抽取！</span></button>
+    <div class="status"><span id="wStatus"></span> <button class="link" id="wReset" hidden>重新开始</button></div>
     <div class="recent" id="recent"></div>
-  </footer>
-  </main>
+  </section>
+
+  <!-- 上上签 -->
+  <section class="view" id="v-sign" hidden>
+    <header class="sign-head">
+      <h2>抽一支上上签</h2>
+      <p>《 摇 一 摇 · 抽 好 运 》</p>
+      <button class="who gold" id="whoS" hidden></button>
+    </header>
+    <svg id="signSvg" viewBox="0 0 600 680" aria-hidden="true">
+      <defs>
+        <linearGradient id="tubeG" x1="0" x2="1"><stop offset="0" stop-color="#6E0911"/><stop offset=".28" stop-color="#C51E29"/><stop offset=".5" stop-color="#E5404A"/><stop offset=".72" stop-color="#C21C27"/><stop offset="1" stop-color="#650810"/></linearGradient>
+        <linearGradient id="stickG" x1="0" x2="1"><stop offset="0" stop-color="#9E0F19"/><stop offset=".5" stop-color="#DD2E37"/><stop offset="1" stop-color="#9E0F19"/></linearGradient>
+        <filter id="fGlow" x="-80%" y="-20%" width="260%" height="140%"><feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#FFD873" flood-opacity=".95"/></filter>
+      </defs>
+      <ellipse cx="300" cy="664" rx="200" ry="18" fill="#2a0004" opacity=".35"/>
+      <g id="tube">
+        <ellipse cx="300" cy="420" rx="172" ry="36" fill="#4A060B" stroke="#8E0E17" stroke-width="6"/>
+        <g id="sticks"></g>
+        <path d="M128 420 L148 626 Q300 674 452 626 L472 420 A172 36 0 0 1 128 420Z" fill="url(#tubeG)"/>
+        <path d="M128 420 A172 36 0 0 0 472 420" fill="none" stroke="#E9A23B" stroke-width="7" stroke-linecap="round"/>
+        <path d="M140 488 Q300 528 460 488" fill="none" stroke="#F3CF8A" stroke-width="3" opacity=".85"/>
+        <path d="M147 590 Q300 632 453 590" fill="none" stroke="#F3CF8A" stroke-width="3" opacity=".85"/>
+        <circle cx="300" cy="538" r="36" fill="none" stroke="#F3CF8A" stroke-width="3"/>
+        <text x="300" y="538" dy=".36em" text-anchor="middle" font-size="38" font-weight="900" fill="#F3CF8A" style="font-family:var(--serif)">签</text>
+      </g>
+    </svg>
+    <button class="cta gold" id="shakeBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l1.5 18M12 3v18M16 3l-1.5 18"/><path d="M5 12c-1 1-1 3 0 4M19 12c1 1 1 3 0 4"/></svg><span id="shakeLabel">摇一摇 · 求签</span></button>
+    <div class="status light"><span id="sStatus"></span> <button class="link" id="sReset" hidden>重新开始</button></div>
+  </section>
+
+  <!-- 名单 -->
+  <section class="view" id="v-list" hidden>
+    <header class="head">
+      <h1 class="title">名单组</h1>
+      <p class="sub">提前把名单存好，抽签时选一个用</p>
+    </header>
+    <div class="groups" id="groupChips"></div>
+    <div class="card">
+      <input class="gname" id="gName" maxlength="20" aria-label="名单组名字">
+      <label class="opt-row" for="gIdentity">
+        <span><b>抽之前先选「我是谁」</b><small>每个人先在名单里选中自己，抽签时不会抽到自己</small></span>
+        <input type="checkbox" class="sw" id="gIdentity">
+      </label>
+    </div>
+    <div class="add-row"><input id="addInp" placeholder="输入名字，可用逗号一次加多个" enterkeyhint="done"><button id="addBtn">＋ 添加</button></div>
+    <div class="list-meta"><span id="listMeta"></span><span><button class="chip" id="bulkBtn">批量编辑</button><button class="chip" id="shuffleBtn">打乱顺序</button></span></div>
+    <div class="items" id="itemList"></div>
+    <button class="danger" id="delGroup">删除这个名单组</button>
+  </section>
+
+  <!-- 设置 -->
+  <section class="view" id="v-settings" hidden>
+    <header class="head"><h1 class="title">设置</h1></header>
+    <div class="card"><h2 class="sec-h">抽签规则<small id="ruleFor"></small></h2><div data-sec="rule"></div></div>
+    <div class="card"><h2 class="sec-h">转盘</h2><div data-sec="wheel"></div></div>
+    <div class="card"><h2 class="sec-h">效果</h2><div data-sec="fx"></div></div>
+    <div class="card"><h2 class="sec-h">抽签记录</h2><ol class="hist" id="histList"></ol><p class="blank" id="histEmpty">还没有抽过</p><button class="chip" id="histClear">清空记录</button></div>
+    <button class="reset-all" id="resetCfg">恢复默认设置（名单保留）</button>
+  </section>
 </div>
 
-<div class="drawer" id="drawer" inert>
-  <div class="scrim" id="scrim"></div>
-  <aside class="panel" role="dialog" aria-modal="true" aria-label="设置">
-    <div class="p-head">
-      <div class="tabs" role="tablist">
-        <button role="tab" data-tab="list">名单</button>
-        <button role="tab" data-tab="draw">抽法</button>
-        <button role="tab" data-tab="look">外观</button>
-        <button role="tab" data-tab="history">记录</button>
-      </div>
-      <button class="icon-btn" id="closeBtn" aria-label="关闭" title="关闭">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-      </button>
-    </div>
-    <div class="p-body" id="pBody">
-      <div class="pane" data-pane="list">
-        <div class="row">
-          <label class="lbl" for="titleInp">转盘名字</label>
-          <input class="txt" id="titleInp" maxlength="24" placeholder="比如：今天吃什么">
-        </div>
-        <div class="row">
-          <label class="lbl" for="listTA">参与抽选的名单</label>
-          <textarea id="listTA" spellcheck="false" placeholder="一行一个，比如：&#10;小明&#10;小红&#10;小刚"></textarea>
-          <div class="list-meta">
-            <span class="count" id="listCount"></span>
-            <span class="tools"><button class="chip" id="shuffleBtn">打乱顺序</button><button class="chip" id="dedupeBtn">去掉重复</button></span>
-          </div>
-        </div>
-        <div class="row">
-          <div class="lbl">按数字生成</div>
-          <div class="tools gen"><input id="genFrom" type="number" inputmode="numeric" value="1" aria-label="起始数字"><span>到</span><input id="genTo" type="number" inputmode="numeric" value="30" aria-label="结束数字"><button class="chip" id="genBtn">替换名单</button></div>
-        </div>
-        <div class="row" id="probRow" hidden>
-          <div class="lbl">各项被抽中的概率</div>
-          <div class="probs" id="probs"></div>
-        </div>
-      </div>
-      <div class="pane" data-pane="draw"></div>
-      <div class="pane" data-pane="look"></div>
-      <div class="pane" data-pane="history">
-        <ol class="hist" id="histList"></ol>
-        <p class="empty" id="histEmpty">还没有抽过</p>
-        <div style="padding-top:14px"><button class="chip" id="histClear">清空记录</button></div>
-      </div>
-    </div>
-  </aside>
+<nav class="tabbar" role="tablist" aria-label="切换">
+  <span class="tab-ind" id="tabInd"></span>
+  <button class="tab" role="tab" data-tab="wheel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 0 1 18 0z"/><path d="M12 18l-4-8M12 18l4-8M12 18V9"/></svg>转盘</button>
+  <button class="tab" role="tab" data-tab="sign"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V6l1.5-3L12 6v15M13 21V8l1.5-3L16 8v13"/><path d="M6 13h12l-1 8H7z"/></svg>上上签</button>
+  <button class="tab" role="tab" data-tab="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.5 6-5.5s5.4 1.9 6 5.5"/><path d="M16 5.5a3 3 0 0 1 0 5.6M18 14.8c1.7.8 2.7 2.5 3 5.2"/></svg>名单</button>
+  <button class="tab" role="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>设置</button>
+</nav>
+
+<div class="sheet" id="sh-who" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="whoH">
+    <div class="grab"></div>
+    <h3 id="whoH">你是谁？</h3>
+    <p class="sh-sub">选中自己再开始，抽签时不会抽到你</p>
+    <div class="who-grid" id="whoGrid"></div>
+  </div>
 </div>
 
-<div class="modal" id="modal" hidden>
-  <div class="box" role="dialog" aria-modal="true" aria-label="抽签结果">
-    <div class="k">你抽中的是</div>
-    <div class="names" id="mNames"></div>
-    <div class="m-actions">
-      <button class="btn-ghost" id="mRemove">移出名单</button>
-      <button class="btn-ghost" id="mAgain">再抽一次</button>
-      <button class="btn" id="mOk">好的</button>
+<div class="sheet" id="sh-result" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+    <div class="grab"></div>
+    <div class="res">
+      <div class="res-title" id="rTitle"></div>
+      <div class="res-sub" id="rSub"></div>
+      <div class="res-avas" id="rAvas"></div>
+      <div class="res-name" id="rName"></div>
+      <div class="res-actions"><button class="btn-o" id="rAgain">再抽一次</button><button class="btn-f" id="rOk">就它了！</button></div>
     </div>
   </div>
 </div>
+
+<div class="sheet" id="sh-bulk" inert>
+  <div class="scrim"></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="bulkH">
+    <div class="grab"></div>
+    <h3 id="bulkH">批量编辑</h3>
+    <p class="sh-sub">一行一个；按权重抽时可写成「名字 | 3」</p>
+    <textarea id="bulkTA" spellcheck="false"></textarea>
+    <div class="gen"><span>生成数字</span><input id="genFrom" type="number" inputmode="numeric" value="1" aria-label="起始数字"><span>到</span><input id="genTo" type="number" inputmode="numeric" value="30" aria-label="结束数字"><button class="chip" id="genBtn">填入</button><button class="chip" id="dedupeBtn">去掉重复</button></div>
+    <div class="res-actions"><button class="btn-o" id="bulkCancel">取消</button><button class="btn-f" id="bulkSave">保存</button></div>
+  </div>
+</div>
+
+<div class="sign-result" id="signRes" hidden>
+  <div class="sign-card" id="signCard"><div class="l1"></div><div class="l2"></div><div class="l3"><div class="seal">签</div><div class="sc-line"></div><div class="sc-name" id="scName"></div><div class="sc-foot">上上签</div></div></div>
+  <p class="sc-who" id="scWho"></p>
+  <div class="sc-actions"><button class="btn-o light" id="scAgain">再求一签</button><button class="btn-f gold" id="scOk">收下好运</button></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
 <canvas id="fx" hidden></canvas>
 
 <script>
 (() => {
 'use strict';
-const KEY = 'lucky-wheel:v2', OLD_KEY = 'lucky-wheel:v1';
+const KEY = 'lucky-wheel:v3', V2_KEY = 'lucky-wheel:v2';
 const NS = 'http://www.w3.org/2000/svg', XL = 'http://www.w3.org/1999/xlink';
 const $ = id => document.getElementById(id);
 const CX = 500, CY = 510, R = 430, RO = 470, RB = 450, PLATE = 118;
+const HAND_SCALE = 0.84, HAND_TIP = 298 * HAND_SCALE, LAMBDA = 200;
+const INK = '#3A2316', CREAM = '#FFF4E2';
+const SERIF = 'Songti SC, STSongti-SC-Bold, Noto Serif SC, Source Han Serif SC, SimSun, serif';
+const SECS = [['#E0413F', '#fff'], [CREAM, INK], ['#24935C', '#fff'], [CREAM, INK], ['#F5B935', INK], [CREAM, INK]];
+const AVA = [['#FDE2DF', '#C8282F'], ['#E1F3E7', '#16703F'], ['#FFF0C7', '#A87204']];
+const BULBS = [['#FF5A5A', 'hR'], ['#FFD045', 'hG'], ['#FFF4CF', 'hW']];
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const THEMES = {
-  cream: { name: '奶油', bg: '#f5eee3', bg2: '#fffaf2', ink: '#2a1f1a', muted: '#8b7b6d', line: '#e6dbca', card: '#fffcf7',
-    accent: '#e8553e', onAccent: '#ffffff', rim: '#2e221c', rimHi: '#5b473a', rimLo: '#140d0a', bulb: '#ffd36e', bulbOff: '#4a3a30',
-    secs: ['#f3a083', '#f7d48c', '#b6d39f', '#a2c5df', '#c9b4e3', '#f6bb98'], labels: ['#33251e'], fix: '#efe2cf', fixLabel: '#33251e', sep: '#fffaf2',
-    needle: '#2e221c', needleHi: '#8a7060', plate: '#fffaf2', plateRing: '#2e221c', glow: 'rgba(255,255,255,.42)', win: '#ffffff',
-    gone: '#e4dbcf', goneLabel: '#b2a597', hub: ['#e8553e', '#ffffff', '#2e221c'] },
-  night: { name: '夜场', bg: '#120f2b', bg2: '#2a2462', ink: '#f6f1ff', muted: '#a49dca', line: '#302b5e', card: '#1b1740',
-    accent: '#ffc94a', onAccent: '#2a1d00', rim: '#0b0920', rimHi: '#3a3380', rimLo: '#000000', bulb: '#ffd76a', bulbOff: '#2b2654',
-    secs: ['#ef476f', '#ffb238', '#1fbf9f', '#4d7cff', '#a35cf0', '#ff7a4a'], labels: ['#ffffff'], fix: '#2fd3e0', fixLabel: '#0b0920', sep: '#120f2b',
-    needle: '#ffc94a', needleHi: '#fff3c4', plate: '#1b1740', plateRing: '#ffc94a', glow: 'rgba(255,255,255,.3)', win: '#ffd76a',
-    gone: '#2b2752', goneLabel: '#6e679c', hub: ['#ffc94a', '#2a1d00', '#0b0920'] },
-  candy: { name: '糖果', bg: '#ffedf3', bg2: '#fffafc', ink: '#4b2638', muted: '#a8798e', line: '#f6d3e1', card: '#ffffff',
-    accent: '#ff4f8b', onAccent: '#ffffff', rim: '#ffffff', rimHi: '#ffffff', rimLo: '#ffc9dc', bulb: '#ff6f9f', bulbOff: '#ffd6e5',
-    secs: ['#ffb0c8', '#ffd6a5', '#fdef9e', '#bdeecd', '#b3dfff', '#d8c3ff'], labels: ['#4b2638'], fix: '#ffffff', fixLabel: '#4b2638', sep: '#ffffff',
-    needle: '#ff4f8b', needleHi: '#ffb0cb', plate: '#ffffff', plateRing: '#ffb3cc', glow: 'rgba(255,255,255,.55)', win: '#ff4f8b',
-    gone: '#f4e4eb', goneLabel: '#caa8b7', hub: ['#ff4f8b', '#ffffff', '#ffffff'] },
-  mono: { name: '黑白', bg: '#ebe9e3', bg2: '#faf9f5', ink: '#111111', muted: '#77736b', line: '#d8d4cb', card: '#ffffff',
-    accent: '#e63b2e', onAccent: '#ffffff', rim: '#111111', rimHi: '#3a3a3a', rimLo: '#000000', bulb: '#fff5dc', bulbOff: '#2c2c2c',
-    secs: ['#151515', '#faf9f5'], labels: ['#faf9f5', '#151515'], fix: '#e63b2e', fixLabel: '#ffffff', sep: '#151515',
-    needle: '#e63b2e', needleHi: '#ff9a90', plate: '#faf9f5', plateRing: '#111111', glow: 'rgba(230,59,46,.38)', win: '#e63b2e',
-    gone: '#b8b4ab', goneLabel: '#8a867d', hub: ['#e63b2e', '#ffffff', '#111111'] },
-  sketch: { name: '线稿', lineArt: true, bg: '#fbfaf7', bg2: '#ffffff', ink: '#2d2a26', muted: '#8c867f', line: '#ebe6df', card: '#ffffff',
-    accent: '#f04b45', onAccent: '#ffffff', rim: '#f04b45', bulb: '#f04b45',
-    secs: ['transparent'], labels: ['#3a342e'], sep: '#f04b45',
-    needle: '#f04b45', needleHi: '#f04b45', plate: '#fbfaf7', plateRing: '#f04b45', glow: 'rgba(240,75,69,.1)', win: '#f04b45',
-    gone: '#f1eeea', goneLabel: '#bdb7b0', hub: ['#ffffff', '#f04b45', '#f04b45'] }
-};
-const THEME_ORDER = ['cream', 'night', 'candy', 'mono', 'sketch'];
-
-const DEF = {
-  title: '今天吃什么',
-  list: '火锅\n烧烤\n日料\n披萨\n麻辣烫\n轻食沙拉\n螺蛳粉\n饺子',
-  count: 1, multi: 'each', after: 'keep', rng: 'equal', stopAt: 'random',
-  theme: 'cream', spinner: 'pointer', duration: 5, turns: 5, easing: 'smooth',
-  labels: true, lights: true, confetti: true, sound: true, popup: false
-};
-const isWheel = () => cfg.spinner === 'wheel';
+const RULE_DEF = { count: 1, multi: 'each', after: 'keep', rng: 'equal', stopAt: 'random' };
+const VIEW_DEF = { spinner: 'pointer', duration: 5, turns: 5, easing: 'smooth', labels: true, lights: true, confetti: true, sound: true, popup: true };
+const RULE_KEYS = Object.keys(RULE_DEF);
 const FIELDS = [
-  { tab: 'draw', key: 'count', type: 'stepper', label: '每次抽几个', min: 1, max: 99 },
-  { tab: 'draw', key: 'multi', type: 'seg', label: '抽多个时', opts: [['each', '一个一个转'], ['once', '转一次全出']], show: () => cfg.count > 1 },
-  { tab: 'draw', key: 'after', type: 'seg', label: '抽中后', opts: [['keep', '放回，还能再中'], ['remove', '移出转盘'], ['gray', '留着但置灰']] },
-  { tab: 'draw', key: 'rng', type: 'seg', label: '抽中概率', opts: [['equal', '人人相同'], ['weight', '按权重'], ['bag', '洗牌轮转']], hint: rngHint },
-  { tab: 'draw', key: 'stopAt', type: 'seg', label: '指针停在扇区的', opts: [['random', '随机位置'], ['center', '正中间']],
-    hint: () => '结果用浏览器的加密级随机数在开转前就定好，转盘只是把它演出来。' },
-  { tab: 'look', key: 'theme', type: 'themes', label: '主题' },
-  { tab: 'look', key: 'spinner', type: 'spinner', label: '转动方式' },
-  { tab: 'look', key: 'duration', type: 'range', label: '转动时长', min: 1, max: 15, step: 0.5, unit: () => ' 秒', group: '动画' },
-  { tab: 'look', key: 'turns', type: 'range', label: () => isWheel() ? '转几圈' : '来回摆几次', min: 1, max: 20, step: 1, unit: () => isWheel() ? ' 圈' : ' 次' },
-  { tab: 'look', key: 'easing', type: 'seg', label: '停下方式', opts: [['smooth', '平稳减速'], ['suspense', '慢慢挪到'], ['bounce', '冲过头再回弹'], ['accel', '先加速再减速']] },
-  { tab: 'look', key: 'labels', type: 'switch', label: '转盘上显示文字', group: '细节' },
-  { tab: 'look', key: 'lights', type: 'switch', label: '跑马灯', show: () => !THEMES[cfg.theme].lineArt },
-  { tab: 'look', key: 'confetti', type: 'switch', label: '抽中撒彩带' },
-  { tab: 'look', key: 'sound', type: 'switch', label: '音效' },
-  { tab: 'look', key: 'popup', type: 'switch', label: '抽中后弹出结果卡片' }
+  { sec: 'rule', key: 'count', type: 'stepper', label: '每次抽几个', min: 1, max: 99, show: () => !idOn() },
+  { sec: 'rule', key: 'multi', type: 'seg', label: '抽多个时', opts: [['each', '一个一个转'], ['once', '转一次全出']], show: () => !idOn() && RU().count > 1 },
+  { sec: 'rule', key: 'after', type: 'seg', label: '抽中后', opts: [['keep', '放回，还能再中'], ['remove', '移出，不再抽中'], ['gray', '置灰，不再抽中']], hint: afterHint },
+  { sec: 'rule', key: 'rng', type: 'seg', label: '抽中概率', opts: [['equal', '人人相同'], ['weight', '按权重'], ['bag', '洗牌轮转']], hint: rngHint },
+  { sec: 'rule', key: 'stopAt', type: 'seg', label: '指针停在扇区的', opts: [['random', '随机位置'], ['center', '正中间']],
+    hint: () => '结果用浏览器的加密级随机数在开转前就定好，转盘和签筒只是把它演出来。' },
+  { sec: 'wheel', key: 'spinner', type: 'spinner', label: '转动方式' },
+  { sec: 'wheel', key: 'duration', type: 'range', label: '转动时长', min: 1, max: 15, step: 0.5, unit: () => ' 秒' },
+  { sec: 'wheel', key: 'turns', type: 'range', label: () => isWheel() ? '转几圈' : '来回摆几次', min: 1, max: 20, step: 1, unit: () => isWheel() ? ' 圈' : ' 次' },
+  { sec: 'wheel', key: 'easing', type: 'seg', label: '停下方式', opts: [['smooth', '平稳减速'], ['suspense', '慢慢挪到'], ['bounce', '冲过头再回弹'], ['accel', '先加速再减速']] },
+  { sec: 'fx', key: 'labels', type: 'switch', label: '转盘上显示文字' },
+  { sec: 'fx', key: 'lights', type: 'switch', label: '圣诞彩灯' },
+  { sec: 'fx', key: 'confetti', type: 'switch', label: '抽中撒彩带' },
+  { sec: 'fx', key: 'sound', type: 'switch', label: '音效' },
+  { sec: 'fx', key: 'popup', type: 'switch', label: '转盘抽中后弹出结果卡片', hint: () => idOn() ? '「先选我是谁」的名单组总会弹出，方便交给下一位。' : '' }
 ];
 const FIELD = {};
 FIELDS.forEach(f => { FIELD[f.key] = f; });
 
 function rngHint() {
-  if (cfg.rng === 'weight') return '在名单里写成「名字 | 3」设置权重，权重越大扇区越大、越容易中；不写默认是 1。';
-  if (cfg.rng === 'bag') return cfg.after === 'keep'
+  if (RU().rng === 'weight') return '在名单页每一项右边调权重（或批量编辑里写「名字 | 3」），权重越大扇区越大、越容易中。';
+  if (RU().rng === 'bag') return RU().after === 'keep'
     ? '像洗牌发牌：一轮里每一项都会被抽到一次，全部轮过才重新洗牌。'
     : '只在「抽中后：放回」时起作用，现在和「人人相同」一样。';
   return '';
 }
+function afterHint() {
+  if (idOn() && RU().after !== 'keep') return '配合「先选我是谁」就是交换礼物：每人抽一次、每人只被抽中一次，也不会让最后一个人只剩自己可抽。';
+  return '';
+}
 
-let cfg = Object.assign({}, DEF);
-const run = { sig: '', drawn: [], bag: [], history: [], last: [] };
-let items = [], layout = [];
-const highlight = new Set();
-const st = { ph: 0, wr: 0 };
-let spinning = false, relayTimer = 0, idleTimer = 0, modalPicked = [];
+/* ---------- 数据 ---------- */
+let cfg = Object.assign({ tab: 'wheel' }, VIEW_DEF);
+let groups = [], activeId = '', runs = {}, history = [];
+const uid = () => Math.random().toString(36).slice(2, 8) + (Date.now() % 1679616).toString(36);
+const mk = (name, w) => ({ id: uid(), name, w: w || 1, on: true });
+function defaultGroups() {
+  return [
+    { id: uid(), name: '圣诞交换礼物', identity: true, rules: Object.assign({}, RULE_DEF, { after: 'remove' }),
+      items: ['小明', '小红', '小刚', '小美', '阿杰', '阿琳', '大卫', '安娜'].map(n => mk(n)) },
+    { id: uid(), name: '今天吃点啥？', identity: false, rules: Object.assign({}, RULE_DEF),
+      items: ['🍲 火锅', '🍢 烧烤', '🍣 日料', '🍕 披萨', '🌶️ 麻辣烫', '🥗 轻食沙拉', '🍜 螺蛳粉', '🥟 饺子'].map(n => mk(n)) }
+  ];
+}
+const G = () => groups.find(g => g.id === activeId) || groups[0];
+const RU = () => G().rules;
+function RN() {
+  const g = G();
+  if (!runs[g.id]) runs[g.id] = { drawn: [], bag: [], done: [], me: null, last: [], lastWho: null };
+  return runs[g.id];
+}
+const idOn = () => !!G().identity;
+const isWheel = () => cfg.spinner === 'wheel';
+const items = () => G().items.filter(i => i.on);
+const itemById = id => G().items.find(i => i.id === id);
+function me() {
+  const r = RN(), it = r.me && itemById(r.me);
+  return idOn() && it && it.on && !r.done.includes(it.id) ? it : null;
+}
+function drawersLeft() { const d = new Set(RN().done); return items().filter(i => !d.has(i.id)); }
+function visible() { const d = new Set(RN().drawn); return RU().after === 'remove' ? items().filter(i => !d.has(i.id)) : items(); }
+function pool() {
+  const d = new Set(RN().drawn), m = me(), keep = RU().after === 'keep';
+  return items().filter(i => (keep || !d.has(i.id)) && (!m || i.id !== m.id));
+}
+function cleanRun() {
+  const ids = new Set(G().items.map(i => i.id)), r = RN();
+  ['drawn', 'bag', 'done'].forEach(k => { r[k] = r[k].filter(id => ids.has(id)); });
+  if (r.me && !ids.has(r.me)) r.me = null;
+}
 
-/* ---------- 存取 ---------- */
-function valid(k, v) {
+function validRule(k, v) {
   const f = FIELD[k];
-  if (typeof v !== typeof DEF[k]) return false;
-  if (f && f.opts) return f.opts.some(o => o[0] === v);
-  if (f && (f.type === 'range' || f.type === 'stepper')) return v >= f.min && v <= f.max;
-  if (k === 'theme') return v in THEMES;
+  if (typeof v !== typeof RULE_DEF[k]) return false;
+  if (f.opts) return f.opts.some(o => o[0] === v);
+  return v >= f.min && v <= f.max;
+}
+function validView(k, v) {
+  const f = FIELD[k];
+  if (typeof v !== typeof VIEW_DEF[k]) return false;
   if (k === 'spinner') return v === 'pointer' || v === 'wheel';
+  if (f.opts) return f.opts.some(o => o[0] === v);
+  if (f.type === 'range') return v >= f.min && v <= f.max;
   return true;
 }
-function load() {
-  let d = null;
-  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
-  if (!d) {
-    try { const o = JSON.parse(localStorage.getItem(OLD_KEY)); if (o && o.cfg && typeof o.cfg.list === 'string') cfg.list = o.cfg.list; } catch (e) { /* 旧版数据读不出就用默认 */ }
-    return;
-  }
-  const c = d.cfg || {}, r = d.run || {};
-  for (const k in DEF) if (k in c && valid(k, c[k])) cfg[k] = c[k];
-  const ints = a => Array.isArray(a) ? a.filter(Number.isInteger) : [];
-  run.sig = typeof r.sig === 'string' ? r.sig : '';
-  run.drawn = ints(r.drawn);
-  run.bag = ints(r.bag);
-  run.history = Array.isArray(r.history) ? r.history.filter(x => x && Array.isArray(x.names)).slice(0, 200) : [];
-  run.last = Array.isArray(r.last) ? r.last.map(String) : [];
+function cleanGroup(g) {
+  if (!g || !Array.isArray(g.items)) return null;
+  const rules = Object.assign({}, RULE_DEF);
+  if (g.rules) RULE_KEYS.forEach(k => { if (validRule(k, g.rules[k])) rules[k] = g.rules[k]; });
+  return {
+    id: String(g.id || uid()), name: String(g.name || '名单组').slice(0, 20), identity: !!g.identity, rules,
+    items: g.items.filter(i => i && i.name).map(i => ({ id: String(i.id || uid()), name: String(i.name).slice(0, 30), w: Number(i.w) > 0 ? Number(i.w) : 1, on: i.on !== false }))
+  };
 }
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify({ cfg, run })); } catch (e) { /* 无痕模式存不了 */ }
-}
-
-/* ---------- 名单 ---------- */
-function parse() {
-  items = [];
-  cfg.list.split(/\r?\n/).forEach(line => {
+function parseLines(text) {
+  const out = [];
+  String(text).split(/\r?\n/).forEach(line => {
     let name = line.trim(), w = 1;
     if (!name) return;
     const m = name.match(/^(.*?)\s*[|｜]\s*(\d+(?:\.\d+)?)$/);
     if (m && m[1]) { name = m[1]; w = parseFloat(m[2]) || 1; }
-    items.push({ id: items.length, name, w });
+    out.push({ name: name.slice(0, 30), w });
   });
-  const sig = items.map(i => i.name + '\u0001' + i.w).join('\n');
-  if (sig !== run.sig) { run.sig = sig; run.drawn = []; run.bag = []; }
+  return out;
 }
-const listText = arr => arr.map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n');
-const drawnSet = () => new Set(run.drawn);
-function visible() { const d = drawnSet(); return cfg.after === 'remove' ? items.filter(i => !d.has(i.id)) : items; }
-function pool() { const d = drawnSet(); return cfg.after === 'keep' ? items : items.filter(i => !d.has(i.id)); }
-function computeLayout() {
-  const vis = visible();
-  layout = [];
-  if (!vis.length) return;
-  const ws = vis.map(i => cfg.rng === 'weight' ? i.w : 1);
-  const tot = ws.reduce((a, b) => a + b, 0);
-  for (let c = 0; c < (isWheel() ? 2 : 1); c++) {
-    let a = -90 + 180 * c;
-    vis.forEach((it, k) => { const s = { it, k, c, a0: a, a1: a + 180 * ws[k] / tot }; a = s.a1; layout.push(s); });
-    layout[layout.length - 1].a1 = 90 + 180 * c;
+function load() {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { d = null; }
+  if (d && Array.isArray(d.groups)) {
+    groups = d.groups.map(cleanGroup).filter(Boolean);
+    const c = d.cfg || {};
+    Object.keys(VIEW_DEF).forEach(k => { if (k in c && validView(k, c[k])) cfg[k] = c[k]; });
+    if (['wheel', 'sign', 'list', 'settings'].includes(c.tab)) cfg.tab = c.tab;
+    activeId = String(d.activeId || '');
+    if (d.runs && typeof d.runs === 'object') {
+      for (const id in d.runs) {
+        const r = d.runs[id] || {}, arr = a => Array.isArray(a) ? a.map(String) : [];
+        runs[id] = { drawn: arr(r.drawn), bag: arr(r.bag), done: arr(r.done), me: r.me ? String(r.me) : null, last: arr(r.last), lastWho: r.lastWho ? String(r.lastWho) : null };
+      }
+    }
+    history = Array.isArray(d.history) ? d.history.filter(x => x && Array.isArray(x.names)).slice(0, 300) : [];
   }
+  if (!groups.length) {
+    groups = defaultGroups();
+    try {
+      const o = JSON.parse(localStorage.getItem(V2_KEY));
+      if (o && o.cfg && typeof o.cfg.list === 'string') {
+        const its = parseLines(o.cfg.list).map(x => mk(x.name, x.w));
+        if (its.length) groups.push({ id: uid(), name: (o.cfg.title || '我的名单').slice(0, 20), identity: false, rules: Object.assign({}, RULE_DEF), items: its });
+      }
+    } catch (e) { /* 旧版数据读不出就只用默认名单 */ }
+  }
+  if (!groups.some(g => g.id === activeId)) activeId = groups[0].id;
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify({ cfg, groups, activeId, runs, history })); } catch (e) { /* 无痕模式存不了 */ }
 }
 
 /* ---------- 随机 ---------- */
@@ -458,183 +625,274 @@ function randInt(n) {
   do cr.getRandomValues(a); while (a[0] >= lim);
   return a[0] % n;
 }
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
 function pickOne(ex) {
-  const p = pool().filter(i => !ex.has(i.id));
+  const rules = RU(), m = me();
+  let p = pool().filter(i => !ex.has(i.id));
+  if (m && rules.after !== 'keep') {
+    // 交换礼物防死锁：不能让最后一个没抽的人只剩自己可抽
+    const left = drawersLeft().filter(i => i.id !== m.id), d = new Set(RN().drawn);
+    const open = items().filter(i => !d.has(i.id));
+    const safe = p.filter(c => {
+      const rest = open.filter(x => x.id !== c.id);
+      return !(left.length === 1 && rest.length === 1 && left[0].id === rest[0].id);
+    });
+    if (safe.length) p = safe;
+  }
   if (!p.length) return null;
-  if (cfg.rng === 'weight') {
+  if (rules.rng === 'weight') {
     const tot = p.reduce((s, i) => s + i.w, 0);
     let r = rand() * tot;
     for (const i of p) { r -= i.w; if (r < 0) return i; }
     return p[p.length - 1];
   }
-  if (cfg.rng === 'bag' && cfg.after === 'keep') {
-    const ok = new Set(p.map(i => i.id));
-    let cand = run.bag.filter(id => ok.has(id));
-    if (!cand.length) { run.bag = items.map(i => i.id); cand = run.bag.filter(id => ok.has(id)); }
+  if (rules.rng === 'bag' && rules.after === 'keep') {
+    const r = RN(), ok = new Set(p.map(i => i.id));
+    let cand = r.bag.filter(id => ok.has(id));
+    if (!cand.length) { r.bag = items().map(i => i.id); cand = r.bag.filter(id => ok.has(id)); }
     const id = cand[randInt(cand.length)];
-    run.bag = run.bag.filter(x => x !== id);
-    return items[id];
+    r.bag = r.bag.filter(x => x !== id);
+    return itemById(id);
   }
   return p[randInt(p.length)];
 }
 
-/* ---------- 几何 ---------- */
+/* ---------- 小工具 ---------- */
 const f2 = n => Math.round(n * 100) / 100;
 const mod = (a, m) => ((a % m) + m) % m;
-function pt(r, a) { const t = a * Math.PI / 180; return [f2(CX + r * Math.sin(t)), f2(CY - r * Math.cos(t))]; }
-function sectorD(r, a0, a1) {
-  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
-  return `M${CX} ${CY}L${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}Z`;
-}
-function arcD(r, a0, a1) {
-  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
-  return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`;
-}
-const halfDisc = r => `M${CX - r} ${CY}A${r} ${r} 0 0 1 ${CX + r} ${CY}Z`;
-const halfRing = (r1, r2) => `M${CX - r2} ${CY}A${r2} ${r2} 0 0 1 ${CX + r2} ${CY}L${CX + r1} ${CY}A${r1} ${r1} 0 0 0 ${CX - r1} ${CY}Z`;
+const wait = ms => new Promise(r => setTimeout(r, ms));
 function el(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
   if (parent) parent.appendChild(e);
   return e;
 }
-const cw = ch => /[ᄀ-￿]/.test(ch) ? 1 : 0.6;
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  kids.forEach(k => e.append(k));
+  return e;
+}
+const cw = ch => ch.codePointAt(0) >= 0x1100 ? 1 : 0.6;
 function textEm(s) { let w = 0; for (const ch of s) w += cw(ch); return w; }
 function cut(s, maxEm) {
   let w = 0, out = '';
   for (const ch of s) { const c = cw(ch); if (w + c > maxEm - 0.8) return out + '…'; w += c; out += ch; }
   return out;
 }
+function isEmo(ch) { const c = ch.codePointAt(0); return c >= 0x1F000 || (c >= 0x2600 && c <= 0x27BF) || (c >= 0x2B00 && c <= 0x2BFF); }
+function split(name) {
+  const first = [...name][0] || '';
+  if (first && isEmo(first)) {
+    const m = name.match(/^(\S+)\s*(.*)$/);
+    return { emo: m[1], text: m[2] || m[1] };
+  }
+  return { emo: '', text: name };
+}
+function avatar(it, cls) {
+  const idx = Math.max(0, G().items.indexOf(it)), [bg, fg] = AVA[idx % AVA.length], sp = split(it.name);
+  const a = h('span', { class: cls || 'ava', style: `background:${bg};color:${fg}` });
+  a.textContent = sp.emo || [...sp.text][0] || '?';
+  return a;
+}
+let toastT = 0;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- 转盘几何 ---------- */
+function pt(r, a) { const t = a * Math.PI / 180; return [f2(CX + r * Math.sin(t)), f2(CY - r * Math.cos(t))]; }
+function arcD(r, a0, a1) {
+  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
+  return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`;
+}
+const halfDisc = r => `M${CX - r} ${CY}A${r} ${r} 0 0 1 ${CX + r} ${CY}Z`;
+let layout = [], waveA = 0, waveRd = HAND_TIP;
+const copies = () => isWheel() ? 2 : 1;
+function computeLayout() {
+  const vis = visible();
+  layout = [];
+  if (!vis.length) return;
+  const n = vis.length, cp = copies();
+  const ws = vis.map(i => RU().rng === 'weight' ? i.w : 1), tot = ws.reduce((a, b) => a + b, 0);
+  const sign = j => (!isWheel() && (j === 0 || j === n)) ? 0 : (mod(j, 2) ? 1 : -1);
+  for (let c = 0; c < cp; c++) {
+    let a = -90 + 180 * c;
+    vis.forEach((it, k) => {
+      const s = { it, k, c, a0: a, a1: a + 180 * ws[k] / tot, s0: sign(c * n + k), s1: sign(c * n + k + 1) };
+      a = s.a1; layout.push(s);
+    });
+    layout[layout.length - 1].a1 = 90 + 180 * c;
+  }
+  const minSpan = Math.min(...layout.map(s => s.a1 - s.a0));
+  waveA = n > 1 ? Math.min(6, minSpan * 0.17) : 0;
+  waveRd = isWheel() ? R - 24 : HAND_TIP;
+}
+function waveOff(r, sg) {
+  if (!sg || !waveA) return 0;
+  const t = Math.min(1, Math.max(0, (r - PLATE) / 90)), sm = t * t * (3 - 2 * t);
+  return sg * waveA * sm * Math.sin(2 * Math.PI * (r - waveRd) / LAMBDA);
+}
+function boundary(a, sg) {
+  const pts = [], r0 = PLATE * 0.6;
+  for (let i = 0; i <= 36; i++) { const r = r0 + (R - r0) * i / 36; pts.push(pt(r, a + waveOff(r, sg))); }
+  return pts;
+}
+function sectorD(s) {
+  const b0 = boundary(s.a0, s.s0), b1 = boundary(s.a1, s.s1).reverse();
+  const big = (s.a1 + waveOff(R, s.s1)) - (s.a0 + waveOff(R, s.s0)) > 180 ? 1 : 0;
+  return `M${CX} ${CY}L` + b0.map(p => p.join(' ')).join('L') + `A${R} ${R} 0 ${big} 1 ${b1[0].join(' ')}L` + b1.map(p => p.join(' ')).join('L') + 'Z';
+}
+function sectorIndex(a) {
+  for (let i = 0; i < layout.length; i++) if (a < layout[i].a1) return i;
+  return layout.length - 1;
+}
 
 /* ---------- 画转盘 ---------- */
 const dial = $('dial'), gBack = $('gBack'), gWheel = $('gWheel'), gSecs = $('gSecs'), cur = $('cur'), gOver = $('gOver'),
-  gBulbs = $('bulbs'), gGhosts = $('gGhosts'), gNeedle = $('gNeedle'), gFlap = $('gFlap'), gBase = $('gBase'), arcDefs = $('arcDefs');
+  gBulbs = $('bulbs'), gBase = $('gBase'), gGhosts = $('gGhosts'), gNeedle = $('gNeedle'), gHub = $('gHub'), gFlap = $('gFlap'), arcDefs = $('arcDefs');
+const HAND = 'M-26 -136C-32 -150 -34 -168 -30 -184C-27 -196 -20 -200 -14 -199L-14 -286A12 12 0 0 1 10 -286L10 -204A8 8 0 0 1 24 -202A8 8 0 0 1 34 -192A8 8 0 0 1 36 -176C37 -160 32 -142 26 -136Z';
+const HAND_LINES = 'M-31 -170C-19 -165 -11 -173 -9 -188M20 -197C17 -189 18 -183 22 -178M31 -186C27 -180 28 -174 32 -169';
+function drawHand(parent, s) {
+  const g = el('g', { transform: `scale(${s})` }, parent);
+  el('rect', { x: -30, y: -122, width: 60, height: 86, rx: 12, fill: '#D9343A', stroke: INK, 'stroke-width': 6 }, g);
+  el('path', { d: HAND, fill: '#fff', stroke: INK, 'stroke-width': 6.5, 'stroke-linejoin': 'round' }, g);
+  el('path', { d: HAND_LINES, fill: 'none', stroke: INK, 'stroke-width': 5, 'stroke-linecap': 'round' }, g);
+  el('rect', { x: -38, y: -143, width: 76, height: 30, rx: 15, fill: '#fff', stroke: INK, 'stroke-width': 6 }, g);
+  return g;
+}
+function starD(r1, r2) {
+  let d = '';
+  for (let i = 0; i < 10; i++) { const r = i % 2 ? r2 : r1, a = Math.PI / 5 * i; d += (i ? 'L' : 'M') + f2(r * Math.sin(a)) + ' ' + f2(-r * Math.cos(a)); }
+  return d + 'Z';
+}
 let needleRot = null, needleSway = null, flapRot = null, ghosts = [];
-
+const FLAP_S = 0.55, FLAP_Y = 9;
 function renderFrame() {
-  const t = THEMES[cfg.theme];
-  [gBack, gOver, gBulbs, gNeedle, gGhosts, gFlap, gBase].forEach(g => { g.textContent = ''; });
-  if (t.lineArt) {
-    el('path', { d: arcD(R, -90, 90), fill: 'none', stroke: t.rim, 'stroke-width': 6, 'stroke-linecap': 'round' }, gOver);
-    el('path', { d: halfDisc(PLATE), fill: t.plate, stroke: t.plateRing, 'stroke-width': 4 }, gOver);
-    el('line', { x1: CX - R - 30, y1: CY, x2: CX + R + 30, y2: CY, stroke: t.rim, 'stroke-width': 6, 'stroke-linecap': 'round' }, gBase);
-  } else {
-    el('path', { d: halfDisc(RO), fill: t.rim, filter: 'url(#fDrop)' }, gBack);
-    el('path', { d: halfDisc(R), fill: 'url(#gVig)' }, gOver);
-    el('path', { d: halfDisc(R), fill: 'url(#gTop)' }, gOver);
-    el('path', { d: arcD(R + 1.5, -90, 90), fill: 'none', stroke: t.rimLo, 'stroke-width': 3 }, gOver);
-    el('path', { d: arcD(RO - 3, -90, 90), fill: 'none', stroke: t.rimHi, 'stroke-width': 2, opacity: 0.9 }, gOver);
-    el('path', { d: halfDisc(PLATE + 14), fill: t.rim, opacity: 0.16 }, gOver);
-    el('path', { d: halfDisc(PLATE), fill: t.plate, stroke: t.plateRing, 'stroke-width': 5 }, gOver);
-    el('rect', { x: CX - RO - 18, y: CY - 6, width: 2 * RO + 36, height: 44, rx: 16, fill: t.rim, filter: 'url(#fDrop)' }, gBase);
-    el('rect', { x: CX - RO - 10, y: CY - 3, width: 2 * RO + 20, height: 2.5, rx: 1.2, fill: t.rimHi, opacity: 0.8 }, gBase);
-    if (cfg.lights) {
-      const n = 17;
-      for (let i = 0; i < n; i++) {
-        const [x, y] = pt(RB, -84 + 168 * i / (n - 1));
-        const b = el('g', { class: 'bulb', transform: `translate(${x} ${y})`, style: `--i:${i};--k:${2 - (i % 3)}` }, gBulbs);
-        el('circle', { r: 7.5, fill: t.bulbOff }, b);
-        const on = el('g', { class: 'on' }, b);
-        el('circle', { r: 21, fill: 'url(#gHalo)' }, on);
-        el('circle', { r: 7.5, fill: t.bulb }, on);
-        el('circle', { r: 2.6, cx: -2.2, cy: -2.4, fill: '#fff', opacity: 0.85 }, on);
-      }
+  [gBack, gOver, gBulbs, gBase, gGhosts, gNeedle, gHub, gFlap].forEach(g => { g.textContent = ''; });
+  dial.setAttribute('viewBox', isWheel() ? '0 -64 1000 644' : '0 0 1000 580');
+  el('path', { d: halfDisc(RO), fill: '#17603C', filter: 'url(#fDrop)' }, gBack);
+  el('path', { d: halfDisc(R), fill: 'url(#gVig)' }, gOver);
+  el('path', { d: halfDisc(R), fill: 'url(#gTop)' }, gOver);
+  el('path', { d: arcD(R + 4, -90, 90), fill: 'none', stroke: '#F5BB33', 'stroke-width': 4 }, gOver);
+  el('path', { d: arcD(RO - 3, -90, 90), fill: 'none', stroke: '#2E8A5A', 'stroke-width': 3 }, gOver);
+  el('path', { d: halfDisc(PLATE + 12), fill: '#17603C', opacity: 0.16 }, gOver);
+  el('path', { d: halfDisc(PLATE), fill: CREAM, stroke: '#F5BB33', 'stroke-width': 5 }, gOver);
+  el('path', { d: arcD(PLATE - 20, -90, 90), fill: 'none', stroke: '#F5BB33', 'stroke-width': 3, 'stroke-dasharray': '1 11', 'stroke-linecap': 'round' }, gOver);
+  el('rect', { x: CX - RO - 16, y: CY - 5, width: 2 * RO + 32, height: 42, rx: 18, fill: '#17603C', filter: 'url(#fDrop)' }, gBase);
+  el('rect', { x: CX - RO - 6, y: CY - 1, width: 2 * RO + 12, height: 3, rx: 1.5, fill: '#F5BB33' }, gBase);
+  if (cfg.lights) {
+    const n = 17;
+    for (let i = 0; i < n; i++) {
+      const [x, y] = pt(RB, -84 + 168 * i / (n - 1)), [col, halo] = BULBS[i % 3];
+      const b = el('g', { transform: `translate(${x} ${y})`, style: `--i:${i};--k:${2 - (i % 3)}` }, gBulbs);
+      el('circle', { r: 9, fill: '#0F4A2D' }, b);
+      const on = el('g', { class: 'on' }, b);
+      el('circle', { r: 25, fill: `url(#${halo})` }, on);
+      el('circle', { r: 9, fill: col }, on);
+      el('circle', { r: 3, cx: -2.6, cy: -2.8, fill: '#fff', opacity: 0.85 }, on);
     }
   }
   ghosts = []; needleRot = needleSway = flapRot = null;
-  gGhosts.style.display = spinning ? '' : 'none';
+  gGhosts.style.display = busy ? '' : 'none';
   if (!isWheel()) {
-    const L = R * 0.64;
-    const shape = (parent, fill) => {
-      el('path', { d: `M-12 0L-4.5 ${-L + 58}L4.5 ${-L + 58}L12 0Z`, fill, stroke: fill, 'stroke-width': 3, 'stroke-linejoin': 'round' }, parent);
-      el('path', { d: `M0 ${-L}L-21 ${-L + 54}L21 ${-L + 54}Z`, fill, stroke: fill, 'stroke-width': 10, 'stroke-linejoin': 'round' }, parent);
-    };
     for (let i = 0; i < 4; i++) {
-      const g = el('g', { opacity: [0.2, 0.13, 0.08, 0.04][i] }, gGhosts);
-      shape(g, t.needle); ghosts.push(g);
+      const g = el('g', { opacity: [0.32, 0.22, 0.13, 0.07][i] }, gGhosts);
+      el('path', { d: HAND, fill: '#fff', transform: `scale(${HAND_SCALE})` }, g);
+      ghosts.push(g);
     }
     needleRot = el('g', {}, gNeedle);
-    needleSway = el('g', { filter: t.lineArt ? '' : 'url(#fSoft)' }, needleRot);
-    shape(needleSway, t.needle);
-    if (!t.lineArt) el('path', { d: `M0 -20L0 ${-L + 66}`, stroke: t.needleHi, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.7 }, needleSway);
+    needleSway = el('g', { filter: 'url(#fSoft)' }, needleRot);
+    drawHand(needleSway, HAND_SCALE);
   } else {
-    flapRot = el('g', {}, gFlap);
-    const fg = el('g', { filter: t.lineArt ? '' : 'url(#fSoft)' }, flapRot);
-    el('path', { d: 'M-24 0L24 0L0 86Z', fill: t.accent, stroke: t.lineArt ? t.accent : '#fff', 'stroke-width': 5, 'stroke-linejoin': 'round' }, fg);
-    el('circle', { r: 11, fill: t.lineArt ? '#fff' : t.rim, stroke: t.accent, 'stroke-width': 5 }, fg);
+    flapRot = el('g', { filter: 'url(#fSoft)' }, gFlap);
+    drawHand(flapRot, FLAP_S);
   }
-  setSway(!spinning);
+  const hub = el('g', { transform: `translate(${CX} ${CY})`, filter: 'url(#fSoft)' }, gHub);
+  el('circle', { r: 58, fill: '#D9343A', stroke: '#fff', 'stroke-width': 8 }, hub);
+  el('circle', { r: 46, fill: 'none', stroke: '#F5BB33', 'stroke-width': 2.5, 'stroke-dasharray': '2 6', 'stroke-linecap': 'round' }, hub);
+  el('path', { d: starD(27, 11.5), fill: '#F5BB33', stroke: '#FFE7A3', 'stroke-width': 2, 'stroke-linejoin': 'round' }, hub);
+  setSway(!busy);
   applyPose();
 }
-
 function colorOf(s, n) {
-  const t = THEMES[cfg.theme], len = t.secs.length;
-  if (isWheel() && n > 1 && n % len === 1 && s.k === n - 1 && !t.lineArt) return [t.fix, t.fixLabel];
-  return [t.secs[s.k % len], t.labels[(s.k % len) % t.labels.length]];
+  let k = s.k % SECS.length;
+  if (isWheel() && n > 1 && s.k === n - 1) {
+    const first = 0, prev = (n - 2) % SECS.length;
+    if (k === first || SECS[k][0] === SECS[first][0]) k = [2, 4].find(x => x !== prev) || 2;
+  }
+  return SECS[k];
 }
-
 function labelPlan() {
   if (!cfg.labels || !layout.length) return { mode: 'none' };
-  const scale = Math.max(0.25, (dial.getBoundingClientRect().width || 600) / 1000);
+  const scale = Math.max(0.25, (dial.getBoundingClientRect().width || 500) / 1000);
   const fsMin = 12 / scale, fsMax = Math.min(46, 27 / scale);
-  const rIn = PLATE + 26, rOut = R - 20;
-  const secs = layout.filter(s => s.c === 0);
-  const rT = R * 0.8;
+  const rIn = PLATE + 26, rOut = R - 22, secs = layout.filter(s => s.c === 0), rT = R * 0.8;
   let fsA = fsMax;
-  secs.forEach(s => { fsA = Math.min(fsA, rT * (s.a1 - s.a0) * Math.PI / 180 * 0.82 / Math.max(textEm(s.it.name), 1.4)); });
+  secs.forEach(s => { fsA = Math.min(fsA, rT * (s.a1 - s.a0) * Math.PI / 180 * 0.7 / Math.max(textEm(s.it.name), 1.4)); });
   fsA = Math.min(fsA, (rOut - rIn) * 0.3);
   if (fsA >= Math.max(fsMin * 1.1, 18)) return { mode: 'arc', fs: fsA, r: rT };
   const k = Math.min(...secs.map(s => s.a1 - s.a0)) * Math.PI / 180;
-  const fs = Math.min(fsMax * 0.9, k * R * 0.82 * 0.6);
+  const fs = Math.min(fsMax * 0.9, k * R * 0.82 * 0.56);
   if (fs < 9 / scale) return { mode: 'none' };
   return { mode: 'radial', fs, rIn, rOut };
 }
-
-function renderSectors(fade) {
+const highlight = new Set();
+let curIdx = -1;
+function renderSectors(enter) {
   gSecs.textContent = ''; arcDefs.textContent = '';
   dial.classList.remove('landed');
-  const t = THEMES[cfg.theme];
+  gSecs.classList.toggle('enter', !!enter && !reduced());
   if (!layout.length) {
-    el('path', { d: arcD(R - 40, -90, 90), fill: 'none', stroke: t.muted, 'stroke-width': 3, 'stroke-dasharray': '2 14', 'stroke-linecap': 'round', opacity: 0.6 }, gSecs);
-    el('text', { x: CX, y: CY - 190, 'text-anchor': 'middle', 'font-size': 40, 'font-weight': 700, fill: t.muted }, gSecs).textContent =
-      items.length ? '全部抽完了' : '名单还是空的';
+    el('path', { d: arcD(R - 50, -90, 90), fill: 'none', stroke: '#C9B39A', 'stroke-width': 4, 'stroke-dasharray': '2 16', 'stroke-linecap': 'round' }, gSecs);
+    el('text', { x: CX, y: CY - 220, 'text-anchor': 'middle', 'font-size': 42, 'font-weight': 800, fill: '#B49A80' }, gSecs).textContent =
+      items().length ? '全部抽完啦' : '名单还是空的';
     return;
   }
-  const n = layout.length / (isWheel() ? 2 : 1), drawn = drawnSet(), gray = cfg.after === 'gray';
-  const plan = labelPlan();
-  if (fade) gSecs.classList.add('fadein'); else gSecs.classList.remove('fadein');
+  const n = layout.length / copies(), drawn = new Set(RN().drawn), gray = RU().after === 'gray', m = me(), plan = labelPlan();
   layout.forEach((s, idx) => {
     const g = el('g', { class: 'sec' }, gSecs);
     s.g = g;
+    if (enter) {
+      const mid = (s.a0 + s.a1) / 2 * Math.PI / 180;
+      g.style.setProperty('--dx', f2(-Math.sin(mid) * 70) + 'px');
+      g.style.setProperty('--dy', f2(Math.cos(mid) * 70) + 'px');
+      g.style.animationDelay = (s.k * 55) + 'ms';
+    }
     let [fill, lab] = colorOf(s, n);
     const off = gray && drawn.has(s.it.id);
-    if (off) { fill = t.gone; lab = t.goneLabel; }
-    el('path', { d: sectorD(R, s.a0, s.a1), fill, stroke: t.lineArt ? 'none' : t.sep, 'stroke-width': n > 40 ? 1 : 2.5, 'stroke-linejoin': 'round' }, g);
+    if (off) { fill = '#EFE5D8'; lab = '#BCA990'; }
+    el('path', { d: sectorD(s), fill, stroke: '#fff', 'stroke-width': n > 40 ? 1.2 : 3.5, 'stroke-linejoin': 'round' }, g);
+    if (m && s.it.id === m.id) {
+      el('path', { d: sectorD(s), fill: 'url(#hatch)' }, g);
+      const [bx, by] = pt(PLATE + 40, (s.a0 + s.a1) / 2);
+      el('circle', { cx: bx, cy: by, r: 21, fill: '#F5BB33', stroke: '#fff', 'stroke-width': 3 }, g);
+      el('text', { x: bx, y: by, dy: '0.36em', 'text-anchor': 'middle', 'font-size': 21, 'font-weight': 900, fill: INK }, g).textContent = '我';
+    }
     if (plan.mode !== 'none') drawLabel(g, s, idx, plan, lab, off);
   });
-  if (t.lineArt) layout.forEach(s => {
-    if (!isWheel() && s.a0 <= -90) return;
-    const [x, y] = pt(R, s.a0);
-    el('line', { x1: CX, y1: CY, x2: x, y2: y, stroke: t.sep, 'stroke-width': n > 40 ? 2 : 5, 'stroke-linecap': 'round' }, gSecs);
-  });
-  el('circle', { class: 'veil', cx: CX, cy: CY, r: R + 1, fill: t.bg }, gSecs);
-  layout.forEach(s => { if (highlight.has(s.it.id)) markWin(s, true); });
-  cur.setAttribute('fill', t.glow);
+  el('circle', { class: 'veil', cx: CX, cy: CY, r: R + 1, fill: '#FFF8EF' }, gSecs);
+  layout.forEach(s => { if (highlight.has(s.it.id)) markWin(s); });
+  cur.setAttribute('fill', 'rgba(255,255,255,.42)');
   curIdx = -1;
-  setSway(!spinning);
+  setSway(!busy);
 }
-
 function drawLabel(g, s, idx, plan, color, off) {
   const span = s.a1 - s.a0, mid = (s.a0 + s.a1) / 2;
   let name = s.it.name;
-  const attrs = { fill: color, 'font-weight': 700, 'font-size': f2(plan.fs) };
+  const attrs = { fill: color, 'font-weight': 800, 'font-size': f2(plan.fs) };
   if (off) attrs['text-decoration'] = 'line-through';
   if (plan.mode === 'arc') {
     const rr = plan.r - plan.fs * 0.36, id = 'arc' + idx;
     el('path', { id, d: arcD(rr, s.a0, s.a1) }, arcDefs);
-    const maxEm = rr * span * Math.PI / 180 * 0.9 / plan.fs;
+    const maxEm = rr * span * Math.PI / 180 * 0.78 / plan.fs;
     if (textEm(name) > maxEm) name = cut(name, maxEm);
-    attrs['letter-spacing'] = '0.04em';
     const tp = el('textPath', { startOffset: '50%', 'text-anchor': 'middle' }, el('text', attrs, g));
     tp.setAttribute('href', '#' + id);
     tp.setAttributeNS(XL, 'xlink:href', '#' + id);
@@ -642,7 +900,7 @@ function drawLabel(g, s, idx, plan, color, off) {
     return;
   }
   const k = span * Math.PI / 180;
-  const room = Math.min(plan.rOut - plan.rIn, plan.rOut - plan.fs * 1.15 / k);
+  const room = Math.min(plan.rOut - plan.rIn, plan.rOut - plan.fs * 1.3 / k);
   if (room < plan.fs * 1.2) return;
   if (textEm(name) * plan.fs > room) name = cut(name, room / plan.fs);
   const right = mid >= 0 && mid <= 180;
@@ -652,28 +910,35 @@ function drawLabel(g, s, idx, plan, color, off) {
   });
   el('text', attrs, g).textContent = name;
 }
-
-function markWin(s, on) {
+function markWin(s) {
   if (!s.g) return;
-  s.g.classList.toggle('win', on);
-  if (on) {
-    const mid = (s.a0 + s.a1) / 2 * Math.PI / 180, d = THEMES[cfg.theme].lineArt ? 0 : 16;
-    s.g.style.transform = `translate(${f2(Math.sin(mid) * d)}px,${f2(-Math.cos(mid) * d)}px)`;
-    s.g.setAttribute('filter', THEMES[cfg.theme].lineArt ? '' : 'url(#fSoft)');
-    s.g.parentNode.appendChild(s.g);
-  } else { s.g.style.transform = ''; s.g.removeAttribute('filter'); }
+  const mid = (s.a0 + s.a1) / 2 * Math.PI / 180;
+  s.g.classList.add('win');
+  s.g.style.transform = `translate(${f2(Math.sin(mid) * 16)}px,${f2(-Math.cos(mid) * 16)}px)`;
+  s.g.setAttribute('filter', 'url(#fSoft)');
+  s.g.parentNode.appendChild(s.g);
 }
 
+/* ---------- 指针与动画 ---------- */
+const st = { ph: 0, wr: 0 };
+const needleAngle = () => 90 * Math.sin(st.ph * Math.PI / 180);
+function pointedLocal() { return isWheel() ? mod(-st.wr + 90, 360) - 90 : needleAngle(); }
+function flapT(flap) { return `translate(${CX} ${FLAP_Y}) rotate(${f2(180 + flap)}) translate(0 ${f2(125 * FLAP_S)})`; }
+function applyPose() {
+  if (needleRot) needleRot.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(needleAngle())})`);
+  gWheel.setAttribute('transform', isWheel() ? `rotate(${f2(st.wr)} ${CX} ${CY})` : '');
+  if (flapRot) flapRot.setAttribute('transform', flapT(0));
+}
 function setSway(on) {
   if (!needleSway) return;
   const old = needleSway.querySelector('animateTransform');
   if (old) old.remove();
-  if (!on || !layout.length || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!on || !layout.length || reduced()) return;
   // 待机轻摆不能越过所在扇区的边界，否则看起来像指着别的项
   const th = needleAngle(), s = layout[sectorIndex(th)];
-  const amp = Math.min(2.2, th - s.a0 - 0.5, s.a1 - th - 0.5);
+  const amp = Math.min(2.4, th - s.a0 - 0.5, s.a1 - th - 0.5);
   if (amp < 0.4) return;
-  el('animateTransform', { attributeName: 'transform', type: 'rotate', values: `${-amp};${amp};${-amp}`, dur: '3.6s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '.45 0 .55 1;.45 0 .55 1', keyTimes: '0;.5;1' }, needleSway);
+  el('animateTransform', { attributeName: 'transform', type: 'rotate', values: `${-amp};${amp};${-amp}`, dur: '3.4s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '.45 0 .55 1;.45 0 .55 1', keyTimes: '0;.5;1' }, needleSway);
 }
 function homePose() {
   st.wr = 0; st.ph = 0;
@@ -681,18 +946,32 @@ function homePose() {
   const s = layout[Math.floor((layout.length - 1) / 2)];
   st.ph = Math.asin(((s.a0 + s.a1) / 2) / 90) * 180 / Math.PI;
 }
-const needleAngle = () => 90 * Math.sin(st.ph * Math.PI / 180);
-let trail = [], lastWr = 0, lastT = 0, curIdx = -1, lastTick = 0;
-function applyPose() {
-  if (needleRot) needleRot.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(needleAngle())})`);
-  gWheel.setAttribute('transform', isWheel() ? `rotate(${f2(st.wr)} ${CX} ${CY})` : '');
-  if (flapRot) flapRot.setAttribute('transform', `translate(${CX} 16)`);
+const outCubic = t => 1 - Math.pow(1 - t, 3);
+const inOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+const outBack = t => 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2);
+const EASE = {
+  smooth: t => 1 - Math.pow(1 - t, 4),
+  suspense: t => 1 - Math.pow(1 - t, 6),
+  accel: t => 1 - Math.pow(1 - t * t, 3),
+  bounce: outCubic
+};
+function animate(dist, dur, over, step, easeFn) {
+  return new Promise(done => {
+    const ease = easeFn || EASE[cfg.easing], t0 = performance.now();
+    const frame = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      let p;
+      if (over) {
+        const o = over / dist, k = 0.8;
+        p = t < k ? (1 + o) * outCubic(t / k) : 1 + o * (1 - inOutSine((t - k) / (1 - k)));
+      } else p = ease(t);
+      step(p);
+      if (t < 1) requestAnimationFrame(frame); else done();
+    };
+    requestAnimationFrame(frame);
+  });
 }
-function pointedLocal() { return isWheel() ? mod(-st.wr + 90, 360) - 90 : needleAngle(); }
-function sectorIndex(a) {
-  for (let i = 0; i < layout.length; i++) if (a < layout[i].a1) return i;
-  return layout.length - 1;
-}
+let trail = [], lastWr = 0, lastT = 0, lastTick = 0;
 function frameUpdate() {
   const now = performance.now();
   if (!isWheel()) {
@@ -707,13 +986,13 @@ function frameUpdate() {
     gSecs.style.setProperty('--lab', String(Math.max(0.28, Math.min(1, 1.25 - v / 1300))));
     const a = pointedLocal(), s = layout[sectorIndex(a)];
     let flap = 0;
-    if (s) { const d = a - s.a0, dz = Math.min(7, (s.a1 - s.a0) * 0.45); if (d < dz) flap = -(1 - d / dz) * 26; }
-    flapRot.setAttribute('transform', `translate(${CX} 16) rotate(${f2(flap)})`);
+    if (s) { const d = a - s.a0, dz = Math.min(7, (s.a1 - s.a0) * 0.45); if (d < dz) flap = -(1 - d / dz) * 24; }
+    flapRot.setAttribute('transform', flapT(flap));
   }
   const idx = sectorIndex(pointedLocal());
   if (idx !== curIdx && layout[idx]) {
     curIdx = idx;
-    cur.setAttribute('d', sectorD(R, layout[idx].a0, layout[idx].a1));
+    cur.setAttribute('d', sectorD(layout[idx]));
     liveName(layout[idx].it.name);
     if (now - lastTick > 26) { lastTick = now; tick(); }
   }
@@ -726,37 +1005,11 @@ function setMotion(on) {
   else gSecs.style.setProperty('--lab', '1');
   if (cfg.lights) { clearTimeout(idleTimer); gBulbs.dataset.mode = on ? 'chase' : 'idle'; }
 }
-
-/* ---------- 转 ---------- */
-const outCubic = t => 1 - Math.pow(1 - t, 3);
-const inOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
-const EASE = {
-  smooth: t => 1 - Math.pow(1 - t, 4),
-  suspense: t => 1 - Math.pow(1 - t, 6),
-  accel: t => 1 - Math.pow(1 - t * t, 3),
-  bounce: outCubic
-};
-function animate(dist, dur, over, step) {
-  return new Promise(done => {
-    const ease = EASE[cfg.easing], t0 = performance.now();
-    const frame = now => {
-      const t = Math.min(1, (now - t0) / dur);
-      let p;
-      if (over) {
-        const o = over / dist, k = 0.8;
-        p = t < k ? (1 + o) * outCubic(t / k) : 1 + o * (1 - inOutSine((t - k) / (1 - k)));
-      } else p = ease(t);
-      step(p);
-      if (t < 1) requestAnimationFrame(frame); else done();
-    };
-    requestAnimationFrame(frame);
-  });
-}
 async function spinTo(it) {
   const cands = layout.filter(s => s.it.id === it.id);
   const s = cands[randInt(cands.length)];
   const span = s.a1 - s.a0;
-  const target = s.a0 + span * (cfg.stopAt === 'center' ? 0.5 : 0.14 + 0.72 * rand());
+  const target = s.a0 + span * (RU().stopAt === 'center' ? 0.5 : 0.2 + 0.6 * rand());
   const dur = cfg.duration * 1000;
   setMotion(true);
   if (!isWheel()) {
@@ -767,31 +1020,56 @@ async function spinTo(it) {
     st.ph = mod(from + dist, 360);
   } else {
     const from = st.wr, dist = cfg.turns * 360 + mod(-target - from, 360);
-    await animate(dist, dur, cfg.easing === 'bounce' ? Math.max(5, Math.min(span * 0.7, 18)) : 0, p => { st.wr = from + dist * p; frameUpdate(); });
+    await animate(dist, dur, cfg.easing === 'bounce' ? Math.max(4, Math.min(span * 0.5, 14)) : 0, p => { st.wr = from + dist * p; frameUpdate(); });
     st.wr = mod(from + dist, 360);
   }
   frameUpdate();
   setMotion(false);
   applyPose();
 }
-const wait = ms => new Promise(r => setTimeout(r, ms));
+async function introHand() {
+  if (isWheel() || !needleRot || reduced() || busy) return;
+  const home = st.ph, from = home - 110;
+  st.ph = from; applyPose(); setSway(false);
+  await animate(110, 1150, 0, p => {
+    if (busy) return;
+    st.ph = from + 110 * p;
+    if (needleRot) needleRot.setAttribute('transform', `translate(${CX} ${CY}) rotate(${f2(needleAngle())})`);
+  }, outBack);
+  if (busy) return;
+  st.ph = home; applyPose(); setSway(true);
+}
 
-async function spin() {
-  if (spinning) return;
-  if (!items.length) { openDrawer('list'); return; }
-  if (!pool().length) { resetDraw(); return; }
-  unlockAudio();
-  clearTimeout(relayTimer);
-  closeModal();
-  spinning = true;
+/* ---------- 抽签流程 ---------- */
+let busy = false, relayTimer = 0, idleTimer = 0;
+function guard() {
+  if (!items().length) { toast('名单是空的，先添加几个吧'); go('list'); return false; }
+  if (idOn()) {
+    if (!drawersLeft().length) { askRestart(); return false; }
+    if (!me()) { openWho(); return false; }
+  }
+  if (!pool().length) {
+    if (idOn()) toast('没有可以抽的人了'); else askRestart();
+    return false;
+  }
+  return true;
+}
+function askRestart() {
+  if (idOn() && !confirm('这一轮所有人都抽完了，重新开始一轮？')) return;
+  resetRound(false);
+  toast('新的一轮开始啦');
+}
+async function spinWheel() {
+  if (busy || !guard()) return;
+  unlockAudio(); clearTimeout(relayTimer); closeSheet(true);
+  busy = true;
   highlight.clear(); computeLayout(); renderSectors(false);
-  const n = Math.min(cfg.count, pool().length);
-  const picked = [], ex = new Set();
-  const take = it => { picked.push(it); ex.add(it.id); if (cfg.after !== 'keep') run.drawn.push(it.id); };
-  const multi = n > 1;
-  paintResult([], multi, true);
-  updateStatus();
-  if (multi && cfg.multi === 'once') {
+  const rules = RU(), m = me();
+  const n = m ? 1 : Math.min(rules.count, pool().length);
+  const picked = [], ex = new Set(), multi = n > 1;
+  const take = it => { picked.push(it); ex.add(it.id); if (rules.after !== 'keep') RN().drawn.push(it.id); };
+  paintResult([], multi, true); updateUI();
+  if (multi && rules.multi === 'once') {
     for (let k = 0; k < n; k++) { const it = pickOne(ex); if (!it) break; take(it); }
     await spinTo(picked[0]);
     picked.forEach(it => highlight.add(it.id));
@@ -806,31 +1084,49 @@ async function spin() {
       if (k < n - 1) {
         ding();
         paintResult(picked.map(i => i.name), true, true);
-        await wait(cfg.after === 'remove' ? 950 : 650);
-        if (cfg.after === 'remove') { highlight.delete(it.id); computeLayout(); renderSectors(true); await wait(260); }
+        await wait(rules.after === 'remove' ? 950 : 650);
+        if (rules.after === 'remove') { highlight.delete(it.id); computeLayout(); renderSectors(false); await wait(260); }
       }
     }
   }
-  finish(picked, multi);
-}
-function finish(picked, multi) {
-  spinning = false;
-  const names = picked.map(i => i.name);
+  const who = commit(picked, 'wheel');
+  busy = false;
   dial.classList.add('landed');
-  paintResult(names, multi, false);
-  run.last = names;
-  run.history.unshift({ t: Date.now(), names });
-  if (run.history.length > 200) run.history.length = 200;
-  save(); renderRecent(); updateStatus();
-  if (cfg.lights) { gBulbs.dataset.mode = 'win'; idleTimer = setTimeout(() => { gBulbs.dataset.mode = 'idle'; }, 2600); }
-  if (cfg.sound) fanfare();
-  if (cfg.confetti && !matchMedia('(prefers-reduced-motion: reduce)').matches) confetti();
-  if (cfg.popup) setTimeout(() => openModal(picked), 650);
-  if (cfg.after === 'remove') relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderSectors(true); }, 2200);
+  paintResult(picked.map(i => i.name), multi, false);
+  celebrate(true);
+  if (cfg.popup || who) setTimeout(() => openResult(picked, who), 750);
+  if (rules.after === 'remove' && !who) relayTimer = setTimeout(() => { highlight.clear(); computeLayout(); renderSectors(false); }, 2300);
+  updateUI();
 }
-function resetDraw() {
-  run.drawn = []; run.bag = [];
-  highlight.clear(); computeLayout(); renderSectors(true); updateStatus(); save();
+function commit(picked, mode) {
+  const r = RN(), m = me();
+  if (m) r.done.push(m.id);
+  r.last = picked.map(i => i.name);
+  r.lastWho = m ? m.name : null;
+  history.unshift({ t: Date.now(), g: G().name, mode, who: m ? m.name : '', names: r.last });
+  if (history.length > 300) history.length = 300;
+  save(); renderHistory();
+  return m;
+}
+function nextPerson() {
+  const r = RN();
+  r.me = null; r.last = []; r.lastWho = null;
+  highlight.clear(); clearTimeout(relayTimer);
+  computeLayout(); renderSectors(false); paintResult([], false, false); renderSticks(true); updateUI(); save();
+  if (drawersLeft().length) setTimeout(openWho, 380);
+  else toast('所有人都抽完啦 🎄');
+}
+function resetRound(ask) {
+  if (ask && !confirm('重新开始一轮？这一轮谁抽了谁会清空（「设置 → 抽签记录」里还留着）。')) return;
+  const r = RN();
+  r.drawn = []; r.bag = []; r.done = []; r.me = null; r.last = []; r.lastWho = null;
+  highlight.clear(); clearTimeout(relayTimer);
+  computeLayout(); renderSectors(true); renderSticks(true); paintResult([], false, false); updateUI(); save();
+}
+function celebrate(lights) {
+  if (lights && cfg.lights) { gBulbs.dataset.mode = 'win'; idleTimer = setTimeout(() => { gBulbs.dataset.mode = 'idle'; }, 2600); }
+  if (cfg.sound) fanfare();
+  if (cfg.confetti && !reduced()) confetti();
 }
 
 /* ---------- 结果显示 ---------- */
@@ -841,35 +1137,130 @@ function paintResult(names, multi, live) {
   res.classList.toggle('multi', multi);
   if (multi) {
     names.forEach((nm, i) => {
-      const t = document.createElement('span');
-      t.className = 'tag' + (live && i < names.length - 1 ? '' : ' pop');
+      const t = h('span', { class: 'tag' + (live && i < names.length - 1 ? '' : ' pop') }, nm);
       if (!live) t.style.animationDelay = (i * 0.08) + 's';
-      t.textContent = nm; res.append(t);
+      res.append(t);
     });
-  } else if (!live && names[0]) {
-    const t = document.createElement('span'); t.className = 'name land'; t.textContent = names[0]; res.append(t);
-  }
-  if (live) {
-    liveEl = document.createElement('span');
-    liveEl.className = multi ? 'tag live' : 'live';
-    liveEl.textContent = '…';
-    res.append(liveEl);
-  }
-  if (!names.length && !live) {
-    const t = document.createElement('span'); t.className = 'ph'; t.textContent = '？'; res.append(t);
-  }
+  } else if (!live && names[0]) res.append(h('span', { class: 'name land' }, names[0]));
+  if (live) { liveEl = h('span', { class: multi ? 'tag live' : 'live' }, '…'); res.append(liveEl); }
+  if (!names.length && !live) res.append(h('span', { class: 'ph' }, '？'));
 }
 function liveName(name) {
-  if (!liveEl || !spinning) return;
+  if (!liveEl || !busy) return;
   liveEl.textContent = name;
-  if (liveEl.animate) liveEl.animate([{ transform: 'translateY(-28%)', opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 140, easing: 'ease-out' });
+  if (liveEl.animate) liveEl.animate([{ transform: 'translateY(-30%)', opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 140, easing: 'ease-out' });
 }
 function showLast() {
-  if (!run.last.length) { paintResult([], false, false); return; }
+  const r = RN();
+  if (!r.last.length) { paintResult([], false, false); return; }
   res.textContent = '';
-  res.classList.toggle('multi', run.last.length > 1);
-  run.last.forEach(nm => { const t = document.createElement('span'); t.className = run.last.length > 1 ? 'tag' : 'name'; t.textContent = nm; res.append(t); });
+  res.classList.toggle('multi', r.last.length > 1);
+  r.last.forEach(nm => res.append(h('span', { class: r.last.length > 1 ? 'tag' : 'name' }, nm)));
 }
+function openResult(picked, who) {
+  if (busy || !picked.length) return;
+  $('rTitle').textContent = who ? `${split(who.name).text}，你抽到了 🎁` : '抽中了！🎉';
+  $('rSub').textContent = who ? '记住就好，先别告诉别人哦' : picked.length > 1 ? `一共 ${picked.length} 个` : '就决定是它啦';
+  const box = $('rAvas');
+  box.textContent = '';
+  box.classList.toggle('many', picked.length > 1);
+  picked.forEach((it, i) => {
+    const a = avatar(it, 'big-ava');
+    a.style.animationDelay = (i * 0.09) + 's';
+    a.append(h('i', {}, '✦'), h('i', {}, '✦'), h('i', {}, '✦'));
+    box.append(a);
+  });
+  $('rName').textContent = picked.map(i => split(i.name).text).join('、');
+  $('rAgain').hidden = !!who;
+  $('rOk').textContent = who ? '我记住了，下一位' : '就它了！';
+  openSheet('sh-result', who ? nextPerson : null);
+}
+$('rOk').onclick = () => closeSheet();
+$('rAgain').onclick = () => { closeSheet(true); spinWheel(); };
+
+/* ---------- 上上签 ---------- */
+function writeVertical(g, name, y0, fs) {
+  g.textContent = '';
+  [...split(name).text].slice(0, 5).forEach((ch, i) => {
+    el('text', { y: f2(y0 + i * fs * 1.12), 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 800, fill: '#FFE6B5', 'font-family': SERIF }, g).textContent = ch;
+  });
+}
+function drawStick(g, name, L) {
+  const w = 60;
+  el('path', { d: `M${-w / 2} 0V${-L + w * 0.5}L0 ${-L}L${w / 2} ${-L + w * 0.5}V0Z`, fill: 'url(#stickG)', stroke: '#7E0C14', 'stroke-width': 1.5 }, g);
+  el('path', { d: `M${-w / 2 + 7} -6V${-L + w * 0.5 + 4}L0 ${-L + 10}L${w / 2 - 7} ${-L + w * 0.5 + 4}V-6`, fill: 'none', stroke: '#F3CF8A', 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, g);
+  el('circle', { cy: -L + w * 1.05, r: 17, fill: '#FBE7C2', stroke: '#E9B85E', 'stroke-width': 2 }, g);
+  el('text', { y: -L + w * 1.05, dy: '0.36em', 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 900, fill: '#C21C26', 'font-family': SERIF }, g).textContent = '签';
+  el('line', { x1: -w / 2 + 9, x2: w / 2 - 9, y1: -L + w * 1.55, y2: -L + w * 1.55, stroke: '#F3CF8A', 'stroke-width': 2 }, g);
+  writeVertical(el('g', { class: 'nm' }, g), name, -L + w * 1.55 + 34, 25);
+}
+function renderSticks(animate) {
+  const host = $('sticks');
+  host.textContent = '';
+  let names = shuffled(items().map(i => i.name));
+  if (!names.length) names = ['上上签'];
+  while (names.length < 9) names = names.concat(names);
+  const n = Math.max(7, Math.min(9, items().length));
+  for (let i = 0; i < n; i++) {
+    const off = i - (n - 1) / 2;
+    const outer = el('g', { transform: `translate(${f2(300 + off * 31)} 612) rotate(${f2(off * 5.4)})` }, host);
+    const inner = el('g', { class: 'stk' + (animate && !reduced() ? ' in' : ''), style: `--d:${Math.round(Math.abs(off) * 70 + i * 18)}ms` }, outer);
+    drawStick(inner, names[i], 384 + ((i * 37) % 5) * 9);
+  }
+}
+async function shakeSign() {
+  if (busy || !guard()) return;
+  unlockAudio(); busy = true; updateUI();
+  const it = pickOne(new Set());
+  if (!it) { busy = false; updateUI(); toast('没有可以抽的了'); return; }
+  if (RU().after !== 'keep') RN().drawn.push(it.id);
+  const tube = $('tube');
+  tube.classList.add('shaking');
+  rattle();
+  await wait(reduced() ? 300 : 1550);
+  tube.classList.remove('shaking');
+  const sticks = [...$('sticks').children];
+  const g = sticks[Math.floor(sticks.length / 2) + randInt(3) - 1] || sticks[0];
+  writeVertical(g.querySelector('.nm'), it.name, -(g.querySelector('path').getBBox().height) + 60 * 1.55 + 34, 25);
+  g.parentNode.appendChild(g);
+  const inner = g.firstChild;
+  inner.classList.remove('in');
+  inner.classList.add('rise');
+  inner.setAttribute('filter', 'url(#fGlow)');
+  whoosh();
+  await wait(reduced() ? 200 : 1000);
+  const who = commit([it], 'sign');
+  busy = false;
+  openSign(it, who);
+  celebrate(false);
+  updateUI();
+}
+let signWho = null;
+function openSign(it, who) {
+  signWho = who;
+  const text = split(it.name).text, len = [...text].length;
+  const box = $('scName');
+  box.textContent = text;
+  const h0 = $('signCard').getBoundingClientRect().height || 440;
+  box.style.fontSize = Math.max(18, Math.min(46, Math.floor((h0 - 190) / Math.max(1, len) / 1.16))) + 'px';
+  $('scWho').textContent = who ? `${split(who.name).text}，这是你的签` : '支支都是上上签';
+  $('scAgain').hidden = !!who;
+  $('scOk').textContent = who ? '我记住了，下一位' : '收下好运';
+  const sr = $('signRes'), card = $('signCard');
+  sr.hidden = false;
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+  $('scOk').focus();
+}
+function closeSign(again) {
+  const sr = $('signRes');
+  if (sr.hidden) return;
+  sr.hidden = true;
+  if (signWho) { signWho = null; nextPerson(); return; }
+  renderSticks(true);
+  if (again) setTimeout(shakeSign, 500);
+}
+$('scOk').onclick = () => closeSign(false);
+$('scAgain').onclick = () => closeSign(true);
 
 /* ---------- 声音 ---------- */
 let ac = null, noise = null;
@@ -880,18 +1271,23 @@ function unlockAudio() {
       const A = window.AudioContext || window.webkitAudioContext;
       if (!A) return;
       ac = new A();
-      noise = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.04), ac.sampleRate);
+      noise = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.05), ac.sampleRate);
       const d = noise.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
     }
     if (ac.state === 'suspended') ac.resume();
   } catch (e) { ac = null; }
 }
-function tick() {
-  if (!cfg.sound || !ac) return;
+function knock(freq, q, vol, at) {
   const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain();
-  src.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 2300 + Math.random() * 600; bp.Q.value = 2.2; g.gain.value = 0.55;
-  src.connect(bp); bp.connect(g); g.connect(ac.destination); src.start();
+  src.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q; g.gain.value = vol;
+  src.connect(bp); bp.connect(g); g.connect(ac.destination); src.start(at || 0);
+}
+function tick() { if (cfg.sound && ac) knock(2300 + Math.random() * 600, 2.2, 0.55); }
+function rattle() {
+  if (!cfg.sound || !ac) return;
+  const t = ac.currentTime;
+  for (let i = 0; i < 16; i++) knock(650 + Math.random() * 500, 1.6, 0.7, t + i * 0.09 + Math.random() * 0.04);
 }
 function tone(freq, at, len, vol, type) {
   const o = ac.createOscillator(), g = ac.createGain();
@@ -902,11 +1298,19 @@ function tone(freq, at, len, vol, type) {
   o.connect(g); g.connect(ac.destination);
   o.start(at); o.stop(at + len + 0.05);
 }
+function whoosh() {
+  if (!cfg.sound || !ac) return;
+  const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+  o.type = 'sine'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.5);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.08, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.65);
+}
 function ding() { if (cfg.sound && ac) { const t = ac.currentTime + 0.01; tone(1046.5, t, 0.35, 0.12, 'sine'); tone(1568, t + 0.06, 0.4, 0.08, 'sine'); } }
 function fanfare() {
   if (!ac) return;
   const t = ac.currentTime + 0.02;
-  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { tone(f, t + i * 0.09, i === 3 ? 1 : 0.32, 0.13, 'triangle'); tone(f * 2, t + i * 0.09, i === 3 ? 0.8 : 0.25, 0.04, 'sine'); });
+  [659.25, 783.99, 987.77, 1318.5].forEach((f, i) => { tone(f, t + i * 0.09, i === 3 ? 1.1 : 0.32, 0.13, 'triangle'); tone(f * 2, t + i * 0.09, i === 3 ? 0.9 : 0.25, 0.04, 'sine'); });
+  [2637, 3136].forEach((f, i) => tone(f, t + 0.45 + i * 0.12, 0.6, 0.03, 'sine'));
 }
 
 /* ---------- 彩带 ---------- */
@@ -915,25 +1319,23 @@ function confetti() {
   const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
   cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   cv.hidden = false;
-  const t = THEMES[cfg.theme];
-  const cols = t.secs.filter(c => c !== 'transparent').concat([t.accent, t.bulb, t.accent]);
-  const hub = $('hub').getBoundingClientRect();
+  const cols = ['#E0413F', '#24935C', '#F5B935', '#FFF4E2', '#E0413F', '#F5B935'];
   const ps = [];
   const shoot = (x, y, ang, spread, sp, count) => {
     for (let i = 0; i < count; i++) {
-      const a = (ang + (Math.random() - 0.5) * spread) * Math.PI / 180, v = sp * (0.55 + Math.random() * 0.6);
-      const kind = Math.random();
+      const a = (ang + (Math.random() - 0.5) * spread) * Math.PI / 180, v = sp * (0.55 + Math.random() * 0.6), r = Math.random();
       ps.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 9,
         flip: Math.random() * 6.3, vf: 6 + Math.random() * 8, wob: Math.random() * 6.3,
-        kind: kind < 0.55 ? 0 : kind < 0.8 ? 1 : 2, s: 5 + Math.random() * 5, c: cols[Math.floor(Math.random() * cols.length)] });
+        kind: r < 0.45 ? 0 : r < 0.68 ? 1 : r < 0.86 ? 2 : 3, s: 5 + Math.random() * 5, c: cols[Math.floor(Math.random() * cols.length)] });
     }
   };
   const sp = Math.max(900, H * 1.45);
   shoot(0, H * 0.95, -62, 26, sp, 70);
   shoot(W, H * 0.95, -118, 26, sp, 70);
-  shoot(hub.left + hub.width / 2, hub.top, -90, 70, sp * 0.62, 50);
+  shoot(W / 2, H * 0.55, -90, 80, sp * 0.6, 50);
   let prev = performance.now();
   const t0 = prev;
+  const star = s => { ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? s * 0.45 : s, a = Math.PI / 5 * i; ctx.lineTo(rr * Math.sin(a), -rr * Math.cos(a)); } ctx.closePath(); ctx.fill(); };
   const step = now => {
     const dt = Math.min(0.033, (now - prev) / 1000); prev = now;
     ctx.clearRect(0, 0, W, H);
@@ -948,7 +1350,8 @@ function confetti() {
       ctx.fillStyle = p.c;
       if (p.kind === 0) ctx.fillRect(-p.s, -p.s * 0.6, p.s * 2, p.s * 1.2);
       else if (p.kind === 1) { ctx.beginPath(); ctx.arc(0, 0, p.s * 0.7, 0, 6.3); ctx.fill(); }
-      else ctx.fillRect(-1.6, -p.s * 1.6, 3.2, p.s * 3.2);
+      else if (p.kind === 2) ctx.fillRect(-1.6, -p.s * 1.6, 3.2, p.s * 3.2);
+      else star(p.s * 1.1);
       ctx.restore();
     }
     if (alive && now - t0 < 6000) requestAnimationFrame(step);
@@ -957,120 +1360,278 @@ function confetti() {
   requestAnimationFrame(step);
 }
 
-/* ---------- 主界面状态 ---------- */
-const hub = $('hub');
-function updateStatus() {
-  const total = items.length, left = pool().length;
-  let s = total ? `共 ${total} 项` : '名单还是空的';
-  let canReset = false;
-  if (total && cfg.after !== 'keep') { s += ` · 还剩 ${left} 项`; canReset = run.drawn.length > 0; }
-  if (total && cfg.after === 'keep' && cfg.rng === 'bag') {
-    const inBag = run.bag.length || total;
-    s += ` · 这一轮还有 ${inBag} 项没抽到`; canReset = inBag < total;
+/* ---------- 弹层 ---------- */
+let sheetId = null, sheetOnClose = null;
+function openSheet(id, onClose) {
+  closeSheet(true);
+  const s = $(id);
+  s.classList.add('open'); s.removeAttribute('inert');
+  sheetId = id; sheetOnClose = onClose || null;
+}
+function closeSheet(silent) {
+  if (!sheetId) return;
+  const s = $(sheetId), cb = sheetOnClose;
+  s.classList.remove('open'); s.setAttribute('inert', '');
+  sheetId = null; sheetOnClose = null;
+  if (cb && !silent) cb();
+}
+document.querySelectorAll('.sheet .scrim').forEach(sc => { sc.onclick = () => closeSheet(); });
+function openWho() {
+  const grid = $('whoGrid'), r = RN(), done = new Set(r.done);
+  grid.textContent = '';
+  items().forEach((it, i) => {
+    const b = h('button', { class: 'who-opt', type: 'button', style: `animation-delay:${i * 28}ms`, 'aria-pressed': String(it.id === r.me) });
+    b.append(avatar(it), h('span', {}, split(it.name).text));
+    if (done.has(it.id)) { b.disabled = true; b.append(h('span', { class: 'tag' }, '已抽')); }
+    b.onclick = () => {
+      RN().me = it.id;
+      highlight.clear(); clearTimeout(relayTimer);
+      closeSheet(true); paintResult([], false, false);
+      computeLayout(); renderSectors(false); updateUI(); save();
+      toast(`你好，${split(it.name).text}！`);
+    };
+    grid.append(b);
+  });
+  openSheet('sh-who');
+}
+
+/* ---------- 界面状态 ---------- */
+function whoBtn(btn) {
+  const on = idOn() && items().length > 0;
+  btn.hidden = !on;
+  if (!on) return;
+  const m = me();
+  btn.textContent = '';
+  btn.classList.toggle('empty', !m);
+  if (m) btn.append(avatar(m), h('span', {}, `我是 ${split(m.name).text}`), h('small', {}, '换人'));
+  else btn.append(h('span', { class: 'ava' }, '?'), h('span', {}, drawersLeft().length ? '点这里选你是谁' : '所有人都抽完了'));
+}
+function statusText() {
+  const total = items().length, r = RN(), rules = RU();
+  if (!total) return ['名单还是空的', false];
+  if (idOn()) {
+    const done = total - drawersLeft().length;
+    return [done >= total ? `${total} 人全部抽完啦` : `已抽 ${done}/${total} 人`, done > 0];
   }
-  if (total && left && cfg.count > 1) s += ` · 每次抽 ${Math.min(cfg.count, left)} 个`;
-  $('statusText').textContent = s;
-  $('resetBtn').hidden = !canReset || spinning;
-  hub.disabled = spinning;
-  if (spinning) { hub.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>'; hub.setAttribute('aria-label', '转动中'); }
-  else {
-    const label = !total ? '添加' : !left ? '重来' : '开始';
-    hub.textContent = label;
-    hub.setAttribute('aria-label', !total ? '添加名单' : !left ? '全部抽完了，重新开始' : '开始抽签');
-  }
-  $('gearBtn').disabled = spinning; $('histBtn').disabled = spinning;
-  $('titleText').textContent = cfg.title || '抽签转盘';
-  document.title = cfg.title ? `${cfg.title} · 抽签转盘` : '抽签转盘';
+  const left = pool().length;
+  let s = `共 ${total} 项`, can = false;
+  if (rules.after !== 'keep') { s += ` · 还剩 ${left} 项`; can = r.drawn.length > 0; }
+  if (rules.after === 'keep' && rules.rng === 'bag') { const inBag = r.bag.length || total; s += ` · 这一轮还有 ${inBag} 项没抽到`; can = inBag < total; }
+  if (left && rules.count > 1) s += ` · 每次抽 ${Math.min(rules.count, left)} 个`;
+  return [s, can];
+}
+function ctaLabel(sign) {
+  if (busy) return sign ? '求签中…' : '转动中…';
+  if (!items().length) return '去添加名单';
+  if (idOn()) {
+    if (!drawersLeft().length) return '全部抽完，重新开始';
+    if (!me()) return '先选你是谁';
+  } else if (!pool().length) return '全部抽完，重新开始';
+  if (sign) return '摇一摇 · 求签';
+  return !idOn() && RU().count > 1 ? `抽 ${Math.min(RU().count, pool().length)} 个！` : '开始抽取！';
+}
+function updateUI() {
+  const g = G(), r = RN();
+  $('wTitle').textContent = g.name;
+  $('wSub').textContent = idOn() ? (me() ? '转一下，看看你要给谁准备礼物' : '先选你是谁，再转转盘') : '转动转盘，让命运决定！';
+  $('kicker').textContent = idOn() ? (r.lastWho ? `${split(r.lastWho).text} 抽中的是` : me() ? `${split(me().name).text}，你会抽到…` : '你抽中的是') : '你抽中的是';
+  whoBtn($('whoW')); whoBtn($('whoS'));
+  $('spinLabel').textContent = ctaLabel(false);
+  $('shakeLabel').textContent = ctaLabel(true);
+  $('spinBtn').disabled = busy; $('shakeBtn').disabled = busy;
+  $('spinBtn').classList.toggle('wait', busy); $('shakeBtn').classList.toggle('wait', busy);
+  const [s, can] = statusText();
+  $('wStatus').textContent = s; $('sStatus').textContent = s;
+  $('wReset').hidden = $('sReset').hidden = !can || busy;
+  document.querySelectorAll('.tab').forEach(t => { t.disabled = busy; });
+  renderRecent();
+}
+function renderRecent() {
+  const box = $('recent');
+  box.textContent = '';
+  if (idOn()) return;
+  history.filter(x => x.g === G().name && !x.who).slice(0, 6).forEach(x => box.append(h('span', {}, x.names.map(String).join('、'))));
 }
 function fmtTime(t) {
   const d = new Date(t), now = new Date(), p = n => String(n).padStart(2, '0');
   const hm = `${p(d.getHours())}:${p(d.getMinutes())}`;
   return d.toDateString() === now.toDateString() ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
 }
-function renderRecent() {
-  const box = $('recent');
-  box.textContent = '';
-  run.history.slice(0, 6).forEach(r => {
-    const s = document.createElement('span');
-    s.textContent = r.names.map(String).join('、');
-    s.title = fmtTime(r.t);
-    box.append(s);
-  });
-}
-function renderHistoryList() {
+function renderHistory() {
   const list = $('histList');
   list.textContent = '';
-  run.history.forEach(r => {
-    const li = document.createElement('li'), t = document.createElement('time'), s = document.createElement('span');
-    t.textContent = fmtTime(r.t); s.textContent = r.names.map(String).join('、');
-    li.append(t, s); list.append(li);
+  history.slice(0, 120).forEach(x => {
+    const s = h('span', {}, h('em', {}, `${x.g}${x.mode === 'sign' ? ' · 签' : ''}`), x.who ? `${x.who} → ${x.names.join('、')}` : x.names.map(String).join('、'));
+    list.append(h('li', {}, h('time', {}, fmtTime(x.t)), s));
   });
-  $('histEmpty').hidden = run.history.length > 0;
-  $('histClear').hidden = !run.history.length;
+  $('histEmpty').hidden = history.length > 0;
+  $('histClear').hidden = !history.length;
 }
 
-/* ---------- 结果卡片 ---------- */
-function openModal(picked) {
-  if (spinning || !picked.length) return;
-  modalPicked = picked;
-  const names = $('mNames');
-  names.textContent = picked.map(i => i.name).join('、');
-  names.classList.toggle('many', picked.length > 3);
-  $('mRemove').hidden = cfg.after !== 'keep';
-  $('modal').hidden = false;
-  $('mOk').focus();
+/* ---------- 名单页 ---------- */
+function renderGroups() {
+  const box = $('groupChips');
+  box.textContent = '';
+  groups.forEach(g => {
+    const b = h('button', { class: 'gchip', 'aria-pressed': String(g.id === activeId) }, g.name || '未命名');
+    b.onclick = () => switchGroup(g.id);
+    box.append(b);
+  });
+  const add = h('button', { class: 'gchip add' }, '＋ 新建');
+  add.onclick = addGroup;
+  box.append(add);
 }
-function closeModal() { $('modal').hidden = true; }
-$('mOk').onclick = closeModal;
-$('mAgain').onclick = () => { closeModal(); spin(); };
-$('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-$('mRemove').onclick = () => {
-  const ids = new Set(modalPicked.map(i => i.id));
-  setList(listText(items.filter(i => !ids.has(i.id))));
-  closeModal();
+function renderList(enter) {
+  const g = G(), list = $('itemList'), r = RN(), drawn = new Set(r.drawn), done = new Set(r.done);
+  if (document.activeElement !== $('gName')) $('gName').value = g.name;
+  $('gIdentity').checked = g.identity;
+  $('delGroup').hidden = groups.length < 2;
+  updateListMeta();
+  list.textContent = '';
+  list.classList.toggle('enter', !!enter && !reduced());
+  if (!g.items.length) { list.append(h('p', { class: 'blank' }, '还没有人，先在上面添加吧')); return; }
+  g.items.forEach((it, i) => {
+    const row = h('div', { class: 'item' + (it.on ? '' : ' off'), style: `--d:${Math.min(i, 14) * 35}ms` });
+    row.dataset.id = it.id;
+    const nm = h('input', { class: 'nm', maxlength: 30, 'aria-label': '名字' });
+    nm.value = it.name;
+    nm.onchange = () => { const v = nm.value.trim(); if (!v) { nm.value = it.name; return; } it.name = v; itemsChanged(true); };
+    nm.onkeydown = e => { if (e.key === 'Enter') nm.blur(); };
+    row.append(avatar(it), nm);
+    if (g.identity && r.me === it.id && !done.has(it.id)) row.append(h('span', { class: 'st me' }, '我'));
+    else if (g.identity && done.has(it.id)) row.append(h('span', { class: 'st' }, '已抽签'));
+    else if (!g.identity && RU().after !== 'keep' && drawn.has(it.id)) row.append(h('span', { class: 'st' }, '已抽中'));
+    if (RU().rng === 'weight') {
+      const ws = h('span', { class: 'wstep' }), minus = h('button', { 'aria-label': '权重减一' }, '−'), plus = h('button', { 'aria-label': '权重加一' }, '+'), val = h('span', {}, `×${it.w}`);
+      minus.onclick = () => { it.w = Math.max(1, it.w - 1); val.textContent = `×${it.w}`; itemsChanged(false); };
+      plus.onclick = () => { it.w = Math.min(99, it.w + 1); val.textContent = `×${it.w}`; itemsChanged(false); };
+      ws.append(minus, val, plus); row.append(ws);
+    }
+    const sw = h('input', { type: 'checkbox', class: 'sw', 'aria-label': '参与抽签' });
+    sw.checked = it.on;
+    sw.onchange = () => { it.on = sw.checked; row.classList.toggle('off', !it.on); itemsChanged(false); };
+    const del = h('button', { class: 'del', 'aria-label': '删除' });
+    del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+    del.onclick = () => {
+      row.classList.add('bye');
+      setTimeout(() => { g.items = g.items.filter(x => x.id !== it.id); itemsChanged(true); }, 260);
+    };
+    row.append(sw, del);
+    list.append(row);
+  });
+}
+function updateListMeta() {
+  const g = G();
+  $('listMeta').textContent = `共 ${g.items.length} 项 · ${items().length} 项参与`;
+}
+function itemsChanged(rerender) {
+  cleanRun();
+  highlight.clear();
+  computeLayout(); renderSectors(false); renderSticks(false); updateUI(); save();
+  if (rerender) renderList(false); else updateListMeta();
+}
+function addItems(text) {
+  const names = String(text).split(/[\n,，、;；]+/).map(s => s.trim()).filter(Boolean);
+  if (!names.length) return;
+  const g = G(), fresh = names.map(n => mk(n.slice(0, 30)));
+  g.items.push(...fresh);
+  itemsChanged(true);
+  fresh.forEach(it => { const row = document.querySelector(`.item[data-id="${it.id}"]`); if (row) row.classList.add('new'); });
+  const last = document.querySelector(`.item[data-id="${fresh[fresh.length - 1].id}"]`);
+  if (last && last.scrollIntoView) last.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function switchGroup(id) {
+  if (busy || id === activeId) return;
+  activeId = id;
+  highlight.clear(); clearTimeout(relayTimer);
+  computeLayout(); renderFrame(); homePose(); applyPose(); renderSectors(true); renderSticks(true); showLast();
+  renderGroups(); renderList(true); updateUI(); syncSettings(); save();
+}
+function addGroup() {
+  const g = { id: uid(), name: '新的名单组', identity: false, rules: Object.assign({}, RULE_DEF), items: [] };
+  groups.push(g);
+  switchGroup(g.id);
+  const inp = $('gName');
+  inp.focus(); inp.select();
+}
+$('gName').addEventListener('input', () => { G().name = $('gName').value.trim().slice(0, 20) || '未命名'; renderGroups(); updateUI(); save(); });
+$('gIdentity').onchange = () => {
+  const g = G();
+  g.identity = $('gIdentity').checked;
+  RN().me = null;
+  computeLayout(); renderSectors(false); renderList(false); updateUI(); syncSettings(); save();
+  if (g.identity && g.rules.after === 'keep') toast('提示：「设置 → 抽中后」选「移出」，每人就只会被抽中一次');
+};
+$('addBtn').onclick = () => { addItems($('addInp').value); $('addInp').value = ''; $('addInp').focus(); };
+$('addInp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('addBtn').click(); } });
+$('shuffleBtn').onclick = () => { G().items = shuffled(G().items); itemsChanged(false); renderList(true); };
+$('delGroup').onclick = () => {
+  if (groups.length < 2 || !confirm(`删除名单组「${G().name}」？`)) return;
+  const id = activeId;
+  groups = groups.filter(g => g.id !== id);
+  delete runs[id];
+  activeId = '';
+  switchGroup(groups[0].id);
+};
+$('bulkBtn').onclick = () => {
+  $('bulkTA').value = G().items.map(i => i.w !== 1 ? `${i.name} | ${i.w}` : i.name).join('\n');
+  openSheet('sh-bulk');
+};
+$('bulkCancel').onclick = () => closeSheet(true);
+$('bulkSave').onclick = () => {
+  const g = G(), pool0 = g.items.slice();
+  g.items = parseLines($('bulkTA').value).map(x => {
+    const i = pool0.findIndex(o => o.name === x.name);
+    if (i < 0) return mk(x.name, x.w);
+    const o = pool0.splice(i, 1)[0];
+    o.w = x.w;
+    return o;
+  });
+  closeSheet(true);
+  itemsChanged(true);
+  renderList(true);
+};
+$('genBtn').onclick = () => {
+  let a = Math.round(parseFloat($('genFrom').value)), b = Math.round(parseFloat($('genTo').value));
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return;
+  if (a > b) [a, b] = [b, a];
+  if (b - a > 999) b = a + 999;
+  const out = [];
+  for (let i = a; i <= b; i++) out.push(String(i));
+  $('bulkTA').value = out.join('\n');
+};
+$('dedupeBtn').onclick = () => {
+  const seen = new Set();
+  $('bulkTA').value = $('bulkTA').value.split(/\r?\n/).filter(l => { const k = l.trim(); if (!k || seen.has(k)) return false; seen.add(k); return true; }).join('\n');
 };
 
-/* ---------- 设置抽屉 ---------- */
-const drawer = $('drawer');
-let curTab = 'list', openedHere = false;
+/* ---------- 设置页 ---------- */
 const refs = {};
-function h(tag, attrs, ...kids) {
-  const e = document.createElement(tag);
-  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
-  kids.forEach(k => e.append(k));
-  return e;
-}
-const val = (x) => typeof x === 'function' ? x() : x;
-
-function miniDial(t, mode) {
-  const c = 60, y = 64, r1 = 44, r2 = 51;
+const val = x => typeof x === 'function' ? x() : x;
+const getV = k => RULE_KEYS.includes(k) ? RU()[k] : cfg[k];
+function miniDial(mode) {
+  const c = 60, y = 66, r1 = 44, r2 = 51;
   const P = (r, a) => [f2(c + r * Math.sin(a * Math.PI / 180)), f2(y - r * Math.cos(a * Math.PI / 180))];
-  let s = `<svg viewBox="0 0 120 78" aria-hidden="true"><rect width="120" height="78" fill="${t.bg}"/>`;
-  if (!t.lineArt) s += `<path d="M${c - r2} ${y}A${r2} ${r2} 0 0 1 ${c + r2} ${y}Z" fill="${t.rim}"/>`;
+  let s = `<svg viewBox="0 0 120 82" aria-hidden="true"><rect width="120" height="82" fill="#FFF7EC"/><path d="M${c - r2} ${y}A${r2} ${r2} 0 0 1 ${c + r2} ${y}Z" fill="#17603C"/>`;
   for (let k = 0; k < 6; k++) {
     const [x0, y0] = P(r1, -90 + 30 * k), [x1, y1] = P(r1, -60 + 30 * k);
-    s += `<path d="M${c} ${y}L${x0} ${y0}A${r1} ${r1} 0 0 1 ${x1} ${y1}Z" fill="${t.lineArt ? 'none' : t.secs[k % t.secs.length]}" stroke="${t.sep}" stroke-width="${t.lineArt ? 1.6 : 0.8}"/>`;
+    s += `<path d="M${c} ${y}L${x0} ${y0}A${r1} ${r1} 0 0 1 ${x1} ${y1}Z" fill="${SECS[k][0]}" stroke="#fff" stroke-width="1"/>`;
   }
-  if (t.lineArt) s += `<path d="M${c - r1} ${y}A${r1} ${r1} 0 0 1 ${c + r1} ${y}" fill="none" stroke="${t.rim}" stroke-width="2"/>`;
-  else for (let i = 0; i < 7; i++) { const [x, yy] = P(47.5, -78 + 26 * i); s += `<circle cx="${x}" cy="${yy}" r="1.6" fill="${t.bulb}"/>`; }
+  for (let i = 0; i < 7; i++) { const [x, yy] = P(47.5, -78 + 26 * i); s += `<circle cx="${x}" cy="${yy}" r="1.7" fill="${BULBS[i % 3][0]}"/>`; }
   if (mode === 'wheel') {
-    s += `<path d="M${c - 5} 6L${c + 5} 6L${c} 19Z" fill="${t.accent}"/>`;
-    s += `<path d="M${c + 30} ${y - 46}A55 55 0 0 1 ${c + 50} ${y - 22}" fill="none" stroke="${t.accent}" stroke-width="2.5" stroke-linecap="round"/><path d="M${c + 50} ${y - 22}l-6 -1.5 4 -4.5z" fill="${t.accent}"/>`;
+    s += `<path d="M${c - 6} 6L${c + 6} 6L${c} 21Z" fill="#fff" stroke="#3A2316" stroke-width="1.6" stroke-linejoin="round"/>`;
+    s += `<path d="M${c + 30} ${y - 48}A56 56 0 0 1 ${c + 51} ${y - 22}" fill="none" stroke="#D9343A" stroke-width="2.6" stroke-linecap="round"/><path d="M${c + 51} ${y - 22}l-6.5 -1.2 4 -4.8z" fill="#D9343A"/>`;
   } else {
-    const [nx, ny] = P(34, 24);
-    s += `<path d="M${c} ${y}L${nx} ${ny}" stroke="${t.needle}" stroke-width="3.2" stroke-linecap="round"/>`;
-    if (mode === 'pointer') s += `<path d="M${c - 22} ${y - 40}A40 40 0 0 1 ${c + 22} ${y - 40}" fill="none" stroke="${t.accent}" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 5"/>`;
+    const [nx, ny] = P(32, 24);
+    s += `<path d="M${c} ${y}L${nx} ${ny}" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M${c} ${y}L${nx} ${ny}" stroke="#3A2316" stroke-width="2" stroke-linecap="round"/>`;
+    s += `<path d="M${c - 24} ${y - 41}A42 42 0 0 1 ${c + 24} ${y - 41}" fill="none" stroke="#D9343A" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 5"/>`;
   }
-  s += `<circle cx="${c}" cy="${y}" r="7" fill="${t.hub[0]}" stroke="${t.hub[2]}" stroke-width="2"/>`;
-  if (!t.lineArt) s += `<rect x="${c - r2 - 4}" y="${y - 1}" width="${2 * r2 + 8}" height="9" rx="3" fill="${t.rim}"/>`;
+  s += `<circle cx="${c}" cy="${y}" r="7" fill="#D9343A" stroke="#fff" stroke-width="2"/><rect x="${c - r2 - 4}" y="${y - 1}" width="${2 * r2 + 8}" height="9" rx="3" fill="#17603C"/>`;
   return s + '</svg>';
 }
-
 function buildSettings() {
   FIELDS.forEach(f => {
-    const pane = document.querySelector(`[data-pane="${f.tab}"]`);
-    if (f.group) pane.append(h('div', { class: 'grp' }, f.group));
-    const id = 'f-' + f.key;
+    const host = document.querySelector(`[data-sec="${f.sec}"]`), id = 'f-' + f.key;
     const inline = f.type === 'switch' || f.type === 'stepper';
     const row = h('div', { class: 'row' + (inline ? ' inline' : '') });
     const r = refs[f.key] = { row };
@@ -1079,181 +1640,130 @@ function buildSettings() {
     let ctl;
     if (f.type === 'seg') {
       ctl = h('div', { class: 'seg', role: 'group' });
-      f.opts.forEach(([v, t]) => { const b = h('button', { type: 'button', 'data-v': v }, t); b.onclick = () => set(f.key, v); ctl.append(b); });
+      f.opts.forEach(([v, t]) => { const b = h('button', { type: 'button', 'data-v': v }, t); b.onclick = () => setV(f.key, v); ctl.append(b); });
     } else if (f.type === 'switch') {
       r.inp = ctl = h('input', { type: 'checkbox', class: 'sw', id });
-      r.inp.onchange = () => set(f.key, r.inp.checked);
+      r.inp.onchange = () => setV(f.key, r.inp.checked);
     } else if (f.type === 'range') {
       r.inp = h('input', { type: 'range', id, min: f.min, max: f.max, step: f.step });
       r.out = h('output', {});
-      r.inp.oninput = () => set(f.key, parseFloat(r.inp.value));
+      r.inp.oninput = () => setV(f.key, parseFloat(r.inp.value));
       ctl = h('div', { class: 'rng' }, r.inp, r.out);
     } else if (f.type === 'stepper') {
       const minus = h('button', { type: 'button', 'aria-label': '减一' }, '−'), plus = h('button', { type: 'button', 'aria-label': '加一' }, '+');
       r.inp = h('input', { type: 'number', inputmode: 'numeric', min: f.min, max: f.max, 'aria-label': val(f.label) });
-      const put = v => { set(f.key, Math.min(f.max, Math.max(f.min, Math.round(v) || f.min))); r.inp.value = cfg[f.key]; };
-      minus.onclick = () => put(cfg[f.key] - 1);
-      plus.onclick = () => put(cfg[f.key] + 1);
+      const put = v => { setV(f.key, Math.min(f.max, Math.max(f.min, Math.round(v) || f.min))); r.inp.value = getV(f.key); };
+      minus.onclick = () => put(getV(f.key) - 1);
+      plus.onclick = () => put(getV(f.key) + 1);
       r.inp.onchange = () => put(parseFloat(r.inp.value));
       ctl = h('div', { class: 'stepper' }, minus, r.inp, plus);
-    } else if (f.type === 'themes') {
-      ctl = h('div', { class: 'cards' });
-      r.cards = THEME_ORDER.map(k => {
-        const b = h('button', { type: 'button', class: 'card-opt', 'data-v': k });
-        b.innerHTML = miniDial(THEMES[k], 'theme');
-        b.append(THEMES[k].name);
-        b.onclick = () => set('theme', k);
-        ctl.append(b); return b;
-      });
     } else if (f.type === 'spinner') {
-      ctl = h('div', { class: 'cards two' });
-      r.cards = [['pointer', '指针摆动', '转盘不动，指针来回摆'], ['wheel', '转盘旋转', '指针不动，转盘转圈']].map(([v, name, sub]) => {
+      ctl = h('div', { class: 'cards' });
+      r.cards = [['pointer', '指针摆动', '转盘不动，小手来回摆'], ['wheel', '转盘旋转', '小手不动，转盘转圈']].map(([v, name, sub]) => {
         const b = h('button', { type: 'button', class: 'card-opt', 'data-v': v });
-        b.dataset.name = name; b.dataset.sub = sub;
-        b.onclick = () => set('spinner', v);
-        ctl.append(b); return b;
+        b.innerHTML = miniDial(v);
+        b.append(name, h('small', {}, sub));
+        b.onclick = () => setV('spinner', v);
+        ctl.append(b);
+        return b;
       });
     }
     row.append(r.lbl, ctl);
     if (f.hint) { r.hint = h('p', { class: 'hint' }); row.append(r.hint); }
-    pane.append(row);
+    host.append(row);
   });
 }
 function syncSettings() {
+  $('ruleFor').textContent = `对「${G().name}」生效`;
   FIELDS.forEach(f => {
-    const r = refs[f.key], v = cfg[f.key];
+    const r = refs[f.key], v = getV(f.key);
     r.row.hidden = f.show ? !f.show() : false;
     r.lbl.textContent = val(f.label);
     if (f.type === 'seg') r.row.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
     else if (f.type === 'switch') r.inp.checked = v;
     else if (f.type === 'range') { r.inp.value = v; r.out.textContent = v + val(f.unit); }
     else if (f.type === 'stepper') { if (document.activeElement !== r.inp) r.inp.value = v; }
-    else if (f.type === 'themes') r.cards.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
-    else if (f.type === 'spinner') r.cards.forEach(b => {
-      b.setAttribute('aria-pressed', String(b.dataset.v === v));
-      b.innerHTML = miniDial(THEMES[cfg.theme], b.dataset.v);
-      b.append(b.dataset.name, h('small', {}, b.dataset.sub));
-    });
+    else if (f.type === 'spinner') r.cards.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
     if (r.hint) { r.hint.textContent = f.hint(); r.hint.hidden = !r.hint.textContent; }
   });
-  updateListMeta();
 }
-function updateListMeta() {
-  $('listCount').textContent = `${items.length} 项`;
-  const show = cfg.rng === 'weight' && items.length > 0;
-  $('probRow').hidden = !show;
-  if (!show) return;
-  const box = $('probs'), tot = items.reduce((s, i) => s + i.w, 0);
-  box.textContent = '';
-  items.slice(0, 60).forEach(i => {
-    const pct = i.w / tot * 100;
-    box.append(h('span', {}, i.name, h('b', {}, (pct >= 10 ? pct.toFixed(0) : pct.toFixed(1)) + '%')));
-  });
-  if (items.length > 60) box.append(h('span', {}, `…共 ${items.length} 项`));
-}
-function applyTheme() {
-  const t = THEMES[cfg.theme], s = document.documentElement.style;
-  const vars = { '--bg': t.bg, '--bg2': t.bg2, '--ink': t.ink, '--muted': t.muted, '--line': t.line, '--card': t.card,
-    '--accent': t.accent, '--on-accent': t.onAccent, '--rim': t.rim, '--bulb': t.bulb, '--win': t.win,
-    '--hub-bg': t.hub[0], '--hub-ink': t.hub[1], '--hub-ring': t.hub[2] };
-  for (const k in vars) s.setProperty(k, vars[k]);
-  document.body.dataset.theme = cfg.theme;
-  document.querySelector('meta[name=theme-color]').setAttribute('content', t.bg);
-}
-function applyAll() {
-  applyTheme(); computeLayout(); renderFrame(); renderSectors(false); updateStatus();
-}
-function set(key, v) {
-  if (spinning || cfg[key] === v) return;
-  cfg[key] = v;
-  if (key === 'after' || key === 'rng') { run.drawn = []; run.bag = []; }
+function setV(k, v) {
+  if (busy || getV(k) === v) return;
+  if (RULE_KEYS.includes(k)) {
+    RU()[k] = v;
+    if (k === 'after' || k === 'rng') { const r = RN(); r.drawn = []; r.bag = []; r.done = []; r.me = null; r.last = []; r.lastWho = null; }
+  } else cfg[k] = v;
   highlight.clear();
-  applyAll();
-  if (key === 'spinner') { homePose(); applyPose(); setSway(true); }
-  syncSettings(); save();
+  computeLayout(); renderFrame();
+  if (k === 'spinner') { homePose(); applyPose(); setSway(true); }
+  renderSectors(false); updateUI(); syncSettings(); save();
 }
-function setList(text) {
-  cfg.list = text;
-  $('listTA').value = text;
-  listChanged();
-}
-function listChanged() {
-  parse(); highlight.clear(); computeLayout(); renderSectors(true); updateStatus(); updateListMeta(); save();
-}
-
-let listTimer = 0;
-$('listTA').addEventListener('input', () => {
-  clearTimeout(listTimer);
-  listTimer = setTimeout(() => { cfg.list = $('listTA').value; listChanged(); }, 220);
-});
-$('titleInp').addEventListener('input', () => { cfg.title = $('titleInp').value.trim(); updateStatus(); save(); });
-$('shuffleBtn').onclick = () => {
-  const lines = $('listTA').value.split(/\r?\n/).filter(l => l.trim());
-  for (let i = lines.length - 1; i > 0; i--) { const j = randInt(i + 1); [lines[i], lines[j]] = [lines[j], lines[i]]; }
-  setList(lines.join('\n'));
+$('histClear').onclick = () => { if (confirm('清空全部抽签记录？')) { history = []; save(); renderHistory(); renderRecent(); } };
+$('resetCfg').onclick = () => {
+  if (!confirm('把动画、效果和各名单组的抽签规则恢复默认？名单保留。')) return;
+  Object.assign(cfg, VIEW_DEF);
+  groups.forEach(g => { g.rules = Object.assign({}, RULE_DEF, g.identity ? { after: 'remove' } : {}); });
+  runs = {};
+  highlight.clear();
+  computeLayout(); renderFrame(); homePose(); applyPose(); renderSectors(true); renderSticks(true); showLast(); updateUI(); syncSettings(); save();
 };
-$('dedupeBtn').onclick = () => { const seen = new Set(); setList(listText(items.filter(i => !seen.has(i.name) && seen.add(i.name)))); };
-$('genBtn').onclick = () => {
-  let a = Math.round(parseFloat($('genFrom').value)), b = Math.round(parseFloat($('genTo').value));
-  if (!Number.isFinite(a) || !Number.isFinite(b)) return;
-  if (a > b) [a, b] = [b, a];
-  if (b - a > 999) b = a + 999;
-  if (items.length && !confirm(`用 ${a} 到 ${b} 替换现在的名单？`)) return;
-  const out = [];
-  for (let i = a; i <= b; i++) out.push(String(i));
-  setList(out.join('\n'));
-};
-$('histClear').onclick = () => { run.history = []; save(); renderHistoryList(); renderRecent(); };
 
-const TABS = ['list', 'draw', 'look', 'history'];
-function showTab(tab) {
-  curTab = tab;
-  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
-  document.querySelectorAll('.pane').forEach(p => { p.hidden = p.dataset.pane !== tab; });
-  $('pBody').scrollTop = 0;
+/* ---------- 页面切换 ---------- */
+const TABS = ['wheel', 'sign', 'list', 'settings'];
+function go(tab) {
+  if (busy) return;
+  cfg.tab = tab;
+  TABS.forEach(t => { $('v-' + t).hidden = t !== tab; });
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  $('tabInd').style.transform = `translateX(${TABS.indexOf(tab) * 100}%)`;
+  document.body.classList.toggle('signing', tab === 'sign');
+  document.querySelector('meta[name=theme-color]').setAttribute('content', tab === 'sign' ? '#9E111B' : '#FFF7EC');
+  closeSheet(true);
+  if (tab === 'wheel') { computeLayout(); renderSectors(true); introHand(); }
+  if (tab === 'sign') renderSticks(true);
+  if (tab === 'list') { renderGroups(); renderList(true); }
+  if (tab === 'settings') { syncSettings(); renderHistory(); }
+  updateUI(); save();
+  window.scrollTo(0, 0);
 }
-function route() {
-  const tab = location.hash.slice(1);
-  const open = TABS.includes(tab) && !spinning;
-  drawer.classList.toggle('open', open);
-  if (open) drawer.removeAttribute('inert'); else drawer.setAttribute('inert', '');
-  $('app').toggleAttribute('inert', open);
-  if (!open) return;
-  showTab(tab);
-  $('listTA').value = cfg.list; $('titleInp').value = cfg.title;
-  syncSettings(); renderHistoryList();
-}
-function openDrawer(tab) { openedHere = true; location.hash = tab; }
-function closeDrawer() {
-  if (openedHere) { openedHere = false; history.back(); }
-  else location.hash = '';
-}
-document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { history.replaceState(null, '', '#' + b.dataset.tab); route(); }; });
-addEventListener('hashchange', () => { if (!TABS.includes(location.hash.slice(1))) openedHere = false; route(); });
-$('gearBtn').onclick = () => openDrawer(curTab === 'history' ? 'list' : curTab);
-$('histBtn').onclick = () => openDrawer('history');
-$('closeBtn').onclick = closeDrawer;
-$('scrim').onclick = closeDrawer;
-
-/* ---------- 操作 ---------- */
-hub.onclick = spin;
-dial.addEventListener('click', spin);
-$('resetBtn').onclick = resetDraw;
+document.querySelectorAll('.tab').forEach(b => { b.onclick = () => go(b.dataset.tab); });
+$('spinBtn').onclick = spinWheel;
+dial.addEventListener('click', spinWheel);
+$('shakeBtn').onclick = shakeSign;
+$('signSvg').addEventListener('click', shakeSign);
+$('whoW').onclick = openWho;
+$('whoS').onclick = openWho;
+$('wReset').onclick = () => resetRound(idOn());
+$('sReset').onclick = () => resetRound(idOn());
 document.addEventListener('keydown', e => {
-  if (!$('modal').hidden) { if (e.key === 'Escape') closeModal(); return; }
-  if (drawer.classList.contains('open')) { if (e.key === 'Escape') closeDrawer(); return; }
-  if (e.key !== ' ' && e.key !== 'Enter') return;
+  if (e.key === 'Escape') { if (!$('signRes').hidden) closeSign(false); else closeSheet(); return; }
+  if (sheetId || !$('signRes').hidden || (e.key !== ' ' && e.key !== 'Enter')) return;
   if (e.target.closest && e.target.closest('button,input,textarea,a')) return;
-  e.preventDefault(); spin();
+  if (cfg.tab === 'wheel') { e.preventDefault(); spinWheel(); }
+  else if (cfg.tab === 'sign') { e.preventDefault(); shakeSign(); }
 });
 let rsTimer = 0, lastW = 0;
 const onResize = () => {
   clearTimeout(rsTimer);
-  rsTimer = setTimeout(() => { const w = Math.round(dial.getBoundingClientRect().width); if (w && w !== lastW && !spinning) { lastW = w; renderSectors(false); } }, 160);
+  rsTimer = setTimeout(() => {
+    const w = Math.round(dial.getBoundingClientRect().width);
+    if (w && w !== lastW && !busy) { lastW = w; renderSectors(false); }
+  }, 160);
 };
 if (window.ResizeObserver) new ResizeObserver(onResize).observe($('stage')); else addEventListener('resize', onResize);
+(function snow() {
+  if (reduced()) return;
+  const card = $('wheelCard');
+  for (let i = 0; i < 14; i++) {
+    const s = 3 + Math.random() * 5;
+    card.append(h('i', { class: 'flake', style: `left:${(Math.random() * 100).toFixed(1)}%;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px;animation-duration:${(7 + Math.random() * 7).toFixed(1)}s;animation-delay:${(-Math.random() * 14).toFixed(1)}s` }));
+  }
+})();
 
-load(); parse(); buildSettings(); applyAll(); homePose(); applyPose(); setSway(true); showLast(); renderRecent(); route();
+load(); cleanRun(); buildSettings();
+computeLayout(); renderFrame(); homePose(); applyPose(); setSway(true);
+showLast(); renderHistory();
+go(TABS.includes(cfg.tab) ? cfg.tab : 'wheel');
 lastW = Math.round(dial.getBoundingClientRect().width);
 })();
 </script>
